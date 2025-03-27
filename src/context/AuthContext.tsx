@@ -27,9 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         setLoading(false);
         
-        if (event === "SIGNED_IN") {
-          navigate("/");
-        } else if (event === "SIGNED_OUT") {
+        if (event === "SIGNED_OUT") {
           navigate("/auth");
         }
       }

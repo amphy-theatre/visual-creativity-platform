@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 
 const Header: React.FC = () => {
   const location = useLocation();
-  const showBackButton = location.pathname !== "/";
+  const showBackButton = location.pathname !== "/" && location.pathname !== "/auth";
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
 

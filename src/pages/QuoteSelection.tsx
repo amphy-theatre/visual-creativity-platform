@@ -3,6 +3,8 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import QuoteCard from "../components/QuoteCard";
+import { Button } from "../components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const QuoteSelection: React.FC = () => {
   const location = useLocation();
@@ -23,6 +25,10 @@ const QuoteSelection: React.FC = () => {
     // In a real app, this would fetch new quotes
     console.log("Refreshing quotes");
   };
+
+  const handleBackToInput = () => {
+    navigate("/");
+  };
   
   return (
     <Layout>
@@ -31,9 +37,14 @@ const QuoteSelection: React.FC = () => {
           <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center mr-2">
             <span className="text-xs text-white">1</span>
           </div>
-          <button className="text-white/70 hover:text-white transition-colors">
+          <Button 
+            variant="ghost" 
+            className="text-white/70 hover:text-white transition-colors p-0 flex items-center gap-2"
+            onClick={handleBackToInput}
+          >
+            <ArrowLeft className="h-4 w-4" />
             Back to Input
-          </button>
+          </Button>
         </div>
         
         <div className="space-y-6">

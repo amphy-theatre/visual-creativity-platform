@@ -1,0 +1,85 @@
+name: Deploy Edge Functions
+
+on:
+  push:
+    branches:
+      - production  # Trigger on production branch pushes
+      - '**'       # Trigger on all other branch pushes
+    paths-ignore:
+      - '**.md'    # Ignore markdown files
+      - 'docs/**'  # Ignore docs directory
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for accurate diff
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Check for function changes
+        id: check-changes
+        if: github.ref != 'refs/heads/production'
+        run: |
+          echo "Checking for function changes in diff: ${{ github.event.before }}..${{ github.sha }}"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "supabase/functions/" && echo "functions_changed=true" >> $GITHUB_OUTPUT || echo "functions_changed=false" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
+      - name: Set Supabase project variables
+        id: set-vars
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/production" ]]; then
+            echo "Using production environment credentials"
+            echo "PROJECT_ID=${{ secrets.SUPABASE_PROJECT_ID }}" >> $GITHUB_OUTPUT
+            echo "ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}" >> $GITHUB_OUTPUT
+          else
+            echo "Using testing environment credentials"
+            echo "PROJECT_ID=${{ secrets.TESTING_PROJECT_ID }}" >> $GITHUB_OUTPUT
+            echo "ACCESS_TOKEN=${{ secrets.TESTING_ACCESS_TOKEN }}" >> $GITHUB_OUTPUT
+          fi
+          cat $GITHUB_OUTPUT
+
+      - name: List modified functions (Non-Production)
+        id: changed-files
+        if: github.ref != 'refs/heads/production' && steps.check-changes.outputs.functions_changed == 'true'
+        run: |
+          MODIFIED_FUNCTIONS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "supabase/functions/" | cut -d'/' -f3 | sort -u)
+          echo "Modified functions for deployment: $MODIFIED_FUNCTIONS"
+          echo "functions=$(echo $MODIFIED_FUNCTIONS | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
+      - name: Deploy modified functions (Non-Production)
+        if: github.ref != 'refs/heads/production' && steps.check-changes.outputs.functions_changed == 'true'
+        env:
+          SUPABASE_PROJECT_ID: ${{ steps.set-vars.outputs.PROJECT_ID }}
+          SUPABASE_ACCESS_TOKEN: ${{ steps.set-vars.outputs.ACCESS_TOKEN }}
+        run: |
+          MODIFIED_LIST="${{ steps.changed-files.outputs.functions }}"
+          if [ -z "$MODIFIED_LIST" ]; then
+            echo "No functions found in the modified list. Skipping deployment."
+            exit 0
+          fi
+          IFS=' ' read -ra FUNCTIONS <<< "$MODIFIED_LIST"
+          for function in "${FUNCTIONS[@]}"; do
+            if [ ! -z "$function" ]; then
+              echo "Deploying function: $function to testing project: $SUPABASE_PROJECT_ID"
+              supabase functions deploy $function --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt --debug
+            fi
+          done
+
+      - name: Deploy all functions (Production)
+        if: github.ref == 'refs/heads/production'
+        env:
+          SUPABASE_PROJECT_ID: ${{ steps.set-vars.outputs.PROJECT_ID }}
+          SUPABASE_ACCESS_TOKEN: ${{ steps.set-vars.outputs.ACCESS_TOKEN }}
+        run: |
+          echo "Deploying ALL functions to production project: $SUPABASE_PROJECT_ID"
+          supabase functions deploy --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt --debug
+

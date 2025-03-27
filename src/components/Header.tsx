@@ -15,7 +15,7 @@ const Header: React.FC = () => {
             <ArrowLeft className="h-5 w-5 text-white" />
           </Link>
         ) : (
-          <div className="w-10"></div> {/* Placeholder for spacing */}
+          <div className="w-10"></div> /* Placeholder for spacing */
         )}
         
         <div className="flex-1 flex justify-end items-center space-x-4">

@@ -48,7 +48,7 @@ const QuoteSelection: React.FC = () => {
         </div>
         
         <div className="space-y-6">
-          <div className="italic text-center text-xl text-foreground/80">
+          <div className="italic text-center text-xl text-foreground/80 max-w-full mx-auto px-4 overflow-hidden break-words">
             "{mood}"
           </div>
           

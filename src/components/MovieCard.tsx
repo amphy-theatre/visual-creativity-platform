@@ -53,7 +53,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
                 className="flex items-center space-x-2 bg-secondary rounded-full px-3 py-1"
               >
                 <span className="w-4 h-4 bg-background rounded-full"></span>
-                <span className="text-xs text-foreground">
+                <span className="text-xs text-secondary-foreground">
                   {platform.name}{platform.variant ? ` ${platform.variant}` : ""}
                 </span>
               </div>

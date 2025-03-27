@@ -35,11 +35,11 @@ const QuoteSelection: React.FC = () => {
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex items-center">
           <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center mr-2">
-            <span className="text-xs text-white">1</span>
+            <span className="text-xs text-secondary-foreground">1</span>
           </div>
           <Button 
             variant="ghost" 
-            className="text-white/70 hover:text-white transition-colors p-0 flex items-center gap-2"
+            className="text-foreground/70 hover:text-foreground transition-colors p-0 flex items-center gap-2"
             onClick={handleBackToInput}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -48,11 +48,11 @@ const QuoteSelection: React.FC = () => {
         </div>
         
         <div className="space-y-6">
-          <div className="italic text-center text-xl text-white/80">
+          <div className="italic text-center text-xl text-foreground/80">
             "{mood}"
           </div>
           
-          <h1 className="text-3xl font-bold text-center text-white">
+          <h1 className="text-3xl font-bold text-center text-foreground">
             Choose a quote that resonates with you
           </h1>
           
@@ -67,7 +67,7 @@ const QuoteSelection: React.FC = () => {
           </div>
           
           <button 
-            className="flex items-center justify-center space-x-2 w-full py-3 rounded-lg border border-white/20 text-white hover:bg-white/10 transition-colors"
+            className="flex items-center justify-center space-x-2 w-full py-3 rounded-lg border border-foreground/20 text-foreground hover:bg-foreground/10 transition-colors"
             onClick={handleRefresh}
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">

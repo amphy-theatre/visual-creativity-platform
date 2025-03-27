@@ -3,8 +3,6 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import QuoteCard from "../components/QuoteCard";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 const QuoteSelection: React.FC = () => {
   const location = useLocation();
@@ -26,10 +24,6 @@ const QuoteSelection: React.FC = () => {
     console.log("Refreshing quotes");
   };
   
-  const goBackToInput = () => {
-    navigate("/");
-  };
-  
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-8">
@@ -37,7 +31,7 @@ const QuoteSelection: React.FC = () => {
           <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center mr-2">
             <span className="text-xs text-white">1</span>
           </div>
-          <button className="text-white/70 hover:text-white transition-colors" onClick={goBackToInput}>
+          <button className="text-white/70 hover:text-white transition-colors">
             Back to Input
           </button>
         </div>
@@ -72,15 +66,6 @@ const QuoteSelection: React.FC = () => {
             </svg>
             <span>None of these quotes resonate? Try again</span>
           </button>
-          
-          <Button 
-            variant="outline" 
-            onClick={goBackToInput}
-            className="w-full border-white/20 text-white hover:bg-white/10 hover:text-white"
-          >
-            <ArrowLeft className="mr-2" />
-            Back to Mood Input
-          </Button>
         </div>
       </div>
     </Layout>

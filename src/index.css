@@ -95,7 +95,7 @@
   }
   
   .preset-card {
-    @apply glass-card transition-all duration-300 hover:bg-secondary/80 hover:scale-[1.02] hover:shadow-xl;
+    @apply glass-card transition-all duration-300 hover:bg-secondary/80 hover:shadow-xl;
   }
   
   .input-field {

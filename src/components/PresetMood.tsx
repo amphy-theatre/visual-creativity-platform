@@ -17,14 +17,31 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
     });
   };
   
+  // Generate dynamic classes based on genre
+  const getGenreClasses = () => {
+    const baseClasses = "preset-card p-6 rounded-lg cursor-pointer transition-all duration-300";
+    
+    // Map of genre-specific background classes
+    const genreBackgrounds: Record<string, string> = {
+      inspiration: "bg-secondary/90 hover:bg-secondary",
+      thriller: "bg-destructive/70 hover:bg-destructive/90",
+      drama: "bg-secondary/90 hover:bg-secondary",
+      romance: "bg-destructive/70 hover:bg-destructive/90",
+      philosophical: "bg-primary/20 hover:bg-primary/30",
+      comedy: "bg-accent/80 hover:bg-accent"
+    };
+    
+    return `${baseClasses} ${genreBackgrounds[genre]}`;
+  };
+  
   return (
     <div 
-      className={`preset-card p-6 rounded-lg bg-genre-${genre} cursor-pointer`}
+      className={getGenreClasses()}
       onClick={handleClick}
     >
       <div className="space-y-2">
-        <div className="text-sm text-white/80">"{description}"</div>
-        <div className="text-xl font-semibold text-white">{title}</div>
+        <div className="text-sm text-foreground/80">"{description}"</div>
+        <div className="text-xl font-semibold text-foreground">{title}</div>
       </div>
     </div>
   );

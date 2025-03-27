@@ -56,14 +56,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        genre: {
-          inspiration: "#4A5568",
-          thriller: "#C05621",
-          drama: "#4A5568",
-          romance: "#B91C1C",
-          philosophical: "#4C51BF",
-          comedy: "#047857",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",

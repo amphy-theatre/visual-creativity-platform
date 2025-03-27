@@ -22,7 +22,7 @@ const MoodInput: React.FC = () => {
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="space-y-2">
-        <h2 className="text-lg font-medium text-white/80">How are you feeling? Describe your current mood:</h2>
+        <h2 className="text-lg font-medium text-foreground/80">How are you feeling? Describe your current mood:</h2>
         <textarea
           className="input-field h-32 resize-none"
           placeholder="How are you feeling? (e.g., I feel like a yellow balloon, On top of the world, I think I am James Bond)"
@@ -46,7 +46,7 @@ const MoodInput: React.FC = () => {
         Get Personalized Recommendations
       </button>
       
-      <div className="text-sm text-white/50 text-center">
+      <div className="text-sm text-foreground/50 text-center">
         1 prompts remaining this month
       </div>
     </div>

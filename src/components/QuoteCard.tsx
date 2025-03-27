@@ -12,7 +12,7 @@ const QuoteCard: React.FC<QuoteCardProps> = ({ quote, onClick }) => {
       className="quote-card animate-scale-in"
       onClick={onClick}
     >
-      <p className="text-center text-white text-lg">{quote}</p>
+      <p className="text-center text-foreground text-lg">{quote}</p>
     </div>
   );
 };

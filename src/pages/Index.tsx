@@ -9,14 +9,14 @@ const Index: React.FC = () => {
     <Layout>
       <div className="space-y-16 pb-12">
         <div className="text-center space-y-4 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold text-white">How are you feeling today?</h1>
-          <p className="text-xl text-white/70">Let's find the perfect content to match your mood</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground">How are you feeling today?</h1>
+          <p className="text-xl text-foreground/70">Let's find the perfect content to match your mood</p>
         </div>
         
         <MoodInput />
         
         <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-          <div className="text-lg text-white/80">Or choose a preset prompt:</div>
+          <div className="text-lg text-foreground/80">Or choose a preset prompt:</div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <PresetMood 

@@ -15,7 +15,7 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {showBackButton ? (
           <Link to="/" className="icon-button">
-            <ArrowLeft className="h-5 w-5 text-white dark:text-white" />
+            <ArrowLeft className="h-5 w-5 text-primary" />
           </Link>
         ) : (
           <div className="w-10">{/* Placeholder for spacing */}</div>
@@ -29,9 +29,9 @@ const Header: React.FC = () => {
             className="icon-button"
           >
             {theme === "dark" ? (
-              <Sun className="h-5 w-5 text-white" />
+              <Sun className="h-5 w-5 text-primary" />
             ) : (
-              <Moon className="h-5 w-5 text-black" />
+              <Moon className="h-5 w-5 text-primary" />
             )}
           </Toggle>
           <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium">

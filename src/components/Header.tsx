@@ -1,9 +1,10 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, Moon, Sun } from "lucide-react";
+import { ArrowLeft, LogIn, Moon, Sun } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { Toggle } from "./ui/toggle";
+import { Button } from "./ui/button";
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -22,6 +23,13 @@ const Header: React.FC = () => {
         )}
         
         <div className="flex-1 flex justify-end items-center space-x-4">
+          {location.pathname !== "/auth" && (
+            <Link to="/auth">
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <LogIn className="h-5 w-5 text-primary" />
+              </Button>
+            </Link>
+          )}
           <Toggle 
             pressed={theme === "light"} 
             onPressedChange={toggleTheme}

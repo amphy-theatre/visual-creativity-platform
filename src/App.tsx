@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import QuoteSelection from "./pages/QuoteSelection";
 import Recommendations from "./pages/Recommendations";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/quotes" element={<QuoteSelection />} />
             <Route path="/recommendations" element={<Recommendations />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

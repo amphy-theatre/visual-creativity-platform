@@ -1,11 +1,18 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, LogIn, LogOut, Moon, Sun } from "lucide-react";
+import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { Toggle } from "./ui/toggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -33,12 +40,6 @@ const Header: React.FC = () => {
             </Link>
           )}
           
-          {user && (
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={signOut}>
-              <LogOut className="h-5 w-5 text-primary" />
-            </Button>
-          )}
-          
           <Toggle 
             pressed={theme === "light"} 
             onPressedChange={toggleTheme}
@@ -53,9 +54,24 @@ const Header: React.FC = () => {
           </Toggle>
           
           {user && (
-            <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium">
-              {user.email?.charAt(0).toUpperCase() || 'U'}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-10 w-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                  <AvatarFallback className="bg-purple-500 text-white text-lg">
+                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem className="text-sm text-muted-foreground">
+                  {user.email}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>

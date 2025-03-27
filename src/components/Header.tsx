@@ -1,15 +1,17 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, LogIn, Moon, Sun } from "lucide-react";
+import { ArrowLeft, LogIn, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { Toggle } from "./ui/toggle";
 import { Button } from "./ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 const Header: React.FC = () => {
   const location = useLocation();
   const showBackButton = location.pathname !== "/";
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
 
   return (
     <header className="w-full py-4 px-4 sm:px-6 md:px-8">
@@ -23,13 +25,20 @@ const Header: React.FC = () => {
         )}
         
         <div className="flex-1 flex justify-end items-center space-x-4">
-          {location.pathname !== "/auth" && (
+          {!user && location.pathname !== "/auth" && (
             <Link to="/auth">
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <LogIn className="h-5 w-5 text-primary" />
               </Button>
             </Link>
           )}
+          
+          {user && (
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={signOut}>
+              <LogOut className="h-5 w-5 text-primary" />
+            </Button>
+          )}
+          
           <Toggle 
             pressed={theme === "light"} 
             onPressedChange={toggleTheme}
@@ -42,9 +51,12 @@ const Header: React.FC = () => {
               <Moon className="h-5 w-5 text-primary" />
             )}
           </Toggle>
-          <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium">
-            A
-          </div>
+          
+          {user && (
+            <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-medium">
+              {user.email?.charAt(0).toUpperCase() || 'U'}
+            </div>
+          )}
         </div>
       </div>
     </header>

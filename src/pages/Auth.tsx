@@ -1,48 +1,12 @@
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import Layout from "@/components/Layout";
 
 const Auth = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
-
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = isSignUp 
-        ? await supabase.auth.signUp({ email, password })
-        : await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) throw error;
-
-      if (isSignUp) {
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link.",
-        });
-      } else {
-        navigate("/");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -66,43 +30,10 @@ const Auth = () => {
     <Layout>
       <div className="flex flex-col items-center justify-center max-w-md mx-auto mt-8 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">
-            {isSignUp ? "Create an account" : "Sign in to your account"}
-          </h1>
+          <h1 className="text-3xl font-bold">Sign in to your account</h1>
           <p className="text-muted-foreground">
-            {isSignUp 
-              ? "Enter your email below to create your account" 
-              : "Enter your email below to sign in to your account"}
+            Continue with Google to access your account
           </p>
-        </div>
-
-        <form onSubmit={handleAuth} className="w-full space-y-4">
-          <div className="space-y-2">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          
-          <Button type="submit" className="w-full" disabled={loading}>
-            {isSignUp ? "Sign Up" : "Sign In"} with Email
-          </Button>
-        </form>
-        
-        <div className="flex items-center w-full">
-          <div className="h-px flex-1 bg-border"></div>
-          <span className="px-4 text-xs text-muted-foreground">OR</span>
-          <div className="h-px flex-1 bg-border"></div>
         </div>
         
         <Button
@@ -118,16 +49,6 @@ const Auth = () => {
           </svg>
           Continue with Google
         </Button>
-        
-        <div className="text-center">
-          <Button 
-            variant="link" 
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm"
-          >
-            {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
-          </Button>
-        </div>
       </div>
     </Layout>
   );

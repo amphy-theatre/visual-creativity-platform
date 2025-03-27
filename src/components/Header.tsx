@@ -34,7 +34,7 @@ const Header: React.FC = () => {
         <div className="flex-1 flex justify-end items-center space-x-4">
           {!user && location.pathname !== "/auth" && (
             <Link to="/auth">
-              <Button variant="ghost" size="icon" className="h-9 w-9">
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
                 <LogIn className="h-5 w-5 text-primary" />
               </Button>
             </Link>
@@ -44,7 +44,7 @@ const Header: React.FC = () => {
             pressed={theme === "light"} 
             onPressedChange={toggleTheme}
             aria-label="Toggle theme"
-            className="icon-button"
+            className="icon-button h-10 w-10 rounded-full"
           >
             {theme === "dark" ? (
               <Sun className="h-5 w-5 text-primary" />
@@ -62,11 +62,11 @@ const Header: React.FC = () => {
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem className="text-sm text-muted-foreground">
+              <DropdownMenuContent align="center" sideOffset={10} className="w-56">
+                <DropdownMenuItem className="text-sm text-muted-foreground text-center justify-center">
                   {user.email}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer">
+                <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer text-center justify-center">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign out</span>
                 </DropdownMenuItem>

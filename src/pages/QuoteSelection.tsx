@@ -37,9 +37,6 @@ const QuoteSelection: React.FC = () => {
     <Layout>
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="flex items-center">
-          <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center mr-2">
-            <span className="text-xs text-secondary-foreground">1</span>
-          </div>
           <Button 
             variant="ghost" 
             className="text-foreground/70 hover:text-foreground transition-colors p-0 flex items-center gap-2"

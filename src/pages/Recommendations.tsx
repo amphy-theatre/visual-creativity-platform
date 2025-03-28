@@ -10,6 +10,7 @@ interface StreamingProvider {
   name: string;
   url: string;
   logoUrl: string;
+  variant?: string;  // Added the optional variant property
 }
 
 interface MovieData {

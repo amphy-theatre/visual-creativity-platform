@@ -27,16 +27,20 @@ const MoodInput: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
         },
         body: JSON.stringify({ emotion: mood }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to generate quotes');
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
       }
       
       // Parse the response if needed
       const data = await response.json();
+      console.log('Received quotes:', data);
       
       // Navigate to the quotes page with the mood
       navigate("/quotes", { state: { mood, quotes: data } });

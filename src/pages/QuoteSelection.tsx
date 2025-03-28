@@ -9,13 +9,16 @@ import { ArrowLeft } from "lucide-react";
 const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { mood } = location.state || { mood: "" };
+  const { mood, quotes } = location.state || { mood: "", quotes: [] };
   
-  const quotes = [
-    "Relief blooms where the weight of uncertainty once lay.",
-    "Every ending carries the seeds of new beginnings.",
-    "Bittersweet journeys shape our brightest horizons."
-  ];
+  // Use quotes from the API if available, otherwise use fallback quotes
+  const displayQuotes = Array.isArray(quotes) && quotes.length > 0 ? 
+    quotes : 
+    [
+      "Relief blooms where the weight of uncertainty once lay.",
+      "Every ending carries the seeds of new beginnings.",
+      "Bittersweet journeys shape our brightest horizons."
+    ];
   
   const handleQuoteSelection = (quote: string) => {
     navigate("/recommendations", { state: { selectedQuote: quote } });
@@ -57,7 +60,7 @@ const QuoteSelection: React.FC = () => {
           </h1>
           
           <div className="space-y-4">
-            {quotes.map((quote, index) => (
+            {displayQuotes.map((quote, index) => (
               <QuoteCard
                 key={index}
                 quote={quote}

@@ -9,10 +9,10 @@ import { ArrowLeft } from "lucide-react";
 const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedQuote, selectedGenre, fromPreset } = location.state || {};
+  const { selectedQuote, recommendations, mood, selectedGenre, fromPreset } = location.state || {};
   
-  // Sample movie data
-  const movies = [
+  // Use the recommendations data from the edge function if available, otherwise use sample data
+  const movies = recommendations?.movies || [
     {
       title: "Lady Bird",
       image: "https://source.unsplash.com/random/800x600/?movie",
@@ -80,6 +80,12 @@ const Recommendations: React.FC = () => {
         </div>
         
         <h1 className="text-3xl font-bold text-foreground">{headerText}</h1>
+        
+        {selectedQuote && (
+          <div className="italic text-xl text-foreground/80 max-w-full px-4 overflow-hidden break-words">
+            "{selectedQuote}"
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {movies.map((movie, index) => (

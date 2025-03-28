@@ -11,9 +11,9 @@ const QuoteSelection: React.FC = () => {
   const navigate = useNavigate();
   const { mood, quotes } = location.state || { mood: "", quotes: [] };
   
-  // Use quotes from the API if available, otherwise use fallback quotes
-  const displayQuotes = Array.isArray(quotes) && quotes.length > 0 ? 
-    quotes : 
+  // Process quotes from the API response structure or use fallback quotes
+  const displayQuotes = quotes && quotes.quotes && Array.isArray(quotes.quotes) && quotes.quotes.length > 0 ? 
+    quotes.quotes.map(q => q.text) : 
     [
       "Relief blooms where the weight of uncertainty once lay.",
       "Every ending carries the seeds of new beginnings.",

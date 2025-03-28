@@ -38,11 +38,11 @@ const MoodInput: React.FC = () => {
         throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
       }
       
-      // Parse the response if needed
+      // Parse the response
       const data = await response.json();
       console.log('Received quotes:', data);
       
-      // Navigate to the quotes page with the mood
+      // Navigate to the quotes page with the mood and quotes data
       navigate("/quotes", { state: { mood, quotes: data } });
     } catch (error) {
       console.error('Error generating quotes:', error);

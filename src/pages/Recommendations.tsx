@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -123,7 +122,8 @@ const Recommendations: React.FC = () => {
                 platforms={movie.streamingProviders.map(provider => ({
                   name: provider.name,
                   logo: provider.logoUrl || "",
-                  variant: provider.variant
+                  variant: provider.variant,
+                  url: provider.url
                 }))}
               />
             </div>

@@ -6,45 +6,69 @@ import MovieCard from "../components/MovieCard";
 import { Button } from "../components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
+interface StreamingProvider {
+  name: string;
+  url: string;
+  logoUrl: string;
+}
+
+interface MovieData {
+  title: string;
+  description: string;
+  link: string;
+  posterUrl: string;
+  streamingProviders: StreamingProvider[];
+  rating: number;
+}
+
+interface RecommendationsResponse {
+  movies: MovieData[];
+}
+
 const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedQuote, recommendations, mood, selectedGenre, fromPreset } = location.state || {};
   
   // Use the recommendations data from the edge function if available, otherwise use sample data
-  const movies = recommendations?.movies || [
-    {
-      title: "Lady Bird",
-      image: "https://source.unsplash.com/random/800x600/?movie",
-      description: "A high school senior navigates the challenges of adolescence and her complex relationship with her mother, all while preparing to leave for college.",
-      rating: 7.3,
-      platforms: [
-        { name: "Netflix", logo: "" },
-        { name: "Netflix", logo: "", variant: "basic with Ads" }
-      ]
-    },
-    {
-      title: "Reality Bites",
-      image: "https://source.unsplash.com/random/800x600/?film",
-      description: "A group of friends faces the uncertainties of post-college life, dealing with love, career choices, and the transition into adulthood.",
-      rating: 6.6,
-      platforms: [
-        { name: "Apple TV", logo: "" },
-        { name: "Google Play Movies", logo: "" },
-        { name: "Cineplex", logo: "" }
-      ]
-    },
-    {
-      title: "Kicking and Screaming",
-      image: "https://source.unsplash.com/random/800x600/?cinema",
-      description: "A group of college friends struggles with the transition into adulthood, each facing their own challenges and uncertainties about the future.",
-      rating: 6.2,
-      platforms: [
-        { name: "Amazon Prime Video", logo: "" },
-        { name: "Amazon Prime Video", logo: "", variant: "with Ads" }
-      ]
-    }
-  ];
+  const recommendationsData: RecommendationsResponse = recommendations || {
+    movies: [
+      {
+        title: "Lady Bird",
+        description: "A high school senior navigates the challenges of adolescence and her complex relationship with her mother, all while preparing to leave for college.",
+        link: "#",
+        posterUrl: "https://source.unsplash.com/random/800x600/?movie",
+        rating: 7.3,
+        streamingProviders: [
+          { name: "Netflix", url: "#", logoUrl: "" },
+          { name: "Netflix", url: "#", logoUrl: "", variant: "basic with Ads" }
+        ]
+      },
+      {
+        title: "Reality Bites",
+        description: "A group of friends faces the uncertainties of post-college life, dealing with love, career choices, and the transition into adulthood.",
+        link: "#", 
+        posterUrl: "https://source.unsplash.com/random/800x600/?film",
+        rating: 6.6,
+        streamingProviders: [
+          { name: "Apple TV", url: "#", logoUrl: "" },
+          { name: "Google Play Movies", url: "#", logoUrl: "" },
+          { name: "Cineplex", url: "#", logoUrl: "" }
+        ]
+      },
+      {
+        title: "Kicking and Screaming",
+        description: "A group of college friends struggles with the transition into adulthood, each facing their own challenges and uncertainties about the future.",
+        link: "#",
+        posterUrl: "https://source.unsplash.com/random/800x600/?cinema",
+        rating: 6.2,
+        streamingProviders: [
+          { name: "Amazon Prime Video", url: "#", logoUrl: "" },
+          { name: "Amazon Prime Video", url: "#", logoUrl: "", variant: "with Ads" }
+        ]
+      }
+    ]
+  };
   
   let headerText = "Based on your mood";
   if (selectedQuote) {
@@ -88,14 +112,18 @@ const Recommendations: React.FC = () => {
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {movies.map((movie, index) => (
+          {recommendationsData.movies.map((movie, index) => (
             <div key={index} style={{ animationDelay: `${index * 0.1}s` }}>
               <MovieCard
                 title={movie.title}
-                image={movie.image}
+                image={movie.posterUrl || "https://source.unsplash.com/random/800x600/?movie"}
                 description={movie.description}
                 rating={movie.rating}
-                platforms={movie.platforms}
+                platforms={movie.streamingProviders.map(provider => ({
+                  name: provider.name,
+                  logo: provider.logoUrl || "",
+                  variant: provider.variant
+                }))}
               />
             </div>
           ))}

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -47,7 +46,6 @@ const QuoteSelection: React.FC = () => {
         throw new Error(`Failed to get movie recommendations: ${response.status} ${response.statusText}`);
       }
 
-      console.log(response);
       // Parse the response
       const recommendations = await response.json();
       console.log('Received movie recommendations:', recommendations);

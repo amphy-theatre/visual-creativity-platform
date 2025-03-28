@@ -46,7 +46,8 @@ const QuoteSelection: React.FC = () => {
         console.error('Error response:', errorData);
         throw new Error(`Failed to get movie recommendations: ${response.status} ${response.statusText}`);
       }
-      
+
+      console.log(response);
       // Parse the response
       const recommendations = await response.json();
       console.log('Received movie recommendations:', recommendations);

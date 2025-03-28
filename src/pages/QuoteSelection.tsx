@@ -1,15 +1,18 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import QuoteCard from "../components/QuoteCard";
 import { Button } from "../components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import { toast } from "../components/ui/use-toast";
 
 const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { mood, quotes } = location.state || { mood: "", quotes: [] };
+  const { mood, quotes: initialQuotes } = location.state || { mood: "", quotes: [] };
+  const [quotes, setQuotes] = useState(initialQuotes);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Process quotes from the API response structure or use fallback quotes
   const displayQuotes = quotes && quotes.quotes && Array.isArray(quotes.quotes) && quotes.quotes.length > 0 ? 
@@ -24,9 +27,46 @@ const QuoteSelection: React.FC = () => {
     navigate("/recommendations", { state: { selectedQuote: quote } });
   };
   
-  const handleRefresh = () => {
-    // In a real app, this would fetch new quotes
-    console.log("Refreshing quotes");
+  const handleRefresh = async () => {
+    if (!mood.trim()) {
+      navigate("/");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate-quotes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+        },
+        body: JSON.stringify({ emotion: mood }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
+      }
+      
+      // Parse the response
+      const data = await response.json();
+      console.log('Received new quotes:', data);
+      
+      // Update quotes state with the new data
+      setQuotes(data);
+    } catch (error) {
+      console.error('Error regenerating quotes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate new quotes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBackToInput = () => {
@@ -67,15 +107,21 @@ const QuoteSelection: React.FC = () => {
           </div>
           
           <button 
-            className="flex items-center justify-center space-x-2 w-full py-3 rounded-lg border border-foreground/20 text-foreground hover:bg-foreground/10 transition-colors"
+            className={`flex items-center justify-center space-x-2 w-full py-3 rounded-lg border border-foreground/20 text-foreground hover:bg-foreground/10 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             onClick={handleRefresh}
+            disabled={isLoading}
           >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
-              <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z" stroke="currentColor" strokeWidth="2" />
-              <path d="M16 12L8 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M13 9L16 12L13 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span>None of these quotes resonate? Try again</span>
+            {isLoading ? (
+              <>
+                <RefreshCw className="h-5 w-5 animate-spin" />
+                <span>Generating new quotes...</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-5 w-5" />
+                <span>None of these quotes resonate? Try again</span>
+              </>
+            )}
           </button>
         </div>
       </div>

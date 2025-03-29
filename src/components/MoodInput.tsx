@@ -23,7 +23,7 @@ const MoodInput: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate-quotes', {
+      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

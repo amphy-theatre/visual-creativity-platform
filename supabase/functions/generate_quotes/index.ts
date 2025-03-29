@@ -1,6 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { OpenAI } from "https://esm.sh/openai";
+import OpenAI from "openai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -44,7 +44,7 @@ serve(async (req) => {
 
     console.log('Generating quotes for emotion:', sanitizedEmotion);
 
-    const openai = new OpenAI();
+    const openai = new OpenAI(api_key=Deno.env.get('OPENAI_API_KEY'));
 
     const openAIData = await openai.responses.create({
         model: "gpt-4o-mini",

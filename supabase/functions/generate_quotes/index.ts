@@ -56,6 +56,7 @@ serve(async (req) => {
     });
 
     if (!openAIData.output?.filter(op => op?.type == "message")[0].content.text) {
+      console.log(openAIData);
       throw new Error('Invalid response from OpenAI API');
     }
 

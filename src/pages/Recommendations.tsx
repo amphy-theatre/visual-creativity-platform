@@ -1,16 +1,18 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import MovieCard from "../components/MovieCard";
 import { Button } from "../components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
+import { toast } from "../components/ui/use-toast";
+import { supabase } from "../integrations/supabase/client";
 
 interface StreamingProvider {
   name: string;
   url: string;
   logoUrl: string;
-  variant?: string;  // Added the optional variant property
+  variant?: string;
 }
 
 interface MovieData {
@@ -18,7 +20,7 @@ interface MovieData {
   description: string;
   link: string;
   posterUrl: string;
-  streamingProviders?: StreamingProvider[];  // Make it optional
+  streamingProviders?: StreamingProvider[];
   rating: number;
 }
 
@@ -29,10 +31,9 @@ interface RecommendationsResponse {
 const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedQuote, recommendations, mood, selectedGenre, fromPreset } = location.state || {};
+  const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
   
-  // Use the recommendations data from the edge function if available, otherwise use sample data
-  const recommendationsData: RecommendationsResponse = recommendations || {
+  const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
     movies: [
       {
         title: "Lady Bird",
@@ -69,7 +70,9 @@ const Recommendations: React.FC = () => {
         ]
       }
     ]
-  };
+  });
+  
+  const [isLoading, setIsLoading] = useState(false);
   
   let headerText = "Based on your mood";
   if (selectedQuote) {
@@ -88,6 +91,66 @@ const Recommendations: React.FC = () => {
   
   const handleBackToQuotes = () => {
     navigate(-1);
+  };
+  
+  const handleGenerateMore = async () => {
+    if (!selectedQuote && !mood) {
+      toast({
+        title: "Error",
+        description: "Missing required information to generate more movies",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Extract current movie titles to avoid duplicates
+    const previousMovies = recommendations.movies.map(movie => movie.title);
+    
+    try {
+      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+        },
+        body: JSON.stringify({
+          selectedQuote,
+          originalEmotion: mood,
+          previousMovies
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to get more movie recommendations: ${response.status} ${response.statusText}`);
+      }
+
+      // Parse the response
+      const newRecommendations = await response.json();
+      console.log('Received new movie recommendations:', newRecommendations);
+      
+      // Add new movies to the existing list
+      setRecommendations(prev => ({
+        movies: [...prev.movies, ...newRecommendations.movies]
+      }));
+      
+      toast({
+        title: "Success",
+        description: "Found more movies for you!",
+      });
+    } catch (error) {
+      console.error('Error getting more movie recommendations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get more movie recommendations. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   return (
@@ -113,7 +176,7 @@ const Recommendations: React.FC = () => {
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recommendationsData.movies.map((movie, index) => (
+          {recommendations.movies.map((movie, index) => (
             <div key={index} style={{ animationDelay: `${index * 0.1}s` }}>
               <MovieCard
                 title={movie.title}
@@ -129,6 +192,26 @@ const Recommendations: React.FC = () => {
               />
             </div>
           ))}
+        </div>
+        
+        <div className="flex justify-center mt-8">
+          <Button 
+            onClick={handleGenerateMore} 
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Finding more movies...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Generate More Movies
+              </>
+            )}
+          </Button>
         </div>
       </div>
     </Layout>

@@ -118,7 +118,7 @@ const Recommendations: React.FC = () => {
         body: JSON.stringify({
           selectedQuote,
           originalEmotion: mood,
-          previousMovies
+          previousMovies: previousMovies
         }),
       });
       

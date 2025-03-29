@@ -21,7 +21,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
   image,
   description,
   rating,
-  platforms,
+  platforms = [], // Provide default empty array to prevent undefined errors
 }) => {
   return (
     <div className="movie-card rounded-lg overflow-hidden flex flex-col h-full border border-foreground/10 hover:border-foreground/30 transition-colors shadow-sm">

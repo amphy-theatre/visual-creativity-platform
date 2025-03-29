@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -17,7 +18,7 @@ interface MovieData {
   description: string;
   link: string;
   posterUrl: string;
-  streamingProviders: StreamingProvider[];
+  streamingProviders?: StreamingProvider[];  // Make it optional
   rating: number;
 }
 
@@ -118,8 +119,8 @@ const Recommendations: React.FC = () => {
                 title={movie.title}
                 image={movie.posterUrl || "https://source.unsplash.com/random/800x600/?movie"}
                 description={movie.description}
-                rating={movie.rating}
-                platforms={movie.streamingProviders.map(provider => ({
+                rating={movie.rating || 0}
+                platforms={(movie.streamingProviders || []).map(provider => ({
                   name: provider.name,
                   logo: provider.logoUrl || "",
                   variant: provider.variant,

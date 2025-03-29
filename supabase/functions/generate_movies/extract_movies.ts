@@ -1,79 +1,80 @@
+
 import { Movie } from './types';
 
-// Helper function to clean text formatting and remove links
-export function cleanTextFormatting(text: string): string {
-  // Remove asterisks, stars, quotes
-  let cleaned = text.replace(/[*'"]/g, '').trim();
-  
-  // Remove URLs, markdown links, and citation-style links
-  cleaned = cleaned.replace(/\bhttps?:\/\/\S+\b/gi, ''); // Remove URLs
-  cleaned = cleaned.replace(/\[\s*.*?\s*\]\s*\(.*?\)/g, ''); // Remove markdown links [text](url)
-  cleaned = cleaned.replace(/\[\s*.*?\s*\]/g, ''); // Remove citation-style links [text]
-  cleaned = cleaned.replace(/\(\s*https?:\/\/.*?\s*\)/g, ''); // Remove parenthesized URLs (url)
-  cleaned = cleaned.replace(/\(\s*http.*?\s*\)/g, ''); // Remove parenthesized URLs with text
-  
-  // Remove any trailing parentheses or brackets that might be left
-  cleaned = cleaned.replace(/\s*\(([^)]*)\)\s*$/g, ''); 
-  cleaned = cleaned.replace(/\s*\[([^\]]*)\]\s*$/g, '');
-  
-  // Remove any reference to "source:" or "according to"
-  cleaned = cleaned.replace(/\b(?:according to|source:).*$/gi, '');
-  
-  return cleaned.trim();
-}
+export function extractMoviesFromResponse(response: string): Movie[] {
+  if (!response || typeof response !== 'string') {
+    return [];
+  }
 
-// Helper function to extract movies from OpenAI response
-export function extractMoviesFromResponse(content: string): Movie[] {
-  console.log("Extracting movies from content:", content);
+  // Split the response by numbered list items (1., 2., 3., etc.)
+  const movieSections = response.split(/\n*\d+\.\s+/).filter(Boolean);
   
   const movies: Movie[] = [];
-  const numberPattern = /\d+\.\s+/;
   
-  // First try to split by numbered sections (1., 2., 3.)
-  let sections = content.split(numberPattern).filter(Boolean);
+  movieSections.forEach(section => {
+    // Extract movie title (first line of each section)
+    const lines = section.trim().split('\n').filter(line => line.trim() !== '');
+    
+    if (lines.length > 0) {
+      const title = lines[0].trim();
+      
+      // Extract description (all remaining lines)
+      const description = lines.slice(1).join(' ').trim();
+      
+      if (title) {
+        // Create a movie object with title and description
+        // Link and other properties will be added later by TMDB integration
+        movies.push({
+          title: title,
+          description: description || `A film titled "${title}"`,
+          link: '',
+          // Initialize with empty streamingProviders array to prevent undefined errors
+          streamingProviders: []
+        });
+      }
+    }
+  });
   
-  // If we don't have enough sections, try alternative parsing
-  if (sections.length < 3) {
-    // Try to split by double newlines which often separate movies
-    sections = content.split(/\n\n+/).filter(Boolean);
+  // If we can't extract movies with the numbered list pattern, try a different approach
+  if (movies.length === 0) {
+    // Look for movie titles in quotes or in bold (e.g., **Title**)
+    const titleMatches = response.match(/["']([^"']+)["']|\*\*([^\*]+)\*\*/g);
+    
+    if (titleMatches && titleMatches.length > 0) {
+      titleMatches.slice(0, 3).forEach(match => {
+        // Remove quotes or asterisks
+        const title = match.replace(/["'\*]/g, '');
+        
+        movies.push({
+          title: title,
+          description: `A film titled "${title}"`,
+          link: '',
+          // Initialize with empty streamingProviders array to prevent undefined errors
+          streamingProviders: []
+        });
+      });
+    }
   }
   
-  // Process sections into movie objects
-  for (const section of sections) {
-    const lines = section.split('\n').filter(line => line.trim() !== '');
+  // If we still can't extract movies, try to find any capitalized phrases that might be titles
+  if (movies.length === 0) {
+    const lines = response.split('\n');
     
-    if (lines.length >= 2) {
-      // First line is typically the title
-      let title = cleanTextFormatting(lines[0]);
-      
-      // Remove "Title:" prefix if present
-      title = title.replace(/^Title:\s*/i, '');
-      
-      // Extract description (combine all lines after the title)
-      let description = '';
-      
-      // If there's a line with "Description:", use that
-      let descriptionIndex = -1;
-      for (let i = 1; i < lines.length; i++) {
-        if (lines[i].toLowerCase().includes('description:')) {
-          descriptionIndex = i;
-          break;
+    for (const line of lines) {
+      // Look for capitalized words that might be movie titles
+      if (/^[A-Z][a-z]/.test(line.trim()) && movies.length < 3) {
+        const possibleTitle = line.trim().split('.')[0];
+        
+        if (possibleTitle && possibleTitle.length > 3) {
+          movies.push({
+            title: possibleTitle,
+            description: `A film titled "${possibleTitle}"`,
+            link: '',
+            // Initialize with empty streamingProviders array to prevent undefined errors
+            streamingProviders: []
+          });
         }
       }
-      
-      if (descriptionIndex > 0) {
-        description = cleanTextFormatting(lines[descriptionIndex].replace(/^Description:\s*/i, ''));
-      } else {
-        // Otherwise, combine all lines after the title into the description
-        description = lines.slice(1).map(line => cleanTextFormatting(line)).join(' ');
-      }
-      
-      // We'll populate these fields later with TMDB data
-      movies.push({
-        title,
-        description: description || `A film that resonates with themes from the quote.`,
-        link: '' // Will be populated with TMDB link
-      });
     }
   }
   

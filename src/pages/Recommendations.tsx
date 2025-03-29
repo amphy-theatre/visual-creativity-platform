@@ -105,6 +105,9 @@ const Recommendations: React.FC = () => {
     
     setIsLoading(true);
     
+    // Extract current movie titles to avoid duplicates
+    const previousMovies = recommendations.movies.map(movie => movie.title);
+    
     try {
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
         method: 'POST',
@@ -114,7 +117,8 @@ const Recommendations: React.FC = () => {
         },
         body: JSON.stringify({
           selectedQuote,
-          originalEmotion: mood
+          originalEmotion: mood,
+          previousMovies: previousMovies
         }),
       });
       

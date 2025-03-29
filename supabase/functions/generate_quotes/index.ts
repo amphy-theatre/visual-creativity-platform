@@ -56,11 +56,11 @@ serve(async (req) => {
     });
 
     if (!openAIData.output?.filter(op => op?.type == "message")[0].content.text) {
-      console.log(openAIData.output.filter(op => op.type == "message").content[0].text)
+      console.log(openAIData.output?.filter(op => op?.type == "message").content);
       throw new Error('Invalid response from OpenAI API');
     }
 
-    const content = openAIData.output?.filter(op => op?.type == "message").content[0].text;
+    const content = openAIData.output?.filter(op => op?.type == "message").content;
     
     // Split by newlines and filter empty lines
     let quoteLines = content.split('\n').filter(line => line.trim() !== '');

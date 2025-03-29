@@ -47,7 +47,7 @@ serve(async (req) => {
     const configuration = new Configuration({
       apiKey: Deno.env.get('OPENAI_API_KEY',
     });
-    const openai = new OpenAI(configuration));
+    const openai = new OpenAI(configuration);
 
     const openAIData = await openai.responses.create({
         model: "gpt-4o-mini",

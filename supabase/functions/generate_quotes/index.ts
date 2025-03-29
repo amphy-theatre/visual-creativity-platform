@@ -1,6 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import OpenAI from "openai";
+import { OpenAI } from "https://esm.sh/openai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -60,7 +60,6 @@ serve(async (req) => {
     }
 
     const content = openAIData.output?.filter(op => op?.type == "message")[0].content.text;
-    console.log(`Dis ma content: ${content}`);
     
     // Split by newlines and filter empty lines
     let quoteLines = content.split('\n').filter(line => line.trim() !== '');

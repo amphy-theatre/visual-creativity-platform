@@ -1,6 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { OpenAI } from "https://deno.land/x/openai@v4.69.0/mod.ts";
+import { OpenAI } from "npm:openai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -56,7 +56,6 @@ serve(async (req) => {
     });
 
     if (!openAIData.output?.filter(op => op?.type == "message")[0].content.text) {
-      console.log(openAIData);
       throw new Error('Invalid response from OpenAI API');
     }
 

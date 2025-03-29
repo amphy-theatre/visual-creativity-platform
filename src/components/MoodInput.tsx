@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +54,15 @@ const MoodInput: React.FC = () => {
     }
   };
   
+  // Handle key press events on the textarea
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // If Enter is pressed without Shift (for new line)
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent default to avoid newline
+      handleSubmit();
+    }
+  };
+  
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="space-y-2">
@@ -61,6 +71,7 @@ const MoodInput: React.FC = () => {
           placeholder="How are you feeling? (e.g., I feel like a yellow balloon, On top of the world, I think I am James Bond)"
           value={mood}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           maxLength={200}
         />
         <div className="flex justify-end">

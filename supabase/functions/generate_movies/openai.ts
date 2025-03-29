@@ -3,7 +3,7 @@ import { extractMoviesFromResponse } from './extract_movies.ts';
 import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
 import { enrichMoviesWithTMDBData } from './tmdb.ts';
-import { OpenAI } from "https://esm.sh/openai@4.0.0";
+import { OpenAI } from "openai";
 
 export async function getMovieRecommendations(
   selectedQuote: string, 
@@ -43,38 +43,33 @@ export async function getMovieRecommendations(
   const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
   try {
-    const openAIData = await openai.chat.completions.create({
+    const openAIData = await openai.responses.create({
       model: "gpt-4o-mini",
-      tools: [{ type: "web_search" }],
-      messages: [
-        {
-          role: "system",
-          content: `You are a movie recommendation assistant. Search the web to generate EXACTLY 3 movie recommendations (include one indie movie) based on the quote and emotional state provided.
-          For each movie, include:
-          - The movie name (no prefixes like 'Title:')
-          - A brief description (1-2 sentences, no label needed)
-          
-          DO NOT include any links, URLs, references, or citations.
-          DO NOT use phrases like "According to..." or "Based on...".
-          Format each movie as a numbered list item (1., 2., 3.) with clear separation between movies.
-          Do not use any special formatting characters like asterisks, quotes, stars, or brackets.
-          
-          ${sanitizedPreviousMovies.length > 0 ? `DO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}` : ''}`
-        },
-        {
-          role: "user",
-          content: `Quote: "${sanitizedQuote}"
-          Emotional state: ${sanitizedEmotion || 'Unknown'}
-          
-          Recommend movies that connect with these themes and emotions.`
-        }
-      ],
+      tools: [{ type: "web_search_preview" }],
+      instructions: `Search the web and generate EXACTLY 3 movie recommendations (include one indie movie) based on the quote and emotional state provided.
+        You must search the web, don't rely on in-built generation.
+        For each movie, include:
+        - The movie name (no prefixes like 'Title:')
+        - A brief description (1-2 sentences, no label needed)
+
+        DO NOT include any links, URLs, references, or citations in your response.
+        DO NOT use phrases like "According to..." or "Based on...".
+        Format each movie as a numbered list item (1., 2., 3.) with clear separation between movies.
+        Do not use any special formatting characters like asterisks, quotes, stars, or brackets.
+        
+        ${sanitizedPreviousMovies.length > 0 ? `DO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}` : ''}
+        `,
+      input: `Quote: "${sanitizedQuote}"
+            Emotional state: ${sanitizedEmotion || 'Unknown'}
+            
+            Recommend movies that connect with these themes and emotions.`,
       temperature: 1.2,
-      max_tokens: 500,
+      max_output_tokens: 300,
     });
   
     // Safely access the response content
-    const content = openAIData.choices[0]?.message?.content;
+    const output = openAIData.output?.filter(op => op?.type === "message");
+    const content = output?.[0]?.content?.[0]?.text;
     
     if (!content) {
       console.error('Invalid or empty response from OpenAI API');

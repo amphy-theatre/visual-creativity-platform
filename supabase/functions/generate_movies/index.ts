@@ -16,8 +16,8 @@ serve(async (req) => {
   try {
     const { selectedQuote, originalEmotion, previousMovies = [] } = await req.json();
     
-    if (!selectedQuote) {
-      throw new Error('Selected quote is required');
+    if (!selectedQuote && !originalEmotion) {
+      throw new Error('Selected quote or emotion is required');
     }
     
     // Note: Prompt usage counting is handled in the client code

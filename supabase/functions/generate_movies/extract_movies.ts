@@ -1,5 +1,5 @@
 
-import { Movie } from './types';
+import { Movie } from './types.ts';
 
 export function extractMoviesFromResponse(response: string): Movie[] {
   if (!response || typeof response !== 'string') {

@@ -1,4 +1,3 @@
-
 import { Movie, StreamingProvider } from './types.ts';
 import { getProviderLogoUrl } from './providers.ts';
 

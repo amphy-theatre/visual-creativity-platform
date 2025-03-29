@@ -93,7 +93,7 @@ const Recommendations: React.FC = () => {
     navigate(-1);
   };
   
-  const handleGenerateMore = async () => {
+  const handleRegenerateMovies = async () => {
     if (!selectedQuote && !mood) {
       toast({
         title: "Error",
@@ -105,9 +105,6 @@ const Recommendations: React.FC = () => {
     
     setIsLoading(true);
     
-    // Extract current movie titles to avoid duplicates
-    const previousMovies = recommendations.movies.map(movie => movie.title);
-    
     try {
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
         method: 'POST',
@@ -117,35 +114,32 @@ const Recommendations: React.FC = () => {
         },
         body: JSON.stringify({
           selectedQuote,
-          originalEmotion: mood,
-          previousMovies: previousMovies
+          originalEmotion: mood
         }),
       });
       
       if (!response.ok) {
         const errorData = await response.text();
         console.error('Error response:', errorData);
-        throw new Error(`Failed to get more movie recommendations: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to get new movie recommendations: ${response.status} ${response.statusText}`);
       }
 
       // Parse the response
       const newRecommendations = await response.json();
       console.log('Received new movie recommendations:', newRecommendations);
       
-      // Add new movies to the existing list
-      setRecommendations(prev => ({
-        movies: [...prev.movies, ...newRecommendations.movies]
-      }));
+      // Replace existing movies with new ones
+      setRecommendations(newRecommendations);
       
       toast({
         title: "Success",
-        description: "Found more movies for you!",
+        description: "Found new movies for you!",
       });
     } catch (error) {
-      console.error('Error getting more movie recommendations:', error);
+      console.error('Error getting new movie recommendations:', error);
       toast({
         title: "Error",
-        description: "Failed to get more movie recommendations. Please try again.",
+        description: "Failed to get new movie recommendations. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -167,7 +161,27 @@ const Recommendations: React.FC = () => {
           </Button>
         </div>
         
-        <h1 className="text-3xl font-bold text-foreground">{headerText}</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-foreground">{headerText}</h1>
+          <Button 
+            onClick={handleRegenerateMovies} 
+            disabled={isLoading}
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Try again?
+              </>
+            )}
+          </Button>
+        </div>
         
         {selectedQuote && (
           <div className="italic text-xl text-foreground/80 max-w-full px-4 overflow-hidden break-words">
@@ -192,26 +206,6 @@ const Recommendations: React.FC = () => {
               />
             </div>
           ))}
-        </div>
-        
-        <div className="flex justify-center mt-8">
-          <Button 
-            onClick={handleGenerateMore} 
-            disabled={isLoading}
-            className="flex items-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin" />
-                Finding more movies...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4" />
-                Generate More Movies
-              </>
-            )}
-          </Button>
         </div>
       </div>
     </Layout>

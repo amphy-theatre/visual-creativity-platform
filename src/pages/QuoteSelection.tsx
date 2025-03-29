@@ -27,7 +27,7 @@ const QuoteSelection: React.FC = () => {
     setIsLoadingRecommendations(true);
     
     try {
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/movie-recommendations', {
+      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ const QuoteSelection: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate-quotes', {
+      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

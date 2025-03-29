@@ -55,9 +55,7 @@ serve(async (req) => {
         max_output_tokens: 250,
     });
 
-    if (!openAIData.output?.filter(op => op?.type == "message")[0].content.text) {
-      console.log(openAIData.output?.filter(op => op?.type == "message")[0].content[0].text);
-
+    if (!openAIData.output?.filter(op => op?.type == "message")[0].content[0].text) {
       throw new Error('Invalid response from OpenAI API');
     }
 

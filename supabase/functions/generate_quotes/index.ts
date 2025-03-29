@@ -1,6 +1,6 @@
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { CreateChatCompletionRequestMessage } from 'https://esm.sh/openai@4.20.1';
-import OpenAI from 'https://esm.sh/openai@4.20.1';
+import OpenAI from "openai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -46,21 +46,20 @@ serve(async (req) => {
 
     const openai = new OpenAI();
 
-    const openAIData = await openai.chat.completions.create({
+    const openAIData = await openai.responses.create({
         model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: "You are a helpful AI assistant that generates movie quotes based on emotional content." },
-          { role: "user", content: `The user is feeling: ${sanitizedEmotion}. Provide 3 movie quotes (9 to 15 words) that might resonate with this emotional state.` }
-        ],
+        tools: [],
+        instructions: 'Generate exactly 3 complete, meaningful movie quotes (without attribution) based on the unique interpretations of the emotional content and meaning of the prompt. Each quote should be on its own line with no numbering. Keep quotes concise (under 100 characters each) but ensure they are complete thoughts.',
+        input: `The user is feeling: ${sanitizedEmotion}. Provide 3 movie quotes (9 to 15 words) that might resonate with this emotional state.`,
         temperature: 1.2,
-        max_tokens: 250,
+        max_output_tokens: 250,
     });
 
-    if (!openAIData.choices[0].message.content) {
+    if (!openAIData.output?.filter(op => op?.type == "message")[0].content.text) {
       throw new Error('Invalid response from OpenAI API');
     }
 
-    const content = openAIData.choices[0].message.content;
+    const content = openAIData.output?.filter(op => op?.type == "message")[0].content.text;
     console.log(`Dis ma content: ${content}`);
     
     // Split by newlines and filter empty lines

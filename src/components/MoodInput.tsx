@@ -85,9 +85,6 @@ const MoodInput: React.FC = () => {
         </div>
       </div>
       
-      {/* File Dropbox Component */}
-      <FileDropbox onChange={handleFileChange} maxSize={10} />
-      
       <Button 
         className="w-full"
         onClick={handleSubmit}
@@ -115,6 +112,9 @@ const MoodInput: React.FC = () => {
       <div className="text-sm text-foreground/50 text-center">
         1 prompts remaining this month
       </div>
+      
+      {/* File Dropbox Component */}
+      <FileDropbox onChange={handleFileChange} maxSize={10} />
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -38,11 +37,9 @@ const MoodInput: React.FC = () => {
         throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
       }
       
-      // Parse the response
       const data = await response.json();
       console.log('Received quotes:', data);
       
-      // Navigate to the quotes page with the mood and quotes data
       navigate("/quotes", { state: { mood, quotes: data } });
     } catch (error) {
       console.error('Error generating quotes:', error);
@@ -59,7 +56,6 @@ const MoodInput: React.FC = () => {
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="space-y-2">
-        <h2 className="text-lg font-medium text-foreground/80">How are you feeling? Describe your current mood:</h2>
         <Textarea
           className="h-32 resize-none"
           placeholder="How are you feeling? (e.g., I feel like a yellow balloon, On top of the world, I think I am James Bond)"

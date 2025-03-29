@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import FileDropbox from "./FileDropbox";
 
 const MoodInput: React.FC = () => {
   const [mood, setMood] = useState("");
   const [charCount, setCharCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const navigate = useNavigate();
   
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -63,6 +65,10 @@ const MoodInput: React.FC = () => {
     }
   };
   
+  const handleFileChange = (file: File | null) => {
+    setUploadedFile(file);
+  };
+  
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="space-y-2">
@@ -78,6 +84,9 @@ const MoodInput: React.FC = () => {
           <span className="text-sm text-muted-foreground">{charCount}/200 characters</span>
         </div>
       </div>
+      
+      {/* File Dropbox Component */}
+      <FileDropbox onChange={handleFileChange} maxSize={10} />
       
       <Button 
         className="w-full"

@@ -1,9 +1,8 @@
-
 import { extractMoviesFromResponse } from './extract_movies.ts';
 import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
 import { enrichMoviesWithTMDBData } from './tmdb.ts';
-import { OpenAI } from "openai";
+import { OpenAI } from "npm:openai";
 
 export async function getMovieRecommendations(
   selectedQuote: string, 

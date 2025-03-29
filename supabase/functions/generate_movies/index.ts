@@ -12,7 +12,7 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-  console.log("test");
+
   try {
     const { selectedQuote, originalEmotion, previousMovies = [] } = await req.json();
     

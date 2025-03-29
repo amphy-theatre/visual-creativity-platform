@@ -1,0 +1,28 @@
+
+name: Deploy Edge Functions
+
+on:
+  push:
+    branches:
+      - main # or master, depending on your default branch
+    paths:
+      - 'supabase/functions/generate_quotes/**' # Only trigger when changes are made to this function
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy edge function
+        run: |
+          supabase functions deploy generate_quotes --project-ref ${{ secrets.SUPABASE_PROJECT_ID }} --no-verify-jwt
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

@@ -1,6 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { OpenAI } from "https://deno.land/x/openai@v4.69.0/mod.ts";
+import { OpenAI } from "npm:openai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

@@ -44,7 +44,10 @@ export async function getMovieRecommendations(
   try {
     const openAIData = await openai.responses.create({
       model: "gpt-4o-mini",
-      tools: [{ type: "web_search_preview" }],
+      tools: [{
+        type: "web_search_preview",
+        search_context_size: "low",
+      }],
       instructions: `Search the web and generate EXACTLY 3 movie recommendations (include one indie movie) based on the quote and emotional state provided.
         You must search the web, don't rely on in-built generation.
         For each movie, include:

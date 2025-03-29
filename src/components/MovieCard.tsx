@@ -26,7 +26,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 }) => {
   return (
     <div className="movie-card rounded-lg overflow-hidden flex flex-col h-full border border-foreground/10 hover:border-foreground/30 transition-colors shadow-sm">
-      <div className="relative h-[400px] overflow-hidden">
+      <div className="relative aspect-[2/3] overflow-hidden">
         <img 
           src={image} 
           alt={title} 

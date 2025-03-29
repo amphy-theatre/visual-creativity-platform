@@ -52,14 +52,14 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   const getGenreStyles = () => {
     const baseClasses = "preset-card p-6 rounded-lg cursor-pointer transition-all duration-300 flex flex-col items-center text-center";
     
-    // Map of genre-specific background styles
+    // Map of genre-specific background styles with vibrant colors by default
     const genreStyles: Record<string, string> = {
-      inspiration: "bg-slate-600 text-white hover:bg-slate-700",
-      thriller: "bg-orange-600 text-white hover:bg-orange-700",
-      drama: "bg-slate-600 text-white hover:bg-slate-700",
-      romance: "bg-rose-600 text-white hover:bg-rose-700",
-      philosophical: "bg-indigo-600 text-white hover:bg-indigo-700",
-      comedy: "bg-emerald-600 text-white hover:bg-emerald-700"
+      inspiration: "bg-gradient-to-br from-amber-500 to-yellow-400 text-white hover:from-amber-600 hover:to-yellow-500",
+      thriller: "bg-gradient-to-br from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600",
+      drama: "bg-gradient-to-br from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700",
+      romance: "bg-gradient-to-br from-pink-500 to-rose-400 text-white hover:from-pink-600 hover:to-rose-500",
+      philosophical: "bg-gradient-to-br from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700",
+      comedy: "bg-gradient-to-br from-emerald-400 to-teal-500 text-white hover:from-emerald-500 hover:to-teal-600"
     };
     
     return `${baseClasses} ${genreStyles[genre]}`;
@@ -71,7 +71,7 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
       onClick={handleClick}
     >
       <div className="space-y-4">
-        <div className="text-sm text-white/80">"{description}"</div>
+        <div className="text-sm text-white/90 font-medium">"{description}"</div>
         <div className="text-xl font-semibold text-white">{title}</div>
       </div>
     </div>

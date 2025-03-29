@@ -12,12 +12,12 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-
+  console.log("test");
   try {
     const { selectedQuote, originalEmotion, previousMovies = [] } = await req.json();
     
-    if (!selectedQuote && !originalEmotion) {
-      throw new Error('Selected quote or emotion is required');
+    if (!selectedQuote) {
+      throw new Error('Selected quote is required');
     }
     
     // Note: Prompt usage counting is handled in the client code

@@ -68,7 +68,11 @@ serve(async (req) => {
           input: [
             {
               role: "system",
-              content: `You will be provided with CSV data of a user's Netflix watch history. From this history, extract key insights about the type of content that the user likes to watch. Include information about the genres that the user likes, the type of plot that the user is drawn to, and other relevant information. Keep your responses VERY CONCISE and informative. answer in bullet points. DO NOT add justification about why you chose to add what you did. DO NOT include examples`
+              content: `You will be provided with CSV data of a user's Netflix watch history. From this history, extract key insights about the type of content that the user likes to watch. Include information about the genres that the user likes, the type of plot that the user is drawn to, and other relevant information. Keep your responses VERY CONCISE and informative. answer in bullet points.`
+            },
+            {
+              role: "system",
+              content: ' DO NOT add justification. NO EXAMPLES.'
             },
             {
               role: "system",

@@ -34,18 +34,24 @@ serve(async (req) => {
 
     // Call OpenAI API to generate summary
     console.log('Calling OpenAI API to summarize data...');
-    const openAIData = await openai.responses.create({
+    const openAIData = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      tools: [],
-      instructions: 'You are an expert in analyzing and summarizing CSV data. Provide a concise yet comprehensive summary of the CSV content.',
-      input: csvData,
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert in analyzing and summarizing CSV data. Provide a concise yet comprehensive summary of the CSV content."
+        },
+        {
+          role: "user",
+          content: csvData
+        }
+      ],
       temperature: 0.7,
-      max_output_tokens: 500,
+      max_tokens: 500,
     });
 
     // Process the response
-    const output = openAIData.output?.filter(op => op?.type === "message");
-    const summary = output?.[0]?.content?.[0]?.text;
+    const summary = openAIData.choices[0]?.message?.content;
     
     if (!summary) {
       throw new Error('Failed to generate summary from OpenAI');

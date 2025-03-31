@@ -127,9 +127,9 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
         throw new Error('Failed to generate summary');
       }
       
-      // Store the summary in the database
+      // Store the summary in the database using raw query to avoid type issues
       const { error: insertError } = await supabase
-        .from('file_summaries')
+        .from('file_summaries' as any)
         .insert({
           user_id: user.id,
           summary: data.summary

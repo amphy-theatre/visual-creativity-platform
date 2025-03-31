@@ -72,7 +72,7 @@ serve(async (req) => {
             },
             {
               role: "system",
-              content: ' DO NOT add justification. NO EXAMPLES.'
+              content: 'DO NOT add any examples. DO NOT add any justification.'
             },
             {
               role: "system",

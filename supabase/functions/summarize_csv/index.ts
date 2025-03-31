@@ -63,12 +63,12 @@ serve(async (req) => {
 
         // Call OpenAI API to generate summary
         console.log('Calling OpenAI API to summarize data...');
-        const openAIData = await openai.chat.completions.create({
+        const openAIData = await openai.responses.create({
           model: "gpt-4o-mini",
-          messages: [
+          input: [
             {
               role: "system",
-              content: "You are an expert in analyzing and summarizing CSV data. Provide a concise yet comprehensive summary of the CSV content."
+              content: `You will be provided with CSV data of a user's Netflix watch history. From this history, extract key insights about the type of content that the user likes to watch. Include information about the genres that the user likes, the type of plot that the user is drawn to, and other relevant information. Keep your responses concise and informative. answer in bullet points.`
             },
             {
               role: "user",
@@ -76,13 +76,14 @@ serve(async (req) => {
             }
           ],
           temperature: 0.7,
-          max_tokens: 500,
+          max_output_tokens: 500,
         });
-
-        // Process the response
-        const summary = openAIData.choices[0]?.message?.content;
         
-        if (!summary) {
+        // Process the response
+        const userPreferences = openAIData.output?.filter(op => op?.type == "message")[0].content[0].text;
+
+        console.log(userPreferences);
+        if (!userPreferences) {
           throw new Error('Failed to generate summary from OpenAI');
         }
 
@@ -92,7 +93,7 @@ serve(async (req) => {
         const { error } = await supabase
           .from('file_summaries')
           .upsert(
-            { user_id: userId, summary },
+            { user_id: userId, summary: userPreferences },
             { onConflict: 'user_id' }
           );
           

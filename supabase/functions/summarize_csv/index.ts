@@ -2,6 +2,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { OpenAI } from "npm:openai";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.22.0';
+import { decode as decodeJWT } from 'https://deno.land/x/djwt@v2.8/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,17 +17,33 @@ serve(async (req) => {
 
   try {
     // Parse the request body
-    const { csvData, userId } = await req.json();
+    const { csvData } = await req.json();
     
     if (!csvData) {
       throw new Error('CSV data is required');
     }
 
+    // Extract and verify JWT token from Authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Authorization header is required');
+    }
+
+    // The Authorization header contains "Bearer <token>"
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Decode the JWT to get the user information
+    // Note: This only decodes, it doesn't verify the signature
+    // For production, you would want to add proper JWT verification
+    const payload = decodeJWT(token)[1];
+    const userId = payload.sub;
+    
     if (!userId) {
-      throw new Error('User ID is required');
+      throw new Error('User ID not found in JWT token');
     }
 
     console.log('Received CSV data to summarize, length:', csvData.length);
+    console.log('Authenticated user ID:', userId);
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://sdwuhuuyyrwzwyqdtdkb.supabase.co';

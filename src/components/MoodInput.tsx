@@ -1,4 +1,3 @@
-
 import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ const MoodInput: React.FC = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [fileSummary, setFileSummary] = useState<string | null>(null);
   
   // Fetch file summary when component mounts
@@ -108,7 +107,7 @@ const MoodInput: React.FC = () => {
       return;
     }
     
-    if (!user) {
+    if (!user || !session) {
       toast({
         title: "Authentication required",
         description: "Please sign in to use this feature.",
@@ -125,16 +124,18 @@ const MoodInput: React.FC = () => {
       if (csvData) {
         setIsProcessingCsv(true);
         
+        // Get the session token for authentication
+        const accessToken = session.access_token;
+        
         // Call the edge function to summarize the CSV
         const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/summarize_csv', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+            'Authorization': `Bearer ${accessToken}`
           },
           body: JSON.stringify({ 
-            csvData: csvData,
-            userId: user.id 
+            csvData: csvData
           }),
         });
         

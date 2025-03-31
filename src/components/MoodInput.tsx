@@ -52,7 +52,7 @@ const MoodInput: React.FC = () => {
         const accessToken = session.access_token;
         
         // Call the edge function to summarize the CSV
-        await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/summarize_csv', {
+        fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/summarize_csv', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -62,32 +62,6 @@ const MoodInput: React.FC = () => {
             csvData: csvData
           }),
         });
-        
-        toast({
-          title: "Processing CSV",
-          description: "Your file is being analyzed in the background. You'll receive recommendations shortly.",
-        });
-        
-        // Go directly to quotes page with a generic mood
-        // This is a placeholder until the background process completes
-        const defaultResponse = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
-          },
-          body: JSON.stringify({ emotion: "Processing your data to understand your emotional state" }),
-        });
-        
-        if (!defaultResponse.ok) {
-          throw new Error(`Failed to generate quotes: ${defaultResponse.status} ${defaultResponse.statusText}`);
-        }
-        
-        const quotesData = await defaultResponse.json();
-        navigate("/quotes", { state: { mood: "Processing your data...", quotes: quotesData } });
-        
-        setIsLoading(false);
-        return;
       }
       
       // Use mood input directly

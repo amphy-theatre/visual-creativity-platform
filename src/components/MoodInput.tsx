@@ -1,3 +1,4 @@
+
 import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ const MoodInput: React.FC = () => {
   const { user, session } = useAuth();
   const [fileSummary, setFileSummary] = useState<string | null>(null);
   
-  // Fetch file summary when component mounts
+  // Fetch file summary when component mounts - kept for background usage but not displayed
   useEffect(() => {
     const fetchSummary = async () => {
       if (!user) return;
@@ -67,10 +68,29 @@ const MoodInput: React.FC = () => {
           if (data && data.summary) {
             setFileSummary(data.summary);
             setIsProcessingCsv(false);
-            setMood(data.summary);
+            
+            // Instead of setting mood to summary, go straight to quotes
+            const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+              },
+              body: JSON.stringify({ emotion: data.summary }),
+            });
+            
+            if (!response.ok) {
+              throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
+            }
+            
+            const quotesData = await response.json();
+            
+            // Navigate to quotes page
+            navigate("/quotes", { state: { mood: data.summary, quotes: quotesData } });
+            
             toast({
               title: "CSV Processed",
-              description: "Your file has been analyzed and is ready for recommendations.",
+              description: "Your file has been analyzed and quotes have been generated.",
             });
             
             // Clear the interval once we get data
@@ -80,6 +100,17 @@ const MoodInput: React.FC = () => {
           }
         } catch (error) {
           console.error('Error polling for summary:', error);
+          setIsProcessingCsv(false);
+          
+          toast({
+            title: "Error",
+            description: error instanceof Error ? error.message : "An unexpected error occurred",
+            variant: "destructive",
+          });
+          
+          if (interval) {
+            clearInterval(interval);
+          }
         }
       }, 3000); // Poll every 3 seconds
     }
@@ -89,7 +120,7 @@ const MoodInput: React.FC = () => {
         clearInterval(interval);
       }
     };
-  }, [isProcessingCsv, user]);
+  }, [isProcessingCsv, user, navigate]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -98,7 +129,7 @@ const MoodInput: React.FC = () => {
   };
   
   const handleSubmit = async () => {
-    if (!mood.trim() && !csvData && !fileSummary) {
+    if (!mood.trim() && !csvData) {
       toast({
         title: "Input required",
         description: "Please enter your mood or upload a CSV file.",
@@ -155,8 +186,8 @@ const MoodInput: React.FC = () => {
         return;
       }
       
-      // Use either manual input or the file summary
-      const moodText = mood.trim() || fileSummary;
+      // Use mood input
+      const moodText = mood.trim();
       
       if (moodText) {
         const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
@@ -221,21 +252,6 @@ const MoodInput: React.FC = () => {
   
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
-      {fileSummary && !mood && (
-        <div className="p-4 border rounded-lg bg-muted/30">
-          <h3 className="font-medium mb-2">Previous File Analysis</h3>
-          <p className="text-sm text-muted-foreground">{fileSummary}</p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-2"
-            onClick={() => setMood(fileSummary)}
-          >
-            Use This Analysis
-          </Button>
-        </div>
-      )}
-    
       <div className="space-y-2">
         <Textarea
           className="h-32 resize-none"
@@ -253,7 +269,7 @@ const MoodInput: React.FC = () => {
       <Button 
         className="w-full"
         onClick={handleSubmit}
-        disabled={((!mood.trim() && !csvData && !fileSummary) || isLoading || isProcessingCsv)}
+        disabled={((!mood.trim() && !csvData) || isLoading || isProcessingCsv)}
         variant="default"
       >
         {isLoading || isProcessingCsv ? (

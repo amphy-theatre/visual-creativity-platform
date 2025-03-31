@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import QuoteCard from "../components/QuoteCard";
 import { Button } from "../components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
+import { supabase } from "../integrations/supabase/client";
+import { useAuth } from "../context/AuthContext";
 
 const QuoteSelection: React.FC = () => {
   const location = useLocation();
@@ -13,6 +16,39 @@ const QuoteSelection: React.FC = () => {
   const [quotes, setQuotes] = useState(initialQuotes);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [userPreferences, setUserPreferences] = useState<string | null>(null);
+  const { user } = useAuth();
+  
+  // Fetch user preferences from file summaries when component mounts
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('file_summaries')
+          .select('summary')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (error) {
+          console.log('No file summaries found or error:', error);
+          return;
+        }
+        
+        if (data) {
+          console.log('Found user preferences from file summary:', data.summary);
+          setUserPreferences(data.summary);
+        }
+      } catch (error) {
+        console.error('Error fetching user preferences:', error);
+      }
+    };
+    
+    fetchUserPreferences();
+  }, [user]);
   
   // Process quotes from the API response structure or use fallback quotes
   const displayQuotes = quotes && quotes.quotes && Array.isArray(quotes.quotes) && quotes.quotes.length > 0 ? 
@@ -36,6 +72,7 @@ const QuoteSelection: React.FC = () => {
         body: JSON.stringify({
           selectedQuote: quote,
           originalEmotion: mood,
+          userPreferences: userPreferences,
           previousMovies: []
         }),
       });

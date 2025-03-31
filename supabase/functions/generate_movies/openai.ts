@@ -39,31 +39,49 @@ export async function getMovieRecommendations(
 
   console.log('Generating movie recommendations for quote:', sanitizedQuote);
   if (sanitizedEmotion) console.log('Also considering emotion:', sanitizedEmotion);
+  if (sanitizedUserPreferences) console.log('User preferences from file summary:', sanitizedUserPreferences);
   if (sanitizedPreviousMovies.length > 0) console.log('Excluding previously recommended movies:', sanitizedPreviousMovies);
 
   const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
   try {
+    // Build the instructions for OpenAI
+    let instructions = `Search the web and generate EXACTLY 3 movie recommendations (include one indie movie) based on the quote, emotional state`;
+    
+    if (sanitizedUserPreferences) {
+      instructions += `, and user preferences from their viewing history`;
+    }
+    
+    instructions += ` and list of movies provided.
+      You must search the web, don't rely on in-built generation.
+      For each movie, include:
+      - The movie name (no prefixes like 'Title:')
+      - A brief description (1-2 sentences, no label needed)
+
+      DO NOT include any links, URLs, references, or citations in your response.
+      DO NOT use phrases like "According to..." or "Based on...".
+      Format each movie as a numbered list item (1., 2., 3.) with clear separation between movies.
+      Do not use any special formatting characters like asterisks, quotes, stars, or brackets.
+      
+      ${sanitizedPreviousMovies.length > 0 ? `DO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}` : ''}
+      `;
+
+    // Build the input for OpenAI
+    let input = `Quote: "${sanitizedQuote}"
+          Emotional state: ${sanitizedEmotion || 'Unknown'}`;
+    
+    // Add user preferences if available
+    if (sanitizedUserPreferences) {
+      input += `\nUser Preferences (from viewing history): ${sanitizedUserPreferences}`;
+    }
+    
+    input += `\nRecommend movies that connect with these themes and emotions.`;
+
     const openAIData = await openai.responses.create({
       model: "gpt-4o-mini",
       tools: [{ type: "web_search_preview" }],
-      instructions: `Search the web and generate EXACTLY 3 movie recommendations (include one indie movie) based on the quote, emotional state, user preference and list of movies provided.
-        You must search the web, don't rely on in-built generation.
-        For each movie, include:
-        - The movie name (no prefixes like 'Title:')
-        - A brief description (1-2 sentences, no label needed)
-
-        DO NOT include any links, URLs, references, or citations in your response.
-        DO NOT use phrases like "According to..." or "Based on...".
-        Format each movie as a numbered list item (1., 2., 3.) with clear separation between movies.
-        Do not use any special formatting characters like asterisks, quotes, stars, or brackets.
-        
-        ${sanitizedPreviousMovies.length > 0 ? `DO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}` : ''}
-        `,
-      input: `Quote: "${sanitizedQuote}"
-            Emotional state: ${sanitizedEmotion || 'Unknown'}
-            User Perference: ${sanitizedUserPreferences || 'Unknown'}
-            Recommend movies that connect with these themes and emotions.`,
+      instructions: instructions,
+      input: input,
       temperature: 1.2,
       max_output_tokens: 300,
     });

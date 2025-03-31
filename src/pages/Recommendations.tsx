@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import MovieCard from "../components/MovieCard";
@@ -7,6 +6,7 @@ import { Button } from "../components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
 import { supabase } from "../integrations/supabase/client";
+import { useAuth } from "../context/AuthContext";
 
 interface StreamingProvider {
   name: string;
@@ -32,6 +32,8 @@ const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
+  const [userPreferences, setUserPreferences] = useState<string | null>(null);
+  const { user } = useAuth();
   
   const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
     movies: [
@@ -73,6 +75,36 @@ const Recommendations: React.FC = () => {
   });
   
   const [isLoading, setIsLoading] = useState(false);
+  
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('file_summaries')
+          .select('summary')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (error) {
+          console.log('No file summaries found or error:', error);
+          return;
+        }
+        
+        if (data) {
+          console.log('Found user preferences from file summary:', data.summary);
+          setUserPreferences(data.summary);
+        }
+      } catch (error) {
+        console.error('Error fetching user preferences:', error);
+      }
+    };
+    
+    fetchUserPreferences();
+  }, [user]);
   
   let headerText = "Based on your mood";
   if (selectedQuote) {
@@ -118,6 +150,7 @@ const Recommendations: React.FC = () => {
         body: JSON.stringify({
           selectedQuote,
           originalEmotion: mood,
+          userPreferences: userPreferences,
           previousMovies: previousMovies
         }),
       });

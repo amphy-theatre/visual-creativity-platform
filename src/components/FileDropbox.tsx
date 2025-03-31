@@ -3,6 +3,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FileDropboxProps {
   onChange?: (file: File | null) => void;
@@ -12,11 +13,12 @@ interface FileDropboxProps {
 
 const FileDropbox: React.FC<FileDropboxProps> = ({
   onChange,
-  accept = "image/*",
+  accept = "text/csv",
   maxSize = 5, // Default 5MB
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -44,7 +46,17 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
     }
   };
 
-  const processFile = (uploadedFile: File) => {
+  const processFile = async (uploadedFile: File) => {
+    // Check file type
+    if (!uploadedFile.type.includes("csv")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a CSV file",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Check file size
     if (uploadedFile.size > maxSize * 1024 * 1024) {
       toast({
@@ -55,43 +67,97 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
       return;
     }
 
-    // Store file in local storage (as base64)
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      try {
-        const base64String = reader.result as string;
-        localStorage.setItem('uploadedFile', JSON.stringify({
-          name: uploadedFile.name,
-          type: uploadedFile.type,
-          size: uploadedFile.size,
-          data: base64String
-        }));
-        
-        toast({
-          title: "File uploaded",
-          description: `${uploadedFile.name} has been stored locally`,
-        });
-      } catch (error) {
-        console.error("Error storing file:", error);
-        toast({
-          title: "Upload failed",
-          description: "Unable to store the file locally",
-          variant: "destructive",
-        });
-      }
-    };
-    
-    reader.readAsDataURL(uploadedFile);
     setFile(uploadedFile);
     
     if (onChange) {
       onChange(uploadedFile);
     }
+    
+    // Read file contents
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const csvData = event.target?.result as string;
+        
+        // Process the CSV using our edge function
+        await processCsvData(csvData);
+        
+      } catch (error) {
+        console.error("Error reading file:", error);
+        toast({
+          title: "Processing failed",
+          description: "Unable to process the CSV file",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    reader.readAsText(uploadedFile);
+  };
+  
+  const processCsvData = async (csvData: string) => {
+    try {
+      setIsProcessing(true);
+      
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to process files",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Call the edge function to summarize the CSV
+      const { data, error } = await supabase.functions.invoke('summarize_csv', {
+        body: { 
+          csvData,
+          userId: user.id 
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (!data.success || !data.summary) {
+        throw new Error('Failed to generate summary');
+      }
+      
+      // Store the summary in the database
+      const { error: insertError } = await supabase
+        .from('file_summaries')
+        .insert({
+          user_id: user.id,
+          summary: data.summary
+        });
+      
+      if (insertError) {
+        throw insertError;
+      }
+      
+      toast({
+        title: "File processed successfully",
+        description: "CSV summary has been generated and stored",
+      });
+      
+    } catch (error) {
+      console.error("Error processing CSV:", error);
+      toast({
+        title: "Processing failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const removeFile = () => {
     setFile(null);
-    localStorage.removeItem('uploadedFile');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -134,7 +200,7 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
           <div className="flex flex-col items-center justify-center gap-2">
             <Upload className="h-8 w-8 text-foreground/50" />
             <p className="text-sm text-foreground/70">
-              Drag and drop a file here, or <span className="text-primary font-medium">browse</span>
+              Drag and drop a CSV file here, or <span className="text-primary font-medium">browse</span>
             </p>
             <p className="text-xs text-foreground/50">
               Maximum file size: {maxSize}MB
@@ -155,16 +221,22 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
                 </p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                removeFile();
-              }}
-            >
-              Remove
-            </Button>
+            <div className="flex items-center space-x-2">
+              {isProcessing && (
+                <p className="text-xs text-primary animate-pulse">Processing...</p>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeFile();
+                }}
+                disabled={isProcessing}
+              >
+                Remove
+              </Button>
+            </div>
           </div>
         </div>
       )}

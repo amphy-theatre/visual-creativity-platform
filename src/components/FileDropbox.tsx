@@ -3,7 +3,6 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 interface FileDropboxProps {
   onChange?: (file: File | null) => void;
@@ -18,7 +17,6 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -46,7 +44,7 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
     }
   };
 
-  const processFile = async (uploadedFile: File) => {
+  const processFile = (uploadedFile: File) => {
     // Check file type
     if (!uploadedFile.type.includes("csv")) {
       toast({
@@ -73,87 +71,10 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
       onChange(uploadedFile);
     }
     
-    // Read file contents
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const csvData = event.target?.result as string;
-        
-        // Process the CSV using our edge function
-        await processCsvData(csvData);
-        
-      } catch (error) {
-        console.error("Error reading file:", error);
-        toast({
-          title: "Processing failed",
-          description: "Unable to process the CSV file",
-          variant: "destructive",
-        });
-      }
-    };
-    
-    reader.readAsText(uploadedFile);
-  };
-  
-  const processCsvData = async (csvData: string) => {
-    try {
-      setIsProcessing(true);
-      
-      // Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to process files",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Call the edge function to summarize the CSV
-      const { data, error } = await supabase.functions.invoke('summarize_csv', {
-        body: { 
-          csvData,
-          userId: user.id 
-        },
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (!data.success || !data.summary) {
-        throw new Error('Failed to generate summary');
-      }
-      
-      // Store the summary in the database using raw query to avoid type issues
-      const { error: insertError } = await supabase
-        .from('file_summaries' as any)
-        .insert({
-          user_id: user.id,
-          summary: data.summary
-        });
-      
-      if (insertError) {
-        throw insertError;
-      }
-      
-      toast({
-        title: "File processed successfully",
-        description: "CSV summary has been generated and stored",
-      });
-      
-    } catch (error) {
-      console.error("Error processing CSV:", error);
-      toast({
-        title: "Processing failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
+    toast({
+      title: "File uploaded",
+      description: "Your CSV file has been selected and is ready for processing",
+    });
   };
 
   const removeFile = () => {
@@ -222,9 +143,6 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              {isProcessing && (
-                <p className="text-xs text-primary animate-pulse">Processing...</p>
-              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -232,7 +150,6 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
                   e.stopPropagation();
                   removeFile();
                 }}
-                disabled={isProcessing}
               >
                 Remove
               </Button>

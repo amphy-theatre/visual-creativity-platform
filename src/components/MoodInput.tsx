@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import FileDropbox from "./FileDropbox";
+import { supabase } from "@/integrations/supabase/client";
 
 const MoodInput: React.FC = () => {
   const [mood, setMood] = useState("");
   const [charCount, setCharCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [csvData, setCsvData] = useState<string | null>(null);
   const navigate = useNavigate();
   
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -20,35 +22,83 @@ const MoodInput: React.FC = () => {
   };
   
   const handleSubmit = async () => {
-    if (!mood.trim()) return;
+    if (!mood.trim() && !csvData) {
+      toast({
+        title: "Input required",
+        description: "Please enter your mood or upload a CSV file.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     
     try {
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
-        },
-        body: JSON.stringify({ emotion: mood }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Error response:', errorData);
-        throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
+      // If we have CSV data, send it to the summarize_csv function
+      if (csvData) {
+        // Get the current user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          throw new Error("Authentication required");
+        }
+        
+        // Call the edge function to summarize the CSV
+        const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/summarize_csv', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+          },
+          body: JSON.stringify({ 
+            csvData,
+            userId: user.id 
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error(`Failed to process CSV: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to generate summary');
+        }
+        
+        // Use the summary as the mood input
+        setMood(data.summary);
       }
       
-      const data = await response.json();
-      console.log('Received quotes:', data);
-      
-      navigate("/quotes", { state: { mood, quotes: data } });
+      // Now proceed with the regular mood-based quotes generation
+      if (mood.trim()) {
+        const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+          },
+          body: JSON.stringify({ emotion: mood }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('Error response:', errorData);
+          throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Received quotes:', data);
+        
+        navigate("/quotes", { state: { mood, quotes: data } });
+      }
     } catch (error) {
-      console.error('Error generating quotes:', error);
+      console.error('Error processing request:', error);
       toast({
         title: "Error",
-        description: "Failed to generate quotes. Please try again.",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
@@ -67,6 +117,20 @@ const MoodInput: React.FC = () => {
   
   const handleFileChange = (file: File | null) => {
     setUploadedFile(file);
+    
+    // If file is removed, clear the CSV data
+    if (!file) {
+      setCsvData(null);
+      return;
+    }
+    
+    // Read the file and store its content
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      setCsvData(content);
+    };
+    reader.readAsText(file);
   };
   
   return (
@@ -88,7 +152,7 @@ const MoodInput: React.FC = () => {
       <Button 
         className="w-full"
         onClick={handleSubmit}
-        disabled={!mood.trim() || isLoading}
+        disabled={(!mood.trim() && !csvData) || isLoading}
         variant="default"
       >
         {isLoading ? (

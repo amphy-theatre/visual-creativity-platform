@@ -46,12 +46,12 @@ const MoodInput: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // If we have CSV data, send it to the summarize_csv function
+      // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData) {
         // Get the session token for authentication
         const accessToken = session.access_token;
         
-        // Call the edge function to summarize the CSV
+        // Call the edge function to summarize the CSV asynchronously
         fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/summarize_csv', {
           method: 'POST',
           headers: {
@@ -62,9 +62,11 @@ const MoodInput: React.FC = () => {
             csvData: csvData
           }),
         });
+        
+        // No need to wait for response or process it here
       }
       
-      // Use mood input directly
+      // Always use the actual mood input for generating quotes
       const moodText = mood.trim();
       
       if (moodText) {
@@ -87,6 +89,10 @@ const MoodInput: React.FC = () => {
         console.log('Received quotes:', data);
         
         navigate("/quotes", { state: { mood: moodText, quotes: data } });
+      } else {
+        // If no mood text, but we have CSV data, simply go to quotes with empty data
+        // This allows the background CSV processing to continue
+        navigate("/quotes", { state: { mood: "Processing your data", quotes: { quotes: [] } } });
       }
     } catch (error) {
       console.error('Error processing request:', error);

@@ -1,7 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
+import { usePromptUsage } from "@/hooks/usePromptUsage";
+import PromptLimitModal from "@/components/modals/PromptLimitModal";
 
 interface PresetMoodProps {
   title: string;
@@ -11,14 +13,31 @@ interface PresetMoodProps {
 
 const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) => {
   const navigate = useNavigate();
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading } = usePromptUsage();
   
   const handleClick = async () => {
+    // Check if user is over their monthly prompt limit
+    if (promptUsage?.limit_reached) {
+      setShowLimitModal(true);
+      return;
+    }
+    
     try {
       // Show loading toast
       toast({
         title: "Generating quotes",
         description: `Finding quotes for "${description}"`,
       });
+      
+      // Increment the prompt count first
+      const updatedUsage = await incrementPromptCount();
+      
+      // Check if the user has reached their limit after incrementing
+      if (updatedUsage?.limit_reached) {
+        setShowLimitModal(true);
+        return;
+      }
       
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate-quotes', {
         method: 'POST',
@@ -37,7 +56,7 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
       const data = await response.json();
       
       // Navigate to the quotes page with the mood and quotes data
-      navigate("/quotes", { state: { mood: description, quotes: data } });
+      navigate("/quotes", { state: { mood: description, quotes: data, promptUsage: updatedUsage } });
     } catch (error) {
       console.error('Error generating quotes:', error);
       toast({
@@ -66,15 +85,23 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   };
   
   return (
-    <div 
-      className={getGenreStyles()}
-      onClick={handleClick}
-    >
-      <div className="space-y-4">
-        <div className="text-sm text-white/90 font-medium">"{description}"</div>
-        <div className="text-xl font-semibold text-white">{title}</div>
+    <>
+      <div 
+        className={getGenreStyles()}
+        onClick={handleClick}
+      >
+        <div className="space-y-4">
+          <div className="text-sm text-white/90 font-medium">"{description}"</div>
+          <div className="text-xl font-semibold text-white">{title}</div>
+        </div>
       </div>
-    </div>
+      
+      <PromptLimitModal
+        open={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        monthlyLimit={promptUsage?.monthly_limit || 75}
+      />
+    </>
   );
 };
 

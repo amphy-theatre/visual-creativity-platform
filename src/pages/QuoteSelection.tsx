@@ -20,14 +20,7 @@ type PromptUsageType = {
 const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { 
-    mood: initialMood, 
-    quotes: initialQuotes, 
-    promptUsage: initialPromptUsage,
-    isGuest = false,
-    allowedRefresh = false
-  } = location.state || { mood: "", quotes: [], promptUsage: null };
-  
+  const { mood: initialMood, quotes: initialQuotes, promptUsage: initialPromptUsage } = location.state || { mood: "", quotes: [], promptUsage: null };
   const { user } = useAuth();
   
   const {
@@ -38,17 +31,17 @@ const QuoteSelection: React.FC = () => {
     setShowLimitModal,
     handleRefresh,
     setPromptUsage
-  } = useQuotes(initialQuotes, initialMood, initialPromptUsage, isGuest, allowedRefresh);
+  } = useQuotes(initialQuotes, initialMood, initialPromptUsage);
   
-  // If we don't have prompt usage data and it's not a guest session, fetch it
+  // If we don't have prompt usage data, fetch it
   useEffect(() => {
     const fetchPromptUsage = async () => {
-      if (!user || promptUsage || isGuest) return;
+      if (!user || promptUsage) return;
       
       try {
         const { data, error } = await supabase.rpc('get_prompt_usage', { 
           uid: user.id,
-          monthly_limit: 75
+          monthly_limit: 5
         });
         
         if (error) {
@@ -68,16 +61,16 @@ const QuoteSelection: React.FC = () => {
     };
     
     fetchPromptUsage();
-  }, [user, promptUsage, setPromptUsage, isGuest]);
+  }, [user, promptUsage, setPromptUsage]);
 
   const handleBackToInput = () => {
-    navigate(isGuest ? "/guest" : "/");
+    navigate("/");
   };
   
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <Button 
             variant="ghost" 
             className="text-foreground/70 hover:text-foreground transition-colors p-0 flex items-center gap-2"
@@ -86,15 +79,6 @@ const QuoteSelection: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Input
           </Button>
-          
-          {isGuest && (
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/auth")}
-            >
-              Sign up for full access
-            </Button>
-          )}
         </div>
         
         <div className="space-y-6">
@@ -114,19 +98,15 @@ const QuoteSelection: React.FC = () => {
             promptUsage={promptUsage}
             setShowLimitModal={setShowLimitModal}
             setPromptUsage={setPromptUsage}
-            isGuest={isGuest}
-            allowedRefresh={allowedRefresh}
           />
         </div>
       </div>
       
-      {!isGuest && (
-        <PromptLimitModal
-          open={showLimitModal}
-          onOpenChange={setShowLimitModal}
-          monthlyLimit={promptUsage?.monthly_limit || 75}
-        />
-      )}
+      <PromptLimitModal
+        open={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        monthlyLimit={promptUsage?.monthly_limit || 5}
+      />
     </Layout>
   );
 };

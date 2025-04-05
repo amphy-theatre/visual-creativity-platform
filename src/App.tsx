@@ -12,7 +12,6 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import GuestExperience from "./pages/GuestExperience";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +25,6 @@ const App = () => (
             <Sonner />
             <Routes>
               <Route path="/auth" element={<Auth />} />
-              <Route path="/guest" element={<GuestExperience />} />
               <Route 
                 path="/" 
                 element={

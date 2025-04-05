@@ -18,19 +18,12 @@ type QuotesType = {
   }[];
 };
 
-export const useQuotes = (
-  initialQuotes: any, 
-  initialMood: string, 
-  initialPromptUsage: PromptUsageType | null,
-  isGuest = false,
-  allowedRefresh = false
-) => {
+export const useQuotes = (initialQuotes: any, initialMood: string, initialPromptUsage: PromptUsageType | null) => {
   const [quotes, setQuotes] = useState(initialQuotes);
   const [isLoading, setIsLoading] = useState(false);
   const [mood, setMood] = useState(initialMood);
   const [promptUsage, setPromptUsage] = useState<PromptUsageType | null>(initialPromptUsage);
   const [showLimitModal, setShowLimitModal] = useState(false);
-  const [hasRefreshed, setHasRefreshed] = useState(false);
   const { user } = useAuth();
 
   // Process quotes from the API response structure or use fallback quotes
@@ -47,17 +40,8 @@ export const useQuotes = (
       return false;
     }
     
-    // For guest sessions, only allow one refresh
-    if (isGuest && hasRefreshed) {
-      toast({
-        title: "Refresh limit reached",
-        description: "Sign up for unlimited refreshes and features",
-      });
-      return false;
-    }
-    
-    // For registered users, check monthly limits
-    if (!isGuest && promptUsage?.limit_reached) {
+    // Check if user has reached their monthly limit
+    if (promptUsage?.limit_reached) {
       setShowLimitModal(true);
       return false;
     }
@@ -65,11 +49,11 @@ export const useQuotes = (
     setIsLoading(true);
     
     try {
-      // For registered users, increment the prompt count
-      if (user && !isGuest) {
+      // First increment the prompt count
+      if (user) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
-          monthly_limit: 75
+          monthly_limit: 5
         });
         
         if (usageError) {
@@ -108,12 +92,6 @@ export const useQuotes = (
       
       // Update quotes state with the new data
       setQuotes(data);
-      
-      // If this is a guest session, mark that we've used our refresh
-      if (isGuest) {
-        setHasRefreshed(true);
-      }
-      
       return true;
     } catch (error) {
       console.error('Error regenerating quotes:', error);
@@ -136,7 +114,6 @@ export const useQuotes = (
     showLimitModal,
     setShowLimitModal,
     handleRefresh,
-    setPromptUsage,
-    hasRefreshed
+    setPromptUsage
   };
 };

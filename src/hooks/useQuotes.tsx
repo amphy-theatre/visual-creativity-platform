@@ -18,12 +18,19 @@ type QuotesType = {
   }[];
 };
 
-export const useQuotes = (initialQuotes: any, initialMood: string, initialPromptUsage: PromptUsageType | null) => {
+export const useQuotes = (
+  initialQuotes: any, 
+  initialMood: string, 
+  initialPromptUsage: PromptUsageType | null, 
+  isGuest: boolean = false,
+  initialAllowedRefresh: boolean = false
+) => {
   const [quotes, setQuotes] = useState(initialQuotes);
   const [isLoading, setIsLoading] = useState(false);
   const [mood, setMood] = useState(initialMood);
   const [promptUsage, setPromptUsage] = useState<PromptUsageType | null>(initialPromptUsage);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [allowedRefresh, setAllowedRefresh] = useState(initialAllowedRefresh);
   const { user } = useAuth();
 
   // Process quotes from the API response structure or use fallback quotes
@@ -40,8 +47,21 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
       return false;
     }
     
-    // Check if user has reached their monthly limit
-    if (promptUsage?.limit_reached) {
+    // For guest users, check if they've already used their one refresh
+    if (isGuest) {
+      if (!allowedRefresh) {
+        toast({
+          title: "Free trial limit reached",
+          description: "Create an account for unlimited refreshes and features!",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      setAllowedRefresh(false); // Use up their one refresh
+    }
+    // For logged in users, check if they've reached their monthly limit
+    else if (promptUsage?.limit_reached) {
       setShowLimitModal(true);
       return false;
     }
@@ -49,8 +69,8 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
     setIsLoading(true);
     
     try {
-      // First increment the prompt count
-      if (user) {
+      // First increment the prompt count if user is logged in
+      if (user && !isGuest) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
           monthly_limit: 5
@@ -114,6 +134,8 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
     showLimitModal,
     setShowLimitModal,
     handleRefresh,
-    setPromptUsage
+    setPromptUsage,
+    isGuest,
+    allowedRefresh
   };
 };

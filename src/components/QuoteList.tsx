@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import QuoteCard from "./QuoteCard";
 import { Button } from "./ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "./ui/use-toast";
@@ -23,6 +23,8 @@ interface QuoteListProps {
   promptUsage: PromptUsageType | null;
   setShowLimitModal: (show: boolean) => void;
   setPromptUsage: (usage: PromptUsageType) => void;
+  isGuest?: boolean;
+  allowedRefresh?: boolean;
 }
 
 const QuoteList: React.FC<QuoteListProps> = ({ 
@@ -32,7 +34,9 @@ const QuoteList: React.FC<QuoteListProps> = ({
   mood, 
   promptUsage,
   setShowLimitModal,
-  setPromptUsage
+  setPromptUsage,
+  isGuest = false,
+  allowedRefresh = false
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -71,8 +75,9 @@ const QuoteList: React.FC<QuoteListProps> = ({
   }, [user]);
 
   const handleQuoteSelection = async (quote: string) => {
-    // Check if user has reached their monthly limit
-    if (promptUsage?.limit_reached) {
+    // For guests, we don't need to check limits as they get one free try
+    // For logged-in users, check if they've reached their monthly limit
+    if (!isGuest && promptUsage?.limit_reached) {
       setShowLimitModal(true);
       return;
     }
@@ -80,8 +85,8 @@ const QuoteList: React.FC<QuoteListProps> = ({
     setIsLoadingRecommendations(true);
     
     try {
-      // First increment the prompt count
-      if (user) {
+      // For logged-in users, increment the prompt count
+      if (user && !isGuest) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
           monthly_limit: 5
@@ -132,7 +137,9 @@ const QuoteList: React.FC<QuoteListProps> = ({
           selectedQuote: quote,
           recommendations: recommendations,
           mood: mood,
-          promptUsage: promptUsage
+          promptUsage: promptUsage,
+          isGuest: isGuest,
+          allowedRefresh: isGuest ? true : undefined
         } 
       });
     } catch (error) {
@@ -168,7 +175,7 @@ const QuoteList: React.FC<QuoteListProps> = ({
           <button 
             className={`flex items-center justify-center space-x-2 w-full py-3 rounded-lg border border-foreground/20 text-foreground hover:bg-foreground/10 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             onClick={onRefresh}
-            disabled={isLoading || (promptUsage?.limit_reached || false)}
+            disabled={isLoading || (isGuest ? !allowedRefresh : (promptUsage?.limit_reached || false))}
           >
             {isLoading ? (
               <>
@@ -178,10 +185,23 @@ const QuoteList: React.FC<QuoteListProps> = ({
             ) : (
               <>
                 <RefreshCw className="h-5 w-5" />
-                <span>None of these quotes resonate? Try again</span>
+                <span>None of these quotes resonate? Try again {isGuest && !allowedRefresh && "(Free trial limit reached)"}</span>
               </>
             )}
           </button>
+          
+          {isGuest && !allowedRefresh && (
+            <div className="text-center">
+              <Button 
+                variant="default" 
+                className="mt-2 flex items-center gap-2"
+                onClick={() => navigate("/auth")}
+              >
+                <LogIn className="h-4 w-4" />
+                Sign in for unlimited refreshes
+              </Button>
+            </div>
+          )}
         </>
       )}
     </div>

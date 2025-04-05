@@ -10,6 +10,7 @@ import QuoteSelection from "./pages/QuoteSelection";
 import Recommendations from "./pages/Recommendations";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Guest from "./pages/Guest";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Sonner />
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/guest" element={<Guest />} />
               <Route 
                 path="/" 
                 element={
@@ -33,22 +35,8 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
-              <Route 
-                path="/quotes" 
-                element={
-                  <ProtectedRoute>
-                    <QuoteSelection />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/recommendations" 
-                element={
-                  <ProtectedRoute>
-                    <Recommendations />
-                  </ProtectedRoute>
-                } 
-              />
+              <Route path="/quotes" element={<QuoteSelection />} />
+              <Route path="/recommendations" element={<Recommendations />} />
               <Route 
                 path="*" 
                 element={

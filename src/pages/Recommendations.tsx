@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import MovieCard from "../components/MovieCard";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, LogIn } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
@@ -31,9 +32,19 @@ interface RecommendationsResponse {
 const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
+  const { 
+    selectedQuote, 
+    recommendations: initialRecommendations, 
+    mood, 
+    selectedGenre, 
+    fromPreset, 
+    isGuest = false,
+    allowedRefresh = false
+  } = location.state || {};
+  
   const [userPreferences, setUserPreferences] = useState<string | null>(null);
   const { user } = useAuth();
+  const [canRegenerateMovies, setCanRegenerateMovies] = useState(allowedRefresh);
   
   const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
     movies: [
@@ -126,10 +137,12 @@ const Recommendations: React.FC = () => {
   };
   
   const handleRegenerateMovies = async () => {
-    if (!selectedQuote && !mood) {
+    if ((!selectedQuote && !mood) || (isGuest && !canRegenerateMovies)) {
       toast({
-        title: "Error",
-        description: "Missing required information to generate more movies",
+        title: isGuest ? "Free trial limit reached" : "Error",
+        description: isGuest 
+          ? "Create an account for unlimited refreshes and features!" 
+          : "Missing required information to generate more movies",
         variant: "destructive",
       });
       return;
@@ -141,6 +154,11 @@ const Recommendations: React.FC = () => {
     const previousMovies = recommendations.movies.map(movie => movie.title);
     
     try {
+      // If guest user, mark that they've used their one regenerate
+      if (isGuest) {
+        setCanRegenerateMovies(false);
+      }
+      
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
         method: 'POST',
         headers: {
@@ -187,7 +205,7 @@ const Recommendations: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center mb-4">
+        <div className="flex items-center justify-between mb-4">
           <Button 
             variant="ghost" 
             className="text-foreground/70 hover:text-foreground transition-colors p-0 flex items-center gap-2"
@@ -196,13 +214,24 @@ const Recommendations: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Quotes
           </Button>
+          
+          {isGuest && (
+            <Button 
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => navigate("/auth")}
+            >
+              <LogIn className="h-4 w-4" />
+              Sign in
+            </Button>
+          )}
         </div>
         
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-foreground">{headerText}</h1>
           <Button 
             onClick={handleRegenerateMovies} 
-            disabled={isLoading}
+            disabled={isLoading || (isGuest && !canRegenerateMovies)}
             size="sm"
             className="flex items-center gap-2"
           >
@@ -215,6 +244,7 @@ const Recommendations: React.FC = () => {
               <>
                 <RefreshCw className="h-4 w-4" />
                 Try again?
+                {isGuest && !canRegenerateMovies && " (Limit reached)"}
               </>
             )}
           </Button>
@@ -244,6 +274,21 @@ const Recommendations: React.FC = () => {
             </div>
           ))}
         </div>
+        
+        {isGuest && (
+          <div className="mt-12 border-t pt-6 text-center">
+            <p className="text-muted-foreground mb-3">
+              Create an account for unlimited movie recommendations and more features
+            </p>
+            <Button 
+              onClick={() => navigate("/auth")}
+              className="flex items-center gap-2"
+            >
+              <LogIn className="h-4 w-4" />
+              Sign up now
+            </Button>
+          </div>
+        )}
       </div>
     </Layout>
   );

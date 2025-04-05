@@ -2,9 +2,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
-import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { MONTHLY_PROMPT_LIMIT } from "@/hooks/usePromptUsage";
 
 interface PresetMoodProps {
   title: string;
@@ -14,50 +11,38 @@ interface PresetMoodProps {
 
 const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   
   const handleClick = async () => {
     try {
       // Show loading toast
       toast({
-        title: "Finding recommendations",
-        description: `Looking for ${title} content for you`,
+        title: "Generating quotes",
+        description: `Finding quotes for "${description}"`,
       });
-
-      // Get user preferences if logged in
-      let userPreferences = null;
-      if (user) {
-        try {
-          const { data, error } = await supabase
-            .from('file_summaries')
-            .select('summary')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-          
-          if (data && !error) {
-            userPreferences = data.summary;
-          }
-        } catch (error) {
-          console.error('Error fetching user preferences:', error);
-        }
+      
+      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate-quotes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+        },
+        body: JSON.stringify({ emotion: description }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to generate quotes: ${response.status}`);
       }
       
-      // Skip quotes generation and navigate directly to recommendations
-      navigate("/recommendations", { 
-        state: { 
-          mood: description,
-          selectedGenre: genre,
-          fromPreset: true,
-          userPreferences
-        } 
-      });
+      // Parse the response
+      const data = await response.json();
+      
+      // Navigate to the quotes page with the mood and quotes data
+      navigate("/quotes", { state: { mood: description, quotes: data } });
     } catch (error) {
-      console.error('Error navigating to recommendations:', error);
+      console.error('Error generating quotes:', error);
       toast({
         title: "Error",
-        description: "Failed to load recommendations. Please try again.",
+        description: "Failed to generate quotes. Please try again.",
         variant: "destructive",
       });
     }

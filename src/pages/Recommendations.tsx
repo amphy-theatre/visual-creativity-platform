@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -8,7 +7,6 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
-import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
 
 interface StreamingProvider {
   name: string;
@@ -33,79 +31,54 @@ interface RecommendationsResponse {
 const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset, userPreferences: initialUserPreferences } = location.state || {};
-  const [userPreferences, setUserPreferences] = useState<string | null>(initialUserPreferences || null);
+  const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
+  const [userPreferences, setUserPreferences] = useState<string | null>(null);
   const { user } = useAuth();
   
-  const [recommendations, setRecommendations] = useState<RecommendationsResponse | null>(initialRecommendations);
-  const [isLoading, setIsLoading] = useState<boolean>(!initialRecommendations);
-  
-  // Fetch movie recommendations if coming directly from preset
-  useEffect(() => {
-    const fetchRecommendations = async () => {
-      if ((fromPreset && !recommendations) || (fromPreset && recommendations && recommendations.movies.length === 0)) {
-        try {
-          setIsLoading(true);
-          
-          // If we don't have user preferences yet, try to fetch them
-          if (!userPreferences && user) {
-            try {
-              const { data, error } = await supabase
-                .from('file_summaries')
-                .select('summary')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-              
-              if (data && !error) {
-                setUserPreferences(data.summary);
-              }
-            } catch (error) {
-              console.error('Error fetching user preferences:', error);
-            }
-          }
-          
-          const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28`
-            },
-            body: JSON.stringify({
-              originalEmotion: mood,
-              userPreferences: userPreferences,
-              genre: selectedGenre,
-              previousMovies: []
-            }),
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Failed to get recommendations: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          setRecommendations(data);
-        } catch (error) {
-          console.error('Error fetching recommendations:', error);
-          toast({
-            title: "Error",
-            description: "Failed to get recommendations. Please try again.",
-            variant: "destructive",
-          });
-        } finally {
-          setIsLoading(false);
-        }
+  const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
+    movies: [
+      {
+        title: "Lady Bird",
+        description: "A high school senior navigates the challenges of adolescence and her complex relationship with her mother, all while preparing to leave for college.",
+        link: "#",
+        posterUrl: "https://source.unsplash.com/random/800x600/?movie",
+        rating: 7.3,
+        streamingProviders: [
+          { name: "Netflix", url: "#", logoUrl: "" },
+          { name: "Netflix", url: "#", logoUrl: "", variant: "basic with Ads" }
+        ]
+      },
+      {
+        title: "Reality Bites",
+        description: "A group of friends faces the uncertainties of post-college life, dealing with love, career choices, and the transition into adulthood.",
+        link: "#", 
+        posterUrl: "https://source.unsplash.com/random/800x600/?film",
+        rating: 6.6,
+        streamingProviders: [
+          { name: "Apple TV", url: "#", logoUrl: "" },
+          { name: "Google Play Movies", url: "#", logoUrl: "" },
+          { name: "Cineplex", url: "#", logoUrl: "" }
+        ]
+      },
+      {
+        title: "Kicking and Screaming",
+        description: "A group of college friends struggles with the transition into adulthood, each facing their own challenges and uncertainties about the future.",
+        link: "#",
+        posterUrl: "https://source.unsplash.com/random/800x600/?cinema",
+        rating: 6.2,
+        streamingProviders: [
+          { name: "Amazon Prime Video", url: "#", logoUrl: "" },
+          { name: "Amazon Prime Video", url: "#", logoUrl: "", variant: "with Ads" }
+        ]
       }
-    };
-    
-    fetchRecommendations();
-  }, [fromPreset, recommendations, mood, selectedGenre, userPreferences, user]);
+    ]
+  });
   
-  // Fetch user preferences if not provided from state
+  const [isLoading, setIsLoading] = useState(false);
+  
   useEffect(() => {
     const fetchUserPreferences = async () => {
-      if (!user || userPreferences) return;
+      if (!user) return;
       
       try {
         const { data, error } = await supabase
@@ -131,16 +104,11 @@ const Recommendations: React.FC = () => {
     };
     
     fetchUserPreferences();
-  }, [user, userPreferences]);
+  }, [user]);
   
-  // Determine the header text based on user path
   let headerText = "Based on your mood";
-  let backButtonText = "Back";
-  let backButtonPath = -1;
-  
   if (selectedQuote) {
     headerText = "Based on your selected quote";
-    backButtonText = "Back to Quotes";
   } else if (fromPreset && selectedGenre) {
     const genreMap: Record<string, string> = {
       inspiration: "Inspirational",
@@ -151,20 +119,14 @@ const Recommendations: React.FC = () => {
       comedy: "Comedy"
     };
     headerText = `${genreMap[selectedGenre]} recommendations`;
-    backButtonText = "Back to Input";
-    backButtonPath = "/";
   }
   
-  const handleBack = () => {
-    if (typeof backButtonPath === 'string') {
-      navigate(backButtonPath);
-    } else {
-      navigate(backButtonPath);
-    }
+  const handleBackToQuotes = () => {
+    navigate(-1);
   };
   
   const handleRegenerateMovies = async () => {
-    if (!mood && !selectedQuote && !selectedGenre) {
+    if (!selectedQuote && !mood) {
       toast({
         title: "Error",
         description: "Missing required information to generate more movies",
@@ -176,21 +138,20 @@ const Recommendations: React.FC = () => {
     setIsLoading(true);
     
     // Extract current movie titles to avoid duplicates
-    const previousMovies = recommendations?.movies?.map(movie => movie.title) || [];
+    const previousMovies = recommendations.movies.map(movie => movie.title);
     
     try {
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28`
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
         },
         body: JSON.stringify({
           selectedQuote,
           originalEmotion: mood,
           userPreferences: userPreferences,
-          previousMovies: previousMovies,
-          genre: selectedGenre
+          previousMovies: previousMovies
         }),
       });
       
@@ -223,56 +184,6 @@ const Recommendations: React.FC = () => {
     }
   };
   
-  // Show loading state
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <RefreshCw className="h-8 w-8 animate-spin mb-4" />
-          <p className="text-foreground/80">Finding the perfect recommendations for you...</p>
-        </div>
-      </Layout>
-    );
-  }
-  
-  // Show placeholder recommendations if none are loaded
-  const movieList = recommendations?.movies || [
-    {
-      title: "Lady Bird",
-      description: "A high school senior navigates the challenges of adolescence and her complex relationship with her mother, all while preparing to leave for college.",
-      link: "#",
-      posterUrl: "https://source.unsplash.com/random/800x600/?movie",
-      rating: 7.3,
-      streamingProviders: [
-        { name: "Netflix", url: "#", logoUrl: "" },
-        { name: "Netflix", url: "#", logoUrl: "", variant: "basic with Ads" }
-      ]
-    },
-    {
-      title: "Reality Bites",
-      description: "A group of friends faces the uncertainties of post-college life, dealing with love, career choices, and the transition into adulthood.",
-      link: "#", 
-      posterUrl: "https://source.unsplash.com/random/800x600/?film",
-      rating: 6.6,
-      streamingProviders: [
-        { name: "Apple TV", url: "#", logoUrl: "" },
-        { name: "Google Play Movies", url: "#", logoUrl: "" },
-        { name: "Cineplex", url: "#", logoUrl: "" }
-      ]
-    },
-    {
-      title: "Kicking and Screaming",
-      description: "A group of friends struggles with the transition into adulthood, each facing their own challenges and uncertainties about the future.",
-      link: "#",
-      posterUrl: "https://source.unsplash.com/random/800x600/?cinema",
-      rating: 6.2,
-      streamingProviders: [
-        { name: "Amazon Prime Video", url: "#", logoUrl: "" },
-        { name: "Amazon Prime Video", url: "#", logoUrl: "", variant: "with Ads" }
-      ]
-    }
-  ];
-  
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-8">
@@ -280,10 +191,10 @@ const Recommendations: React.FC = () => {
           <Button 
             variant="ghost" 
             className="text-foreground/70 hover:text-foreground transition-colors p-0 flex items-center gap-2"
-            onClick={handleBack}
+            onClick={handleBackToQuotes}
           >
             <ArrowLeft className="h-4 w-4" />
-            {backButtonText}
+            Back to Quotes
           </Button>
         </div>
         
@@ -316,7 +227,7 @@ const Recommendations: React.FC = () => {
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {movieList.map((movie, index) => (
+          {recommendations.movies.map((movie, index) => (
             <div key={index} style={{ animationDelay: `${index * 0.1}s` }}>
               <MovieCard
                 title={movie.title}

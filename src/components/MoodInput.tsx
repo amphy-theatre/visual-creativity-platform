@@ -11,18 +11,25 @@ import { useAuth } from "@/context/AuthContext";
 // Number of prompts allowed per month - easy to change
 const MONTHLY_PROMPT_LIMIT = 5;
 
+type PromptUsageType = {
+  prompt_count: number;
+  limit_reached: boolean;
+  remaining: number;
+  monthly_limit: number;
+};
+
 const MoodInput: React.FC = () => {
   const [mood, setMood] = useState("");
   const [charCount, setCharCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<string | null>(null);
-  const [promptUsage, setPromptUsage] = useState<{
-    prompt_count: number;
-    limit_reached: boolean;
-    remaining: number;
-    monthly_limit: number;
-  }>({ prompt_count: 0, limit_reached: false, remaining: MONTHLY_PROMPT_LIMIT, monthly_limit: MONTHLY_PROMPT_LIMIT });
+  const [promptUsage, setPromptUsage] = useState<PromptUsageType>({ 
+    prompt_count: 0, 
+    limit_reached: false, 
+    remaining: MONTHLY_PROMPT_LIMIT, 
+    monthly_limit: MONTHLY_PROMPT_LIMIT 
+  });
   const navigate = useNavigate();
   const { user, session } = useAuth();
   
@@ -42,7 +49,8 @@ const MoodInput: React.FC = () => {
           return;
         }
         
-        setPromptUsage(data);
+        // Type assertion to ensure the data matches our expected structure
+        setPromptUsage(data as PromptUsageType);
       } catch (err) {
         console.error('Failed to fetch prompt usage:', err);
       }
@@ -100,8 +108,8 @@ const MoodInput: React.FC = () => {
         throw new Error(`Failed to update prompt usage: ${usageError.message}`);
       }
       
-      // Update local state with the new prompt usage
-      setPromptUsage(usageData);
+      // Update local state with the new prompt usage, with type assertion
+      setPromptUsage(usageData as PromptUsageType);
       
       // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData) {

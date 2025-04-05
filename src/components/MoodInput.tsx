@@ -7,6 +7,14 @@ import { toast } from "@/components/ui/use-toast";
 import FileDropbox from "./FileDropbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 // Number of prompts allowed per month - easy to change
 const MONTHLY_PROMPT_LIMIT = 5;
@@ -30,6 +38,7 @@ const MoodInput: React.FC = () => {
     remaining: MONTHLY_PROMPT_LIMIT, 
     monthly_limit: MONTHLY_PROMPT_LIMIT 
   });
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const navigate = useNavigate();
   const { user, session } = useAuth();
   
@@ -50,7 +59,13 @@ const MoodInput: React.FC = () => {
         }
         
         // Type assertion to ensure the data matches our expected structure
-        setPromptUsage(data as PromptUsageType);
+        const usage = data as PromptUsageType;
+        setPromptUsage(usage);
+        
+        // Show the modal if user has reached their limit
+        if (usage.limit_reached) {
+          setShowLimitModal(true);
+        }
       } catch (err) {
         console.error('Failed to fetch prompt usage:', err);
       }
@@ -87,11 +102,7 @@ const MoodInput: React.FC = () => {
     
     // Check if the user has reached their monthly limit
     if (promptUsage.limit_reached) {
-      toast({
-        title: "Monthly limit reached",
-        description: `You've used all ${promptUsage.monthly_limit} prompts for this month.`,
-        variant: "destructive",
-      });
+      setShowLimitModal(true);
       return;
     }
     
@@ -109,7 +120,8 @@ const MoodInput: React.FC = () => {
       }
       
       // Update local state with the new prompt usage, with type assertion
-      setPromptUsage(usageData as PromptUsageType);
+      const updatedUsage = usageData as PromptUsageType;
+      setPromptUsage(updatedUsage);
       
       // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData) {
@@ -197,6 +209,8 @@ const MoodInput: React.FC = () => {
     };
     reader.readAsText(file);
   };
+
+  const closeModal = () => setShowLimitModal(false);
   
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
@@ -244,6 +258,24 @@ const MoodInput: React.FC = () => {
       
       {/* File Dropbox Component */}
       <FileDropbox onChange={handleFileChange} maxSize={10} />
+
+      {/* Monthly Limit Modal */}
+      <Dialog open={showLimitModal} onOpenChange={setShowLimitModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Monthly Limit Reached</DialogTitle>
+            <DialogDescription>
+              You've used all {promptUsage.monthly_limit} prompts available for this month. 
+              Your limit will reset at the beginning of next month.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={closeModal}>
+              I understand
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

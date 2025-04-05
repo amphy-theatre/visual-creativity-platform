@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -31,9 +32,19 @@ interface RecommendationsResponse {
 const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
+  const { 
+    selectedQuote, 
+    recommendations: initialRecommendations, 
+    mood, 
+    selectedGenre, 
+    fromPreset,
+    isGuest = false,
+    allowedRefresh = false
+  } = location.state || {};
+  
   const [userPreferences, setUserPreferences] = useState<string | null>(null);
   const { user } = useAuth();
+  const [hasRefreshed, setHasRefreshed] = useState(false);
   
   const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
     movies: [
@@ -78,7 +89,7 @@ const Recommendations: React.FC = () => {
   
   useEffect(() => {
     const fetchUserPreferences = async () => {
-      if (!user) return;
+      if (!user || isGuest) return;
       
       try {
         const { data, error } = await supabase
@@ -104,7 +115,7 @@ const Recommendations: React.FC = () => {
     };
     
     fetchUserPreferences();
-  }, [user]);
+  }, [user, isGuest]);
   
   let headerText = "Based on your mood";
   if (selectedQuote) {
@@ -135,6 +146,15 @@ const Recommendations: React.FC = () => {
       return;
     }
     
+    // For guest users, only allow one refresh
+    if (isGuest && hasRefreshed) {
+      toast({
+        title: "Refresh limit reached",
+        description: "Sign up for unlimited refreshes and features",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     // Extract current movie titles to avoid duplicates
@@ -150,7 +170,7 @@ const Recommendations: React.FC = () => {
         body: JSON.stringify({
           selectedQuote,
           originalEmotion: mood,
-          userPreferences: userPreferences,
+          userPreferences: isGuest ? null : userPreferences,
           previousMovies: previousMovies
         }),
       });
@@ -167,6 +187,11 @@ const Recommendations: React.FC = () => {
       
       // Replace existing movies with new ones
       setRecommendations(newRecommendations);
+      
+      // If this is a guest session, mark that we've used our refresh
+      if (isGuest) {
+        setHasRefreshed(true);
+      }
       
       toast({
         title: "Success",
@@ -187,7 +212,7 @@ const Recommendations: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center mb-4">
+        <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
             className="text-foreground/70 hover:text-foreground transition-colors p-0 flex items-center gap-2"
@@ -196,13 +221,22 @@ const Recommendations: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Quotes
           </Button>
+          
+          {isGuest && (
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/auth")}
+            >
+              Sign up for full access
+            </Button>
+          )}
         </div>
         
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-foreground">{headerText}</h1>
           <Button 
             onClick={handleRegenerateMovies} 
-            disabled={isLoading}
+            disabled={isLoading || (isGuest && hasRefreshed)}
             size="sm"
             className="flex items-center gap-2"
           >
@@ -244,6 +278,16 @@ const Recommendations: React.FC = () => {
             </div>
           ))}
         </div>
+        
+        {isGuest && (
+          <div className="mt-12 p-6 border border-dashed rounded-lg text-center">
+            <h3 className="text-xl font-bold mb-2">Enjoying your recommendations?</h3>
+            <p className="mb-4">Sign up for unlimited access to personalized movie recommendations</p>
+            <Button onClick={() => navigate("/auth")}>
+              Create an account
+            </Button>
+          </div>
+        )}
       </div>
     </Layout>
   );

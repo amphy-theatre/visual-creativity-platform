@@ -1,5 +1,5 @@
 
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,14 +8,48 @@ import FileDropbox from "./FileDropbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
+// Number of prompts allowed per month - easy to change
+const MONTHLY_PROMPT_LIMIT = 5;
+
 const MoodInput: React.FC = () => {
   const [mood, setMood] = useState("");
   const [charCount, setCharCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<string | null>(null);
+  const [promptUsage, setPromptUsage] = useState<{
+    prompt_count: number;
+    limit_reached: boolean;
+    remaining: number;
+    monthly_limit: number;
+  }>({ prompt_count: 0, limit_reached: false, remaining: MONTHLY_PROMPT_LIMIT, monthly_limit: MONTHLY_PROMPT_LIMIT });
   const navigate = useNavigate();
   const { user, session } = useAuth();
+  
+  // Fetch the user's prompt usage when component mounts
+  useEffect(() => {
+    const fetchPromptUsage = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase.rpc('get_prompt_usage', { 
+          uid: user.id,
+          monthly_limit: MONTHLY_PROMPT_LIMIT
+        });
+        
+        if (error) {
+          console.error('Error fetching prompt usage:', error);
+          return;
+        }
+        
+        setPromptUsage(data);
+      } catch (err) {
+        console.error('Failed to fetch prompt usage:', err);
+      }
+    };
+    
+    fetchPromptUsage();
+  }, [user]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -43,9 +77,32 @@ const MoodInput: React.FC = () => {
       return;
     }
     
+    // Check if the user has reached their monthly limit
+    if (promptUsage.limit_reached) {
+      toast({
+        title: "Monthly limit reached",
+        description: `You've used all ${promptUsage.monthly_limit} prompts for this month.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
+      // Increment the prompt count in the database
+      const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
+        uid: user.id,
+        monthly_limit: MONTHLY_PROMPT_LIMIT
+      });
+      
+      if (usageError) {
+        throw new Error(`Failed to update prompt usage: ${usageError.message}`);
+      }
+      
+      // Update local state with the new prompt usage
+      setPromptUsage(usageData);
+      
       // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData) {
         // Get the session token for authentication
@@ -152,7 +209,7 @@ const MoodInput: React.FC = () => {
       <Button 
         className="w-full"
         onClick={handleSubmit}
-        disabled={((!mood.trim() && !csvData) || isLoading)}
+        disabled={((!mood.trim() && !csvData) || isLoading || promptUsage.limit_reached)}
         variant="default"
       >
         {isLoading ? (
@@ -174,7 +231,7 @@ const MoodInput: React.FC = () => {
       </Button>
       
       <div className="text-sm text-foreground/50 text-center">
-        1 prompts remaining this month
+        {promptUsage.remaining} prompt{promptUsage.remaining !== 1 ? 's' : ''} remaining this month
       </div>
       
       {/* File Dropbox Component */}

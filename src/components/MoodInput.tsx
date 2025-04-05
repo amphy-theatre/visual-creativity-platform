@@ -123,6 +123,10 @@ const MoodInput: React.FC = () => {
       const updatedUsage = usageData as PromptUsageType;
       setPromptUsage(updatedUsage);
       
+      // If the updated usage shows we've hit the limit after this request,
+      // we'll still process this one but show the modal afterward
+      const justReachedLimit = updatedUsage.limit_reached && updatedUsage.prompt_count === updatedUsage.monthly_limit;
+      
       // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData) {
         // Get the session token for authentication
@@ -165,7 +169,18 @@ const MoodInput: React.FC = () => {
         const data = await response.json();
         console.log('Received quotes:', data);
         
-        navigate("/quotes", { state: { mood: moodText, quotes: data } });
+        navigate("/quotes", { 
+          state: { 
+            mood: moodText, 
+            quotes: data, 
+            promptUsage: updatedUsage // Pass the prompt usage data
+          }
+        });
+        
+        // If this request just caused us to reach the limit, show the modal after navigation
+        if (justReachedLimit) {
+          setTimeout(() => setShowLimitModal(true), 500);
+        }
       } else {
         // If no mood text, but we have CSV data, simply go to quotes with empty data
         // This allows the background CSV processing to continue

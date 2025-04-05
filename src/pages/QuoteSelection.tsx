@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -8,16 +7,63 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../components/ui/dialog";
+
+type PromptUsageType = {
+  prompt_count: number;
+  limit_reached: boolean;
+  remaining: number;
+  monthly_limit: number;
+};
 
 const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { mood, quotes: initialQuotes } = location.state || { mood: "", quotes: [] };
+  const { mood, quotes: initialQuotes, promptUsage: initialPromptUsage } = location.state || { mood: "", quotes: [], promptUsage: null };
   const [quotes, setQuotes] = useState(initialQuotes);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const [userPreferences, setUserPreferences] = useState<string | null>(null);
+  const [promptUsage, setPromptUsage] = useState<PromptUsageType | null>(initialPromptUsage);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const { user } = useAuth();
+  
+  // If we don't have prompt usage data, fetch it
+  useEffect(() => {
+    const fetchPromptUsage = async () => {
+      if (!user || promptUsage) return;
+      
+      try {
+        const { data, error } = await supabase.rpc('get_prompt_usage', { 
+          uid: user.id,
+          monthly_limit: 5 // Using the same limit as in MoodInput
+        });
+        
+        if (error) {
+          console.error('Error fetching prompt usage:', error);
+          return;
+        }
+        
+        // Type assertion to ensure the data matches our expected structure
+        setPromptUsage(data as PromptUsageType);
+        
+        if ((data as PromptUsageType).limit_reached) {
+          setShowLimitModal(true);
+        }
+      } catch (err) {
+        console.error('Failed to fetch prompt usage:', err);
+      }
+    };
+    
+    fetchPromptUsage();
+  }, [user, promptUsage]);
   
   // Fetch user preferences from file summaries when component mounts
   useEffect(() => {
@@ -60,9 +106,37 @@ const QuoteSelection: React.FC = () => {
     ];
   
   const handleQuoteSelection = async (quote: string) => {
+    // Check if user has reached their monthly limit
+    if (promptUsage?.limit_reached) {
+      setShowLimitModal(true);
+      return;
+    }
+    
     setIsLoadingRecommendations(true);
     
     try {
+      // First increment the prompt count
+      if (user) {
+        const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
+          uid: user.id,
+          monthly_limit: 5 // Using the same limit as in MoodInput
+        });
+        
+        if (usageError) {
+          throw new Error(`Failed to update prompt usage: ${usageError.message}`);
+        }
+        
+        // Update local state with the new prompt usage
+        setPromptUsage(usageData as PromptUsageType);
+        
+        // If the limit has been reached, show the modal and abort
+        if ((usageData as PromptUsageType).limit_reached && (usageData as PromptUsageType).prompt_count > (promptUsage?.prompt_count || 0)) {
+          setShowLimitModal(true);
+          setIsLoadingRecommendations(false);
+          return;
+        }
+      }
+      
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
         method: 'POST',
         headers: {
@@ -92,7 +166,8 @@ const QuoteSelection: React.FC = () => {
         state: { 
           selectedQuote: quote,
           recommendations: recommendations,
-          mood: mood
+          mood: mood,
+          promptUsage: promptUsage
         } 
       });
     } catch (error) {
@@ -112,9 +187,37 @@ const QuoteSelection: React.FC = () => {
       return;
     }
     
+    // Check if user has reached their monthly limit
+    if (promptUsage?.limit_reached) {
+      setShowLimitModal(true);
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
+      // First increment the prompt count
+      if (user) {
+        const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
+          uid: user.id,
+          monthly_limit: 5 // Using the same limit as in MoodInput
+        });
+        
+        if (usageError) {
+          throw new Error(`Failed to update prompt usage: ${usageError.message}`);
+        }
+        
+        // Update local state with the new prompt usage
+        setPromptUsage(usageData as PromptUsageType);
+        
+        // If the limit has been reached, show the modal and abort
+        if ((usageData as PromptUsageType).limit_reached && (usageData as PromptUsageType).prompt_count > (promptUsage?.prompt_count || 0)) {
+          setShowLimitModal(true);
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
         method: 'POST',
         headers: {
@@ -151,6 +254,8 @@ const QuoteSelection: React.FC = () => {
   const handleBackToInput = () => {
     navigate("/");
   };
+  
+  const closeModal = () => setShowLimitModal(false);
   
   return (
     <Layout>
@@ -196,7 +301,7 @@ const QuoteSelection: React.FC = () => {
             <button 
               className={`flex items-center justify-center space-x-2 w-full py-3 rounded-lg border border-foreground/20 text-foreground hover:bg-foreground/10 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               onClick={handleRefresh}
-              disabled={isLoading}
+              disabled={isLoading || (promptUsage?.limit_reached || false)}
             >
               {isLoading ? (
                 <>
@@ -213,6 +318,24 @@ const QuoteSelection: React.FC = () => {
           )}
         </div>
       </div>
+      
+      {/* Monthly Limit Modal */}
+      <Dialog open={showLimitModal} onOpenChange={setShowLimitModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Monthly Limit Reached</DialogTitle>
+            <DialogDescription>
+              You've used all {promptUsage?.monthly_limit || 5} prompts available for this month. 
+              Your limit will reset at the beginning of next month.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={closeModal}>
+              I understand
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

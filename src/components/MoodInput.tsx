@@ -1,5 +1,5 @@
 
-import React, { useState, KeyboardEvent, useEffect } from "react";
+import React, { useState, KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,24 +7,9 @@ import { toast } from "@/components/ui/use-toast";
 import FileDropbox from "./FileDropbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-
-// Number of prompts allowed per month - easy to change
-const MONTHLY_PROMPT_LIMIT = 5;
-
-type PromptUsageType = {
-  prompt_count: number;
-  limit_reached: boolean;
-  remaining: number;
-  monthly_limit: number;
-};
+import { readFileAsText } from "@/utils/csvUtils";
+import { usePromptUsage, PromptUsageType } from "@/hooks/usePromptUsage";
+import PromptLimitModal from "./modals/PromptLimitModal";
 
 const MoodInput: React.FC = () => {
   const [mood, setMood] = useState("");
@@ -32,47 +17,14 @@ const MoodInput: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<string | null>(null);
-  const [promptUsage, setPromptUsage] = useState<PromptUsageType>({ 
-    prompt_count: 0, 
-    limit_reached: false, 
-    remaining: MONTHLY_PROMPT_LIMIT, 
-    monthly_limit: MONTHLY_PROMPT_LIMIT 
-  });
-  const [showLimitModal, setShowLimitModal] = useState(false);
   const navigate = useNavigate();
   const { user, session } = useAuth();
-  
-  // Fetch the user's prompt usage when component mounts
-  useEffect(() => {
-    const fetchPromptUsage = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase.rpc('get_prompt_usage', { 
-          uid: user.id,
-          monthly_limit: MONTHLY_PROMPT_LIMIT
-        });
-        
-        if (error) {
-          console.error('Error fetching prompt usage:', error);
-          return;
-        }
-        
-        // Type assertion to ensure the data matches our expected structure
-        const usage = data as PromptUsageType;
-        setPromptUsage(usage);
-        
-        // Show the modal if user has reached their limit
-        if (usage.limit_reached) {
-          setShowLimitModal(true);
-        }
-      } catch (err) {
-        console.error('Failed to fetch prompt usage:', err);
-      }
-    };
-    
-    fetchPromptUsage();
-  }, [user]);
+  const {
+    promptUsage,
+    showLimitModal,
+    setShowLimitModal,
+    incrementPromptCount,
+  } = usePromptUsage();
   
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -110,22 +62,16 @@ const MoodInput: React.FC = () => {
     
     try {
       // Increment the prompt count in the database
-      const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
-        uid: user.id,
-        monthly_limit: MONTHLY_PROMPT_LIMIT
-      });
+      const updatedUsage = await incrementPromptCount();
       
-      if (usageError) {
-        throw new Error(`Failed to update prompt usage: ${usageError.message}`);
+      if (!updatedUsage) {
+        throw new Error("Failed to update prompt usage");
       }
-      
-      // Update local state with the new prompt usage, with type assertion
-      const updatedUsage = usageData as PromptUsageType;
-      setPromptUsage(updatedUsage);
       
       // If the updated usage shows we've hit the limit after this request,
       // we'll still process this one but show the modal afterward
-      const justReachedLimit = updatedUsage.limit_reached && updatedUsage.prompt_count === updatedUsage.monthly_limit;
+      const justReachedLimit = updatedUsage.limit_reached && 
+        updatedUsage.prompt_count === updatedUsage.monthly_limit;
       
       // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData) {
@@ -207,7 +153,7 @@ const MoodInput: React.FC = () => {
     }
   };
   
-  const handleFileChange = (file: File | null) => {
+  const handleFileChange = async (file: File | null) => {
     setUploadedFile(file);
     
     // If file is removed, clear the CSV data
@@ -216,17 +162,20 @@ const MoodInput: React.FC = () => {
       return;
     }
     
-    // Read the file and store its content
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
+    try {
+      // Read the file and store its content
+      const content = await readFileAsText(file);
       setCsvData(content);
-    };
-    reader.readAsText(file);
+    } catch (error) {
+      console.error("Error reading file:", error);
+      toast({
+        title: "File Error",
+        description: "Failed to read the uploaded file",
+        variant: "destructive",
+      });
+    }
   };
 
-  const closeModal = () => setShowLimitModal(false);
-  
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="space-y-2">
@@ -275,22 +224,11 @@ const MoodInput: React.FC = () => {
       <FileDropbox onChange={handleFileChange} maxSize={10} />
 
       {/* Monthly Limit Modal */}
-      <Dialog open={showLimitModal} onOpenChange={setShowLimitModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Monthly Limit Reached</DialogTitle>
-            <DialogDescription>
-              You've used all {promptUsage.monthly_limit} prompts available for this month. 
-              Your limit will reset at the beginning of next month.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={closeModal}>
-              I understand
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PromptLimitModal
+        open={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        monthlyLimit={promptUsage.monthly_limit}
+      />
     </div>
   );
 };

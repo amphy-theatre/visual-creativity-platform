@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, LogIn } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
 import QuoteList from "../components/QuoteList";
@@ -20,19 +20,7 @@ type PromptUsageType = {
 const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { 
-    mood: initialMood, 
-    quotes: initialQuotes, 
-    promptUsage: initialPromptUsage,
-    isGuest = false,
-    allowedRefresh = false
-  } = location.state || { 
-    mood: "", 
-    quotes: [], 
-    promptUsage: null,
-    isGuest: false,
-    allowedRefresh: false
-  };
+  const { mood: initialMood, quotes: initialQuotes, promptUsage: initialPromptUsage } = location.state || { mood: "", quotes: [], promptUsage: null };
   const { user } = useAuth();
   
   const {
@@ -42,19 +30,18 @@ const QuoteSelection: React.FC = () => {
     showLimitModal,
     setShowLimitModal,
     handleRefresh,
-    setPromptUsage,
-    allowedRefresh: canRefresh
-  } = useQuotes(initialQuotes, initialMood, initialPromptUsage, isGuest, allowedRefresh);
+    setPromptUsage
+  } = useQuotes(initialQuotes, initialMood, initialPromptUsage);
   
-  // If we don't have prompt usage data and user is logged in, fetch it
+  // If we don't have prompt usage data, fetch it
   useEffect(() => {
     const fetchPromptUsage = async () => {
-      if (!user || promptUsage || isGuest) return;
+      if (!user || promptUsage) return;
       
       try {
         const { data, error } = await supabase.rpc('get_prompt_usage', { 
           uid: user.id,
-          monthly_limit: 100
+          monthly_limit: 5
         });
         
         if (error) {
@@ -74,16 +61,16 @@ const QuoteSelection: React.FC = () => {
     };
     
     fetchPromptUsage();
-  }, [user, promptUsage, setPromptUsage, isGuest]);
+  }, [user, promptUsage, setPromptUsage]);
 
   const handleBackToInput = () => {
-    navigate(isGuest ? "/guest" : "/");
+    navigate("/");
   };
   
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <Button 
             variant="ghost" 
             className="text-foreground/70 hover:text-foreground transition-colors p-0 flex items-center gap-2"
@@ -92,17 +79,6 @@ const QuoteSelection: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
             Back to Input
           </Button>
-          
-          {isGuest && (
-            <Button 
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={() => navigate("/auth")}
-            >
-              <LogIn className="h-4 w-4" />
-              Sign in
-            </Button>
-          )}
         </div>
         
         <div className="space-y-6">
@@ -122,32 +98,15 @@ const QuoteSelection: React.FC = () => {
             promptUsage={promptUsage}
             setShowLimitModal={setShowLimitModal}
             setPromptUsage={setPromptUsage}
-            isGuest={isGuest}
-            allowedRefresh={canRefresh}
           />
         </div>
       </div>
       
-      {isGuest ? (
-        <div className="mt-12 border-t pt-6 text-center">
-          <p className="text-muted-foreground mb-3">
-            Create an account for unlimited quotes and personalized recommendations
-          </p>
-          <Button 
-            onClick={() => navigate("/auth")}
-            className="flex items-center gap-2"
-          >
-            <LogIn className="h-4 w-4" />
-            Sign up now
-          </Button>
-        </div>
-      ) : (
-        <PromptLimitModal
-          open={showLimitModal}
-          onOpenChange={setShowLimitModal}
-          monthlyLimit={promptUsage?.monthly_limit || 5}
-        />
-      )}
+      <PromptLimitModal
+        open={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        monthlyLimit={promptUsage?.monthly_limit || 5}
+      />
     </Layout>
   );
 };

@@ -19,7 +19,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/guest" />;
+    return <Navigate to="/auth" />;
   }
 
   return <>{children}</>;

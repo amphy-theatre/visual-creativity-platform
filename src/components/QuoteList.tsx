@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "./ui/use-toast";
 import { useAuth } from "../context/AuthContext";
+import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -84,7 +85,7 @@ const QuoteList: React.FC<QuoteListProps> = ({
       if (user) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
-          monthly_limit: 5
+          monthly_limit: MONTHLY_PROMPT_LIMIT
         });
         
         if (usageError) {

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "../components/ui/use-toast";
+import { MONTHLY_PROMPT_LIMIT } from "./usePromptUsage";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -53,7 +54,7 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
       if (user) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
-          monthly_limit: 5
+          monthly_limit: MONTHLY_PROMPT_LIMIT
         });
         
         if (usageError) {

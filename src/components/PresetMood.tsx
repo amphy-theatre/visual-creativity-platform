@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
-import { usePromptUsage } from "@/hooks/usePromptUsage";
+import { usePromptUsage, MONTHLY_PROMPT_LIMIT } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "@/components/modals/PromptLimitModal";
 
 interface PresetMoodProps {

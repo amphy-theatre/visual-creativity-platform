@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -9,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import QuoteList from "../components/QuoteList";
 import { useQuotes } from "../hooks/useQuotes";
 import PromptLimitModal from "../components/modals/PromptLimitModal";
+import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -33,7 +33,6 @@ const QuoteSelection: React.FC = () => {
     setPromptUsage
   } = useQuotes(initialQuotes, initialMood, initialPromptUsage);
   
-  // If we don't have prompt usage data, fetch it
   useEffect(() => {
     const fetchPromptUsage = async () => {
       if (!user || promptUsage) return;
@@ -41,7 +40,7 @@ const QuoteSelection: React.FC = () => {
       try {
         const { data, error } = await supabase.rpc('get_prompt_usage', { 
           uid: user.id,
-          monthly_limit: 5
+          monthly_limit: MONTHLY_PROMPT_LIMIT
         });
         
         if (error) {
@@ -49,7 +48,6 @@ const QuoteSelection: React.FC = () => {
           return;
         }
         
-        // Type assertion to ensure the data matches our expected structure
         setPromptUsage(data as PromptUsageType);
         
         if ((data as PromptUsageType).limit_reached) {
@@ -105,7 +103,7 @@ const QuoteSelection: React.FC = () => {
       <PromptLimitModal
         open={showLimitModal}
         onOpenChange={setShowLimitModal}
-        monthlyLimit={promptUsage?.monthly_limit || 5}
+        monthlyLimit={promptUsage?.monthly_limit || MONTHLY_PROMPT_LIMIT}
       />
     </Layout>
   );

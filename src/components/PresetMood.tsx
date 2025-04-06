@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { usePromptUsage, MONTHLY_PROMPT_LIMIT } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "@/components/modals/PromptLimitModal";
+import { useAuth } from "@/context/AuthContext";
 
 interface PresetMoodProps {
   title: string;
@@ -15,6 +16,7 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   const navigate = useNavigate();
   const [showLimitModal, setShowLimitModal] = useState(false);
   const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading } = usePromptUsage();
+  const { session } = useAuth();
   
   const handleClick = async () => {
     // Check if user is over their monthly prompt limit
@@ -39,11 +41,11 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
         return;
       }
       
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate-quotes', {
+      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+          'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
         },
         body: JSON.stringify({ emotion: description }),
       });

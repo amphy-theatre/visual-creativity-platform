@@ -73,7 +73,7 @@ export const useQuotes = (
       if (user && !isGuest) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
-          monthly_limit: 5
+          monthly_limit: 100
         });
         
         if (usageError) {

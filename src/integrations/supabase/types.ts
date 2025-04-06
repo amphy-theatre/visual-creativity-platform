@@ -75,6 +75,33 @@ export type Database = {
         }
         Relationships: []
       }
+      usage_analytics: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          is_anonymous: boolean
+          properties: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          is_anonymous?: boolean
+          properties?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          is_anonymous?: boolean
+          properties?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_movie_recommendations: {
         Row: {
           id: string

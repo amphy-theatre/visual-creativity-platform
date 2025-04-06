@@ -54,7 +54,7 @@ const QuoteSelection: React.FC = () => {
       try {
         const { data, error } = await supabase.rpc('get_prompt_usage', { 
           uid: user.id,
-          monthly_limit: 5
+          monthly_limit: 100
         });
         
         if (error) {

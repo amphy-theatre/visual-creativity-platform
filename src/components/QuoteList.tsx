@@ -9,6 +9,7 @@ import { toast } from "./ui/use-toast";
 import { useAuth } from "../context/AuthContext";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
 import { useUserPreferences } from "../hooks/useUserPreferences";
+import { useAnalytics } from "../hooks/useAnalytics";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -40,6 +41,7 @@ const QuoteList: React.FC<QuoteListProps> = ({
   const { user, session } = useAuth();
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const { userPreferences } = useUserPreferences();
+  const { trackEvent } = useAnalytics();
 
   const handleQuoteSelection = async (quote: string) => {
     // Check if user has reached their monthly limit
@@ -75,6 +77,13 @@ const QuoteList: React.FC<QuoteListProps> = ({
       // Parse the response
       const recommendations = await response.json();
       console.log('Received movie recommendations:', recommendations);
+      
+      // Track the movie recommendations event
+      trackEvent('movies_generated', {
+        quote: quote,
+        originalMood: mood,
+        recommendedMovies: recommendations.movies.map((m: any) => m.title).join(', ')
+      });
       
       // Only increment prompt count after successful movie generation
       if (user) {

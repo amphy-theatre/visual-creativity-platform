@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -10,6 +11,7 @@ import { useAuth } from "../context/AuthContext";
 import { useUserPreferences } from "../hooks/useUserPreferences";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
 import FreeTrialBanner from "../components/FreeTrialBanner";
+import { useAnalytics } from "../hooks/useAnalytics";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -44,6 +46,7 @@ const Recommendations: React.FC = () => {
   const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
   const { user, session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { userPreferences } = useUserPreferences();
+  const { trackEvent } = useAnalytics();
   
   const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
     movies: [
@@ -176,6 +179,15 @@ const Recommendations: React.FC = () => {
 
       const newRecommendations = await response.json();
       console.log('Received new movie recommendations:', newRecommendations);
+      
+      // Track the movie regeneration event
+      trackEvent('movies_generated', {
+        quote: selectedQuote,
+        originalMood: mood,
+        isRegeneration: true,
+        previousMovies: previousMovies.join(', '),
+        newMovies: newRecommendations.movies.map((m: any) => m.title).join(', ')
+      });
       
       setRecommendations(newRecommendations);
       

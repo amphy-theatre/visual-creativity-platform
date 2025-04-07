@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { readFileAsText } from "@/utils/csvUtils";
 import { usePromptUsage } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "./modals/PromptLimitModal";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const MoodInput: React.FC = () => {
   const [mood, setMood] = useState("");
@@ -19,6 +20,7 @@ const MoodInput: React.FC = () => {
   const [csvData, setCsvData] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user, session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
+  const { trackEvent } = useAnalytics();
   const {
     promptUsage,
     showLimitModal,
@@ -104,6 +106,13 @@ const MoodInput: React.FC = () => {
         
         const data = await response.json();
         console.log('Received quotes:', data);
+        
+        // Track the quotes generated event
+        trackEvent('quotes_generated', {
+          mood: moodText,
+          source: 'custom_input',
+          has_csv: csvData !== null
+        });
         
         navigate("/quotes", { 
           state: { 

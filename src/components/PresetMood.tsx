@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/use-toast";
 import { usePromptUsage, MONTHLY_PROMPT_LIMIT } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "@/components/modals/PromptLimitModal";
 import { useAuth } from "@/context/AuthContext";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface PresetMoodProps {
   title: string;
@@ -17,6 +18,7 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   const [showLimitModal, setShowLimitModal] = useState(false);
   const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading } = usePromptUsage();
   const { session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
+  const { trackEvent } = useAnalytics();
   
   const handleClick = async () => {
     // Check if guest user has already used their free trial
@@ -68,6 +70,13 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
       
       // Parse the response
       const data = await response.json();
+      
+      // Track the quotes generated event
+      trackEvent('quotes_generated', {
+        mood: description,
+        genre: genre,
+        source: 'preset_mood'
+      });
       
       // Navigate to the quotes page with the mood and quotes data
       navigate("/quotes", { 

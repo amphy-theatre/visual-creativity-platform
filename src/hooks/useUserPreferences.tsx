@@ -3,8 +3,13 @@ import { useState, useEffect } from "react";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
 
+// Cache object to store preferences by user ID
+const preferencesCache: Record<string, { data: string | null; timestamp: number }> = {};
+// Cache expiration time (5 minutes)
+const CACHE_EXPIRATION_MS = 5 * 60 * 1000;
+
 /**
- * Custom hook to fetch user preferences from file_summaries table
+ * Custom hook to fetch user preferences from file_summaries table with caching
  * @returns {Object} User preferences data and loading state
  */
 export const useUserPreferences = () => {
@@ -15,6 +20,17 @@ export const useUserPreferences = () => {
   useEffect(() => {
     const fetchUserPreferences = async () => {
       if (!user) {
+        setIsLoading(false);
+        return;
+      }
+      
+      // Check if we have a valid cached value
+      const cachedData = preferencesCache[user.id];
+      const now = Date.now();
+      
+      if (cachedData && (now - cachedData.timestamp) < CACHE_EXPIRATION_MS) {
+        console.log('Using cached user preferences');
+        setUserPreferences(cachedData.data);
         setIsLoading(false);
         return;
       }
@@ -36,6 +52,12 @@ export const useUserPreferences = () => {
         } else if (data) {
           console.log('Found user preferences from file summary:', data.summary);
           setUserPreferences(data.summary);
+          
+          // Cache the result
+          preferencesCache[user.id] = {
+            data: data.summary,
+            timestamp: now
+          };
         }
       } catch (error) {
         console.error('Error fetching user preferences:', error);

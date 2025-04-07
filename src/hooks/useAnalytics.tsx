@@ -26,6 +26,10 @@ export const useAnalytics = () => {
         }
         // Mark this page as viewed
         viewedPages.current.add(pageKey);
+        
+        // Add page name based on path for better readability in analytics
+        const pageName = getPageNameFromPath(properties.path || '');
+        properties.page_name = pageName;
       }
       
       await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/track_analytics', {
@@ -44,6 +48,26 @@ export const useAnalytics = () => {
       console.error('Analytics error:', error);
     }
   }, [user]);
+  
+  // Helper function to map paths to readable page names
+  const getPageNameFromPath = (path: string): string => {
+    switch (path) {
+      case '/':
+        return 'Home';
+      case '/quotes':
+        return 'Quote Selection';
+      case '/recommendations':
+        return 'Movie Recommendations';
+      case '/auth':
+        return 'Authentication';
+      default:
+        if (path === '/*' || !path) {
+          return 'Not Found';
+        }
+        // For any unknown paths, return a cleaned version of the path
+        return path.replace(/^\//, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+  };
   
   return { trackEvent };
 };

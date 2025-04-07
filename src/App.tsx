@@ -24,10 +24,12 @@ const AnalyticsTracker = ({ children }: { children: React.ReactNode }) => {
   const { trackEvent } = useAnalytics();
   
   useEffect(() => {
-    // Track page view for each route change
+    // Track page view for each route change with detailed path information
     trackEvent('page_view', {
       path: location.pathname,
       search: location.search,
+      title: document.title || 'Unknown Page',
+      referrer: document.referrer || 'Direct Navigation'
     });
   }, [location.pathname, location.search, trackEvent]);
   

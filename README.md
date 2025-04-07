@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -52,7 +53,7 @@ npm run dev
 
 ## What technologies are used for this project?
 
-This project is built with .
+This project is built with:
 
 - Vite
 - TypeScript
@@ -62,8 +63,54 @@ This project is built with .
 
 ## How can I deploy this project?
 
+### Option 1: Using Lovable
 Simply open [Lovable](https://lovable.dev/projects/20ea082f-9932-476d-9844-cbe7450d0fed) and click on Share -> Publish.
 
-## I want to use a custom domain - is that possible?
+### Option 2: Deploying to Vercel with a custom domain
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+1. **Create a Vercel account** if you don't have one already at [vercel.com](https://vercel.com)
+
+2. **Install the Vercel CLI** (optional but recommended):
+   ```
+   npm install -g vercel
+   ```
+
+3. **Push your code to a Git repository** (GitHub, GitLab, or Bitbucket)
+
+4. **Deploy to Vercel**:
+   - Connect your Git repository to Vercel through their dashboard
+   - Or use the CLI: 
+     ```
+     vercel
+     ```
+   - Follow the prompts to link your project
+
+5. **Connect your custom domain**:
+   - Go to your project in the Vercel dashboard
+   - Navigate to "Settings" > "Domains"
+   - Add your domain (e.g., amphytheatre.com)
+   - Follow Vercel's instructions to update your DNS settings:
+     - Typically, you'll need to add an A record pointing to Vercel's IP
+     - Or use nameservers provided by Vercel
+
+6. **Configure DNS records**:
+   - Log in to your domain registrar (where you purchased amphytheatre.com)
+   - Update the DNS records as specified by Vercel
+   - This generally includes adding an A record or CNAME record, or changing nameservers
+
+7. **Verify domain ownership** (if required):
+   - Vercel may ask you to verify domain ownership
+   - Follow their instructions to add a TXT record to your DNS
+
+8. **Wait for DNS propagation**:
+   - DNS changes can take 24-48 hours to fully propagate
+   - Vercel will automatically provision an SSL certificate for your domain
+
+### Notes about Supabase functions
+
+If you're using Supabase Edge Functions in this project, you'll need to:
+
+1. Update your Supabase project settings to allow requests from your custom domain
+2. Set the appropriate environment variables in your Vercel project for Supabase integration
+
+For more help, refer to the [Vercel Documentation](https://vercel.com/docs) and [Supabase Documentation](https://supabase.com/docs).

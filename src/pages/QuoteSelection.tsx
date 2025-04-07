@@ -10,6 +10,7 @@ import QuoteList from "../components/QuoteList";
 import { useQuotes } from "../hooks/useQuotes";
 import PromptLimitModal from "../components/modals/PromptLimitModal";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
+import FreeTrialBanner from "../components/FreeTrialBanner";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -22,7 +23,7 @@ const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { mood: initialMood, quotes: initialQuotes, promptUsage: initialPromptUsage } = location.state || { mood: "", quotes: [], promptUsage: null };
-  const { user } = useAuth();
+  const { user, isGuestMode } = useAuth();
   
   const {
     displayQuotes,
@@ -69,6 +70,8 @@ const QuoteSelection: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-8">
+        {isGuestMode && <FreeTrialBanner />}
+        
         <div className="flex items-center">
           <Button 
             variant="ghost" 

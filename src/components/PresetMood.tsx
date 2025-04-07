@@ -16,11 +16,21 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   const navigate = useNavigate();
   const [showLimitModal, setShowLimitModal] = useState(false);
   const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading } = usePromptUsage();
-  const { session } = useAuth();
+  const { session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   
   const handleClick = async () => {
-    // Check if user is over their monthly prompt limit
-    if (promptUsage?.limit_reached) {
+    // Check if guest user has already used their free trial
+    if (isGuestMode && isTrialUsed) {
+      toast({
+        title: "Free Trial Used",
+        description: "Please sign in to generate more movie recommendations.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check if signed-in user is over their monthly prompt limit
+    if (!isGuestMode && promptUsage?.limit_reached) {
       setShowLimitModal(true);
       return;
     }
@@ -32,13 +42,15 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
         description: `Finding quotes for "${description}"`,
       });
       
-      // Increment the prompt count first
-      const updatedUsage = await incrementPromptCount();
-      
-      // Check if the user has reached their limit after incrementing
-      if (updatedUsage?.limit_reached) {
-        setShowLimitModal(true);
-        return;
+      // Increment the prompt count for signed-in users
+      if (!isGuestMode) {
+        const updatedUsage = await incrementPromptCount();
+        
+        // Check if the user has reached their limit after incrementing
+        if (updatedUsage?.limit_reached) {
+          setShowLimitModal(true);
+          return;
+        }
       }
       
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
@@ -58,7 +70,13 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
       const data = await response.json();
       
       // Navigate to the quotes page with the mood and quotes data
-      navigate("/quotes", { state: { mood: description, quotes: data, promptUsage: updatedUsage } });
+      navigate("/quotes", { 
+        state: { 
+          mood: description, 
+          quotes: data, 
+          promptUsage: promptUsage 
+        }
+      });
     } catch (error) {
       console.error('Error generating quotes:', error);
       toast({

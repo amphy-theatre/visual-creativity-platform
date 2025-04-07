@@ -1,0 +1,40 @@
+
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
+import { Button } from "./ui/button";
+import { useAuth } from "@/context/AuthContext";
+
+const FreeTrialBanner: React.FC = () => {
+  const { isGuestMode, isTrialUsed } = useAuth();
+  const navigate = useNavigate();
+  
+  if (!isGuestMode) {
+    return null;
+  }
+  
+  return (
+    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200 mb-6">
+      <div className="flex items-center gap-3">
+        <AlertCircle className="h-5 w-5" />
+        <div className="flex-1">
+          {isTrialUsed ? (
+            <p>You've used your free trial. Sign in to continue using Amphytheatre.</p>
+          ) : (
+            <p>You're using a free trial. You can make one recommendation request without signing in.</p>
+          )}
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => navigate("/auth")}
+          className="border-amber-800 text-amber-800 hover:bg-amber-100 dark:border-amber-200 dark:text-amber-200 dark:hover:bg-amber-900"
+        >
+          Sign in
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default FreeTrialBanner;

@@ -1,3 +1,4 @@
+
 import React, { useState, KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import FileDropbox from "./FileDropbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { readFileAsText } from "@/utils/csvUtils";
-import { usePromptUsage, PromptUsageType } from "@/hooks/usePromptUsage";
+import { usePromptUsage } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "./modals/PromptLimitModal";
 
 const MoodInput: React.FC = () => {
@@ -17,7 +18,7 @@ const MoodInput: React.FC = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { user, session } = useAuth();
+  const { user, session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const {
     promptUsage,
     showLimitModal,
@@ -40,18 +41,18 @@ const MoodInput: React.FC = () => {
       return;
     }
     
-    if (!user || !session) {
+    // Check if guest user has already used their free trial
+    if (isGuestMode && isTrialUsed) {
       toast({
-        title: "Authentication required",
-        description: "Please sign in to use this feature.",
+        title: "Free Trial Used",
+        description: "Please sign in to get more movie recommendations.",
         variant: "destructive",
       });
-      navigate("/auth");
       return;
     }
     
-    // Check if the user has reached their monthly limit
-    if (promptUsage.limit_reached) {
+    // For signed-in users, check prompt limit
+    if (!isGuestMode && promptUsage.limit_reached) {
       setShowLimitModal(true);
       return;
     }
@@ -59,13 +60,10 @@ const MoodInput: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // REMOVED: No longer incrementing the prompt count in the database for quotes
-      // We only increment prompt count when generating movies now
-      
       // If we have CSV data, send it to the summarize_csv function asynchronously
-      if (csvData) {
+      if (csvData && user) {
         // Get the session token for authentication
-        const accessToken = session.access_token;
+        const accessToken = session?.access_token;
         
         try {
           // Call the edge function to summarize the CSV asynchronously
@@ -93,7 +91,7 @@ const MoodInput: React.FC = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+            'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
           },
           body: JSON.stringify({ emotion: moodText }),
         });
@@ -182,7 +180,7 @@ const MoodInput: React.FC = () => {
       <Button 
         className="w-full"
         onClick={handleSubmit}
-        disabled={((!mood.trim() && !csvData) || isLoading || promptUsage.limit_reached)}
+        disabled={((!mood.trim() && !csvData) || isLoading || (!isGuestMode && promptUsage.limit_reached) || (isGuestMode && isTrialUsed))}
         variant="default"
       >
         {isLoading ? (
@@ -203,9 +201,11 @@ const MoodInput: React.FC = () => {
         )}
       </Button>
       
-      <div className="text-sm text-foreground/50 text-center">
-        {promptUsage.remaining} prompt{promptUsage.remaining !== 1 ? 's' : ''} remaining this month
-      </div>
+      {!isGuestMode && (
+        <div className="text-sm text-foreground/50 text-center">
+          {promptUsage.remaining} prompt{promptUsage.remaining !== 1 ? 's' : ''} remaining this month
+        </div>
+      )}
       
       {/* File Dropbox Component */}
       <FileDropbox onChange={handleFileChange} maxSize={10} />

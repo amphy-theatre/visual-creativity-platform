@@ -9,6 +9,10 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  isTrialUsed: boolean;
+  setTrialUsed: (used: boolean) => void;
+  isGuestMode: boolean;
+  setGuestMode: (enabled: boolean) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,7 +21,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isTrialUsed, setTrialUsed] = useState(() => {
+    const storedValue = sessionStorage.getItem("trialUsed");
+    return storedValue ? JSON.parse(storedValue) : false;
+  });
+  const [isGuestMode, setGuestMode] = useState(false);
   const navigate = useNavigate();
+
+  // Persist trial usage to session storage when it changes
+  useEffect(() => {
+    sessionStorage.setItem("trialUsed", JSON.stringify(isTrialUsed));
+  }, [isTrialUsed]);
 
   useEffect(() => {
     // Set up the auth state listener
@@ -45,10 +59,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setGuestMode(false);
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user, loading, signOut, isTrialUsed, setTrialUsed, isGuestMode, setGuestMode }}>
       {children}
     </AuthContext.Provider>
   );

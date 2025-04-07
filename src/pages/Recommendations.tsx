@@ -9,6 +9,7 @@ import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
 import { useUserPreferences } from "../hooks/useUserPreferences";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
+import FreeTrialBanner from "../components/FreeTrialBanner";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -41,7 +42,7 @@ const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
-  const { user, session } = useAuth();
+  const { user, session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { userPreferences } = useUserPreferences();
   
   const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
@@ -114,12 +115,20 @@ const Recommendations: React.FC = () => {
       return;
     }
     
+    if (isGuestMode && isTrialUsed) {
+      toast({
+        title: "Free Trial Used",
+        description: "Please sign in to generate more movie recommendations.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     const previousMovies = recommendations.movies.map(movie => movie.title);
     
     try {
-      // First increment the prompt count since we're generating movies
       if (user) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
@@ -130,10 +139,8 @@ const Recommendations: React.FC = () => {
           throw new Error(`Failed to update prompt usage: ${usageError.message}`);
         }
         
-        // Type cast the usageData to PromptUsageType to access the limit_reached property
         const typedUsageData = usageData as PromptUsageType;
         
-        // If the user has reached their limit, show a message and abort
         if (typedUsageData.limit_reached) {
           toast({
             title: "Monthly Limit Reached",
@@ -143,6 +150,8 @@ const Recommendations: React.FC = () => {
           setIsLoading(false);
           return;
         }
+      } else if (isGuestMode && !isTrialUsed) {
+        setTrialUsed(true);
       }
       
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
@@ -189,6 +198,8 @@ const Recommendations: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-8">
+        {isGuestMode && <FreeTrialBanner />}
+        
         <div className="flex items-center mb-4">
           <Button 
             variant="ghost" 
@@ -204,7 +215,7 @@ const Recommendations: React.FC = () => {
           <h1 className="text-3xl font-bold text-foreground">{headerText}</h1>
           <Button 
             onClick={handleRegenerateMovies} 
-            disabled={isLoading}
+            disabled={isLoading || (isGuestMode && isTrialUsed)}
             size="sm"
             className="flex items-center gap-2"
           >

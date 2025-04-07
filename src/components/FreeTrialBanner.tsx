@@ -19,7 +19,7 @@ const FreeTrialBanner: React.FC = () => {
         <AlertCircle className="h-5 w-5" />
         <div className="flex-1">
           {isTrialUsed ? (
-            <p>You've used your free trial. Sign in to continue using Amphytheatre.</p>
+            <p>You've used your trial prompt. Sign up to continue using Amphytheatre. It's completely free!</p>
           ) : (
             <p>You're using a trial prompt. Sign up for more prompts and features!</p>
           )}

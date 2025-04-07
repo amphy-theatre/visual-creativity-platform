@@ -32,7 +32,7 @@ serve(async (req) => {
       .insert({
         event_name: event_name,
         user_id: user_id || 'anonymous',
-        is_anonymous: !user_id,
+        is_anonymous: user_id === 'anonymous',
         properties: {
           ...properties,
           ip_address: clientIP,

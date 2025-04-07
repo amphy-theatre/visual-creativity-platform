@@ -121,7 +121,7 @@ const FileDropbox: React.FC<FileDropboxProps> = ({
           <div className="flex flex-col items-center justify-center gap-2">
             <Upload className="h-8 w-8 text-foreground/50" />
             <p className="text-sm text-foreground/70">
-              Drag and drop a CSV file here, or <span className="text-primary font-medium">browse</span>
+              Upload your Netflix watch history here, or <span className="text-primary font-medium">browse</span>
             </p>
             <p className="text-xs text-foreground/50">
               Maximum file size: {maxSize}MB

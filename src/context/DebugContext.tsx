@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 type DebugContextType = {
   debugMode: boolean;
   toggleDebugMode: () => void;
+  setDebugMode: (value: boolean) => void;
 };
 
 const DebugContext = createContext<DebugContextType | undefined>(undefined);
@@ -15,8 +16,20 @@ const originalConsole = {
   error: console.error,
 };
 
+// Helper to determine if we're in production
+const isProduction = () => {
+  return window.location.hostname.includes('vercel.app') || 
+         process.env.NODE_ENV === 'production';
+};
+
 export function DebugProvider({ children }: { children: React.ReactNode }) {
   const [debugMode, setDebugMode] = useState<boolean>(() => {
+    // In production, default to false regardless of localStorage
+    if (isProduction()) {
+      return false;
+    }
+    
+    // Otherwise, check localStorage
     const savedDebugMode = localStorage.getItem("debug-mode");
     return savedDebugMode === "true";
   });
@@ -54,7 +67,7 @@ export function DebugProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <DebugContext.Provider value={{ debugMode, toggleDebugMode }}>
+    <DebugContext.Provider value={{ debugMode, toggleDebugMode, setDebugMode }}>
       {children}
     </DebugContext.Provider>
   );

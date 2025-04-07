@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 type DebugContextType = {
@@ -19,7 +20,8 @@ const originalConsole = {
 // Helper to determine if we're in production
 const isProduction = () => {
   return window.location.hostname.includes('vercel.app') || 
-         process.env.NODE_ENV === 'production';
+         process.env.NODE_ENV === 'production' ||
+         import.meta.env.VITE_DISABLE_DEBUG === 'true';
 };
 
 export function DebugProvider({ children }: { children: React.ReactNode }) {

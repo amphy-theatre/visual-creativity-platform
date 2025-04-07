@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -10,6 +9,13 @@ import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
 import { useUserPreferences } from "../hooks/useUserPreferences";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
+
+type PromptUsageType = {
+  prompt_count: number;
+  limit_reached: boolean;
+  remaining: number;
+  monthly_limit: number;
+};
 
 interface StreamingProvider {
   name: string;
@@ -124,8 +130,11 @@ const Recommendations: React.FC = () => {
           throw new Error(`Failed to update prompt usage: ${usageError.message}`);
         }
         
+        // Type cast the usageData to PromptUsageType to access the limit_reached property
+        const typedUsageData = usageData as PromptUsageType;
+        
         // If the user has reached their limit, show a message and abort
-        if (usageData.limit_reached) {
+        if (typedUsageData.limit_reached) {
           toast({
             title: "Monthly Limit Reached",
             description: "You've reached your monthly limit for movie recommendations.",

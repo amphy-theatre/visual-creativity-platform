@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import QuoteCard from "./QuoteCard";
 import { Button } from "./ui/button";
@@ -8,6 +7,7 @@ import { supabase } from "../integrations/supabase/client";
 import { toast } from "./ui/use-toast";
 import { useAuth } from "../context/AuthContext";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -38,38 +38,7 @@ const QuoteList: React.FC<QuoteListProps> = ({
   const navigate = useNavigate();
   const { user, session } = useAuth();
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
-  const [userPreferences, setUserPreferences] = useState<string | null>(null);
-
-  // Fetch user preferences from file summaries when component mounts
-  React.useEffect(() => {
-    const fetchUserPreferences = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('file_summaries')
-          .select('summary')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-        
-        if (error) {
-          console.log('No file summaries found or error:', error);
-          return;
-        }
-        
-        if (data) {
-          console.log('Found user preferences from file summary:', data.summary);
-          setUserPreferences(data.summary);
-        }
-      } catch (error) {
-        console.error('Error fetching user preferences:', error);
-      }
-    };
-    
-    fetchUserPreferences();
-  }, [user]);
+  const { userPreferences } = useUserPreferences();
 
   const handleQuoteSelection = async (quote: string) => {
     // Check if user has reached their monthly limit

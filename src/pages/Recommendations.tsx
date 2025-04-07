@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import MovieCard from "../components/MovieCard";
@@ -8,6 +7,7 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 
 interface StreamingProvider {
   name: string;
@@ -33,8 +33,8 @@ const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
-  const [userPreferences, setUserPreferences] = useState<string | null>(null);
   const { user, session } = useAuth();
+  const { userPreferences } = useUserPreferences();
   
   const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
     movies: [
@@ -77,36 +77,6 @@ const Recommendations: React.FC = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   
-  useEffect(() => {
-    const fetchUserPreferences = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('file_summaries')
-          .select('summary')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-        
-        if (error) {
-          console.log('No file summaries found or error:', error);
-          return;
-        }
-        
-        if (data) {
-          console.log('Found user preferences from file summary:', data.summary);
-          setUserPreferences(data.summary);
-        }
-      } catch (error) {
-        console.error('Error fetching user preferences:', error);
-      }
-    };
-    
-    fetchUserPreferences();
-  }, [user]);
-  
   let headerText = "Based on your mood";
   if (selectedQuote) {
     headerText = "Based on your selected quote";
@@ -138,7 +108,6 @@ const Recommendations: React.FC = () => {
     
     setIsLoading(true);
     
-    // Extract current movie titles to avoid duplicates
     const previousMovies = recommendations.movies.map(movie => movie.title);
     
     try {
@@ -162,11 +131,9 @@ const Recommendations: React.FC = () => {
         throw new Error(`Failed to get new movie recommendations: ${response.status} ${response.statusText}`);
       }
 
-      // Parse the response
       const newRecommendations = await response.json();
       console.log('Received new movie recommendations:', newRecommendations);
       
-      // Replace existing movies with new ones
       setRecommendations(newRecommendations);
       
       toast({

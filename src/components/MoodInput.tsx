@@ -1,4 +1,3 @@
-
 import React, { useState, KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,6 @@ const MoodInput: React.FC = () => {
     promptUsage,
     showLimitModal,
     setShowLimitModal,
-    incrementPromptCount,
   } = usePromptUsage();
   
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -61,17 +59,8 @@ const MoodInput: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // Increment the prompt count in the database
-      const updatedUsage = await incrementPromptCount();
-      
-      if (!updatedUsage) {
-        throw new Error("Failed to update prompt usage");
-      }
-      
-      // If the updated usage shows we've hit the limit after this request,
-      // we'll still process this one but show the modal afterward
-      const justReachedLimit = updatedUsage.limit_reached && 
-        updatedUsage.prompt_count === updatedUsage.monthly_limit;
+      // REMOVED: No longer incrementing the prompt count in the database for quotes
+      // We only increment prompt count when generating movies now
       
       // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData) {
@@ -122,14 +111,9 @@ const MoodInput: React.FC = () => {
           state: { 
             mood: moodText, 
             quotes: data, 
-            promptUsage: updatedUsage // Pass the prompt usage data
+            promptUsage: promptUsage // Pass the current prompt usage data
           }
         });
-        
-        // If this request just caused us to reach the limit, show the modal after navigation
-        if (justReachedLimit) {
-          setTimeout(() => setShowLimitModal(true), 500);
-        }
       } else {
         // If no mood text, but we have CSV data, simply go to quotes with empty data
         // This allows the background CSV processing to continue

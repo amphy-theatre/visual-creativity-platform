@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -8,6 +9,7 @@ import { toast } from "../components/ui/use-toast";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
 import { useUserPreferences } from "../hooks/useUserPreferences";
+import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
 
 interface StreamingProvider {
   name: string;
@@ -111,6 +113,29 @@ const Recommendations: React.FC = () => {
     const previousMovies = recommendations.movies.map(movie => movie.title);
     
     try {
+      // First increment the prompt count since we're generating movies
+      if (user) {
+        const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
+          uid: user.id,
+          monthly_limit: MONTHLY_PROMPT_LIMIT
+        });
+        
+        if (usageError) {
+          throw new Error(`Failed to update prompt usage: ${usageError.message}`);
+        }
+        
+        // If the user has reached their limit, show a message and abort
+        if (usageData.limit_reached) {
+          toast({
+            title: "Monthly Limit Reached",
+            description: "You've reached your monthly limit for movie recommendations.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
         method: 'POST',
         headers: {

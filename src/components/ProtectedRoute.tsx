@@ -8,8 +8,9 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading, isGuestMode } = useAuth();
+  const { user, loading, isGuestMode, setGuestMode } = useAuth();
 
+  // If the auth state is still loading, show the loading spinner
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -18,8 +19,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
+  // If there's no authenticated user, automatically set guest mode
+  // so they can access the app directly without auth
   if (!user && !isGuestMode) {
-    return <Navigate to="/auth" />;
+    setGuestMode(true);
+    return <>{children}</>;
   }
 
   return <>{children}</>;

@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,13 +7,13 @@ import { useAuth } from "@/context/AuthContext";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, isGuestMode, setGuestMode } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (user || isGuestMode) {
+    if (user) {
       navigate('/');
     }
-  }, [user, isGuestMode, navigate]);
+  }, [user, navigate]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -35,11 +34,6 @@ const Auth = () => {
   };
 
   const handleTryForFree = () => {
-    setGuestMode(true);
-    toast({
-      title: "Free Trial Active",
-      description: "You can now make one movie recommendation request without signing in.",
-    });
     navigate('/');
   };
 

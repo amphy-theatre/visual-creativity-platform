@@ -11,6 +11,7 @@ import Recommendations from "./pages/Recommendations";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import { AuthProvider } from "./context/AuthContext";
+import { DebugProvider } from "./context/DebugContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -19,47 +20,49 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
-        <ThemeProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route 
-                path="/" 
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/quotes" 
-                element={
-                  <ProtectedRoute>
-                    <QuoteSelection />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/recommendations" 
-                element={
-                  <ProtectedRoute>
-                    <Recommendations />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="*" 
-                element={
-                  <ProtectedRoute>
-                    <NotFound />
-                  </ProtectedRoute>
-                } 
-              />
-            </Routes>
-          </TooltipProvider>
-        </ThemeProvider>
+        <DebugProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route 
+                  path="/" 
+                  element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/quotes" 
+                  element={
+                    <ProtectedRoute>
+                      <QuoteSelection />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/recommendations" 
+                  element={
+                    <ProtectedRoute>
+                      <Recommendations />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="*" 
+                  element={
+                    <ProtectedRoute>
+                      <NotFound />
+                    </ProtectedRoute>
+                  } 
+                />
+              </Routes>
+            </TooltipProvider>
+          </ThemeProvider>
+        </DebugProvider>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>

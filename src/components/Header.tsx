@@ -1,11 +1,12 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound } from "lucide-react";
+import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound, Bug } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { Toggle } from "./ui/toggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useDebug } from "@/context/DebugContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,7 @@ const Header: React.FC = () => {
   const location = useLocation();
   const showBackButton = location.pathname !== "/" && location.pathname !== "/auth";
   const { theme, toggleTheme } = useTheme();
+  const { debugMode, toggleDebugMode } = useDebug();
   const { user, signOut } = useAuth();
 
   return (
@@ -39,6 +41,15 @@ const Header: React.FC = () => {
               </Button>
             </Link>
           )}
+
+          <Toggle 
+            pressed={debugMode} 
+            onPressedChange={toggleDebugMode}
+            aria-label="Toggle debug mode"
+            className="icon-button h-10 w-10 rounded-full"
+          >
+            <Bug className={`h-5 w-5 ${debugMode ? 'text-red-500' : 'text-primary'}`} />
+          </Toggle>
           
           <Toggle 
             pressed={theme === "light"} 

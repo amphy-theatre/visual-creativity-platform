@@ -15,22 +15,12 @@ import {
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
-// Helper to determine if we're in production - matching the same logic from DebugContext
-const isProduction = () => {
-  return window.location.hostname.includes('vercel.app') || 
-         process.env.NODE_ENV === 'production' ||
-         import.meta.env.VITE_DISABLE_DEBUG === 'true';
-};
-
 const Header: React.FC = () => {
   const location = useLocation();
   const showBackButton = location.pathname !== "/" && location.pathname !== "/auth";
   const { theme, toggleTheme } = useTheme();
   const { debugMode, toggleDebugMode } = useDebug();
   const { user, signOut } = useAuth();
-  
-  // Determine if we should show the debug toggle
-  const showDebugToggle = !isProduction();
 
   return (
     <header className="w-full py-4 px-4 sm:px-6 md:px-8">
@@ -52,16 +42,14 @@ const Header: React.FC = () => {
             </Link>
           )}
 
-          {showDebugToggle && (
-            <Toggle 
-              pressed={debugMode} 
-              onPressedChange={toggleDebugMode}
-              aria-label="Toggle debug mode"
-              className="icon-button h-10 w-10 rounded-full"
-            >
-              <Bug className={`h-5 w-5 ${debugMode ? 'text-red-500' : 'text-primary'}`} />
-            </Toggle>
-          )}
+          <Toggle 
+            pressed={debugMode} 
+            onPressedChange={toggleDebugMode}
+            aria-label="Toggle debug mode"
+            className="icon-button h-10 w-10 rounded-full"
+          >
+            <Bug className={`h-5 w-5 ${debugMode ? 'text-red-500' : 'text-primary'}`} />
+          </Toggle>
           
           <Toggle 
             pressed={theme === "light"} 

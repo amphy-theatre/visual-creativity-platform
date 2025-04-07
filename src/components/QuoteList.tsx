@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import QuoteCard from "./QuoteCard";
 import { Button } from "./ui/button";
@@ -50,28 +51,7 @@ const QuoteList: React.FC<QuoteListProps> = ({
     setIsLoadingRecommendations(true);
     
     try {
-      // First increment the prompt count
-      if (user) {
-        const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
-          uid: user.id,
-          monthly_limit: MONTHLY_PROMPT_LIMIT
-        });
-        
-        if (usageError) {
-          throw new Error(`Failed to update prompt usage: ${usageError.message}`);
-        }
-        
-        // Update local state with the new prompt usage
-        setPromptUsage(usageData as PromptUsageType);
-        
-        // If the limit has been reached, show the modal and abort
-        if ((usageData as PromptUsageType).limit_reached && (usageData as PromptUsageType).prompt_count > (promptUsage?.prompt_count || 0)) {
-          setShowLimitModal(true);
-          setIsLoadingRecommendations(false);
-          return;
-        }
-      }
-      
+      // Generate movie recommendations first
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
         method: 'POST',
         headers: {
@@ -95,6 +75,27 @@ const QuoteList: React.FC<QuoteListProps> = ({
       // Parse the response
       const recommendations = await response.json();
       console.log('Received movie recommendations:', recommendations);
+      
+      // Only increment prompt count after successful movie generation
+      if (user) {
+        const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
+          uid: user.id,
+          monthly_limit: MONTHLY_PROMPT_LIMIT
+        });
+        
+        if (usageError) {
+          throw new Error(`Failed to update prompt usage: ${usageError.message}`);
+        }
+        
+        // Update local state with the new prompt usage
+        setPromptUsage(usageData as PromptUsageType);
+        
+        // If the limit has been reached after this increment, show the modal but still navigate
+        // since we already got the recommendations
+        if ((usageData as PromptUsageType).limit_reached && (usageData as PromptUsageType).prompt_count > (promptUsage?.prompt_count || 0)) {
+          setShowLimitModal(true);
+        }
+      }
       
       // Navigate to recommendations page with data
       navigate("/recommendations", { 

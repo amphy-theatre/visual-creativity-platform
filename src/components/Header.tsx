@@ -7,6 +7,7 @@ import { Toggle } from "./ui/toggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useDebug } from "@/context/DebugContext";
+import FeedbackButton from "./FeedbackButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +23,13 @@ const Header: React.FC = () => {
   const { debugMode, toggleDebugMode } = useDebug();
   const { user, signOut } = useAuth();
 
+  // Check if we're in production environment
+  const isProduction = () => {
+    return window.location.hostname.includes('vercel.app') || 
+           process.env.NODE_ENV === 'production' ||
+           import.meta.env.VITE_DISABLE_DEBUG === 'true';
+  };
+
   return (
     <header className="w-full py-4 px-4 sm:px-6 md:px-8">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -34,6 +42,8 @@ const Header: React.FC = () => {
         )}
         
         <div className="flex-1 flex justify-end items-center space-x-4">
+          <FeedbackButton />
+          
           {!user && location.pathname !== "/auth" && (
             <Link to="/auth">
               <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
@@ -42,14 +52,16 @@ const Header: React.FC = () => {
             </Link>
           )}
 
-          <Toggle 
-            pressed={debugMode} 
-            onPressedChange={toggleDebugMode}
-            aria-label="Toggle debug mode"
-            className="icon-button h-10 w-10 rounded-full"
-          >
-            <Bug className={`h-5 w-5 ${debugMode ? 'text-red-500' : 'text-primary'}`} />
-          </Toggle>
+          {!isProduction() && (
+            <Toggle 
+              pressed={debugMode} 
+              onPressedChange={toggleDebugMode}
+              aria-label="Toggle debug mode"
+              className="icon-button h-10 w-10 rounded-full"
+            >
+              <Bug className={`h-5 w-5 ${debugMode ? 'text-red-500' : 'text-primary'}`} />
+            </Toggle>
+          )}
           
           <Toggle 
             pressed={theme === "light"} 

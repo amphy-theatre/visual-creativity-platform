@@ -7,7 +7,6 @@ import { Toggle } from "./ui/toggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useDebug } from "@/context/DebugContext";
-import FeedbackButton from "./FeedbackButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,8 +41,6 @@ const Header: React.FC = () => {
         )}
         
         <div className="flex-1 flex justify-end items-center space-x-4">
-          <FeedbackButton />
-          
           {!user && location.pathname !== "/auth" && (
             <Link to="/auth">
               <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">

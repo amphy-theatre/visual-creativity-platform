@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -61,15 +61,15 @@ const FeedbackButton: React.FC = () => {
 
   return (
     <>
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-10 w-10 rounded-full" 
-        onClick={() => setOpen(true)}
-        aria-label="Leave feedback"
-      >
-        <MessageSquare className="h-5 w-5 text-primary" />
-      </Button>
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button 
+          onClick={() => setOpen(true)}
+          className="rounded-full h-14 w-14 shadow-lg hover:shadow-xl transition-all duration-300 bg-primary"
+          aria-label="Leave feedback"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </Button>
+      </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[500px] bg-[#0A0F1D] border-zinc-800">

@@ -58,12 +58,12 @@ export async function getMovieRecommendations(
       - The movie name (no prefixes like 'Title:')
       - A brief description (1-2 sentences, no label needed)
 
+      ${sanitizedPreviousMovies.length > 0 ? `DO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}` : ''}
+
       DO NOT include any links, URLs, references, or citations in your response.
       DO NOT use phrases like "According to..." or "Based on...".
       Format each movie as a numbered list item (1., 2., 3.) with clear separation between movies.
       Do not use any special formatting characters like asterisks, quotes, stars, or brackets.
-      
-      ${sanitizedPreviousMovies.length > 0 ? `DO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}` : ''}
       `;
 
     // Build the input for OpenAI

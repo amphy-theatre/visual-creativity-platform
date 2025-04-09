@@ -13,6 +13,7 @@ type AuthContextType = {
   setTrialUsed: (used: boolean) => void;
   isGuestMode: boolean;
   setGuestMode: (enabled: boolean) => void;
+  getRedirectUrl: () => string;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +33,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     sessionStorage.setItem("trialUsed", JSON.stringify(isTrialUsed));
   }, [isTrialUsed]);
+
+  // Function to determine the redirect URL based on origin
+  const getRedirectUrl = (): string => {
+    const hostname = window.location.hostname;
+    
+    // Check if we're on a testing domain
+    if (hostname.startsWith('testing.')) {
+      return window.location.origin;
+    }
+    
+    // Default redirect to the current origin
+    return window.location.origin;
+  };
 
   useEffect(() => {
     // Set up the auth state listener
@@ -63,7 +77,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut, isTrialUsed, setTrialUsed, isGuestMode, setGuestMode }}>
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      loading, 
+      signOut, 
+      isTrialUsed, 
+      setTrialUsed, 
+      isGuestMode, 
+      setGuestMode,
+      getRedirectUrl
+    }}>
       {children}
     </AuthContext.Provider>
   );

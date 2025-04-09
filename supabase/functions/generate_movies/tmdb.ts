@@ -7,12 +7,15 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 // Search for a movie by title and return basic info
 async function searchMovie(title: string): Promise<any> {
   try {
+    // Clean the title by removing any asterisks before searching
+    const cleanTitle = title.replace(/^\*+|\*+$/g, '').trim();
+    
     const response = await fetch(
-      `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&include_adult=false`,
+      `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanTitle)}&include_adult=false`,
     );
     
     if (!response.ok) {
-      console.error(`TMDB search failed for "${title}": ${response.status}`);
+      console.error(`TMDB search failed for "${cleanTitle}": ${response.status}`);
       return null;
     }
     
@@ -132,8 +135,11 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
   
   for (const movie of movies) {
     try {
+      // Make sure the title is clean before searching
+      const cleanTitle = movie.title.replace(/^\*+|\*+$/g, '').trim();
+      
       // Find the movie in TMDB
-      const tmdbMovie = await searchMovie(movie.title);
+      const tmdbMovie = await searchMovie(cleanTitle);
       
       if (tmdbMovie) {
         // Get streaming providers
@@ -152,6 +158,7 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
         
         enrichedMovies.push({
           ...movie,
+          title: cleanTitle, // Use the clean title
           link: tmdbLink,
           posterUrl: posterUrl,
           streamingProviders: providers.length > 0 ? providers : undefined,
@@ -161,7 +168,8 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
         // If no TMDB data, keep original movie but add placeholder link
         enrichedMovies.push({
           ...movie,
-          link: `https://www.google.com/search?q=${encodeURIComponent(movie.title)}+movie+watch+canada`,
+          title: cleanTitle, // Use the clean title
+          link: `https://www.google.com/search?q=${encodeURIComponent(cleanTitle)}+movie+watch+canada`,
         });
       }
     } catch (error) {

@@ -16,7 +16,9 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     const lines = section.trim().split('\n').filter(line => line.trim() !== '');
     
     if (lines.length > 0) {
-      const title = lines[0].trim();
+      // Trim the title and remove any "*" characters from the beginning and end
+      const rawTitle = lines[0].trim();
+      const title = rawTitle.replace(/^\*+|\*+$/g, '').trim();
       
       // Extract description (all remaining lines)
       const description = lines.slice(1).join(' ').trim();
@@ -42,8 +44,9 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     
     if (titleMatches && titleMatches.length > 0) {
       titleMatches.slice(0, 3).forEach(match => {
-        // Remove quotes or asterisks
-        const title = match.replace(/["'\*]/g, '');
+        // Remove quotes, asterisks, and trim the title
+        const rawTitle = match.replace(/["'\*]/g, '');
+        const title = rawTitle.trim();
         
         movies.push({
           title: title,
@@ -66,9 +69,12 @@ export function extractMoviesFromResponse(response: string): Movie[] {
         const possibleTitle = line.trim().split('.')[0];
         
         if (possibleTitle && possibleTitle.length > 3) {
+          // Trim and remove any "*" characters
+          const title = possibleTitle.replace(/^\*+|\*+$/g, '').trim();
+          
           movies.push({
-            title: possibleTitle,
-            description: `A film titled "${possibleTitle}"`,
+            title: title,
+            description: `A film titled "${title}"`,
             link: '',
             // Initialize with empty streamingProviders array to prevent undefined errors
             streamingProviders: []

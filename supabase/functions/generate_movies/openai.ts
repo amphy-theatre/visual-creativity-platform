@@ -131,6 +131,12 @@ export async function getMovieRecommendations(
       movies = movies.slice(0, 3);
     }
 
+    // Final cleanup of movie titles to ensure no stray asterisks
+    movies = movies.map(movie => ({
+      ...movie,
+      title: movie.title.replace(/^\*+|\*+$/g, '').trim()
+    }));
+
     // Enrich movies with TMDB data (posters and streaming providers)
     movies = await enrichMoviesWithTMDBData(movies);
 

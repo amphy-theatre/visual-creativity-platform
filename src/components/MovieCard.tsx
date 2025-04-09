@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Separator } from "./ui/separator";
 
 interface Platform {
@@ -24,6 +24,27 @@ const MovieCard: React.FC<MovieCardProps> = ({
   rating,
   platforms = [],
 }) => {
+  const [imageRetries, setImageRetries] = useState(0);
+  const [imageFailed, setImageFailed] = useState(false);
+  
+  const fallbackImages = [
+    "https://source.unsplash.com/random/800x600/?movie",
+    "https://source.unsplash.com/random/800x600/?cinema",
+    "https://source.unsplash.com/random/800x600/?film",
+  ];
+  
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    if (imageRetries < 2) {
+      // Try up to 2 more times with the original URL (3 attempts total)
+      setImageRetries(prev => prev + 1);
+      e.currentTarget.src = image;
+    } else {
+      // After 3 failed attempts, use a fallback image
+      setImageFailed(true);
+      e.currentTarget.src = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+    }
+  };
+
   return (
     <div className="movie-card rounded-lg overflow-hidden flex flex-col h-full border border-foreground/10 hover:border-foreground/30 transition-colors shadow-sm">
       <div className="relative aspect-[2/3] overflow-hidden">
@@ -31,10 +52,15 @@ const MovieCard: React.FC<MovieCardProps> = ({
           src={image} 
           alt={title} 
           className="w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.src = "https://source.unsplash.com/random/800x600/?movie";
-          }}
+          onError={handleImageError}
         />
+        {imageFailed && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/30 backdrop-blur-sm">
+            <span className="text-sm text-foreground/70 bg-background/80 px-2 py-1 rounded">
+              No poster available
+            </span>
+          </div>
+        )}
       </div>
       
       <div className="p-6 space-y-5 flex-1 flex flex-col">

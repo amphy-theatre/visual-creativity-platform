@@ -21,7 +21,10 @@ export function extractMoviesFromResponse(response: string): Movie[] {
       const title = rawTitle.replace(/^\*+|\*+$/g, '').trim();
       
       // Extract description (all remaining lines)
-      const description = lines.slice(1).join(' ').trim();
+      const descriptionText = lines.slice(1).join(' ').trim();
+      
+      // Remove links in the format [website](link) from the description
+      const description = descriptionText.replace(/\[.*?\]\(.*?\)/g, '').trim();
       
       if (title) {
         // Create a movie object with title and description

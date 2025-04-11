@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Separator } from "./ui/separator";
 
 interface Platform {
@@ -32,6 +32,12 @@ const MovieCard: React.FC<MovieCardProps> = ({
     "https://source.unsplash.com/random/800x600/?cinema",
     "https://source.unsplash.com/random/800x600/?film",
   ];
+  
+  // Reset states when the image prop changes (new movie is loaded)
+  useEffect(() => {
+    setImageRetries(0);
+    setImageFailed(false);
+  }, [image, title]);
   
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     if (imageRetries < 2) {

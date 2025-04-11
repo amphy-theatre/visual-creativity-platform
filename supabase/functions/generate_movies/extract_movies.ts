@@ -24,7 +24,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
       const descriptionText = lines.slice(1).join(' ').trim();
       
       // Remove links in the format [website](link) from the description
-      const description = descriptionText.replace(/\[.*?\]\(.*?\)/g, '').trim();
+      const description = descriptionText.replace(/\(\[.*?\]\(.*?\)\)/g, '').trim();
       
       if (title) {
         // Create a movie object with title and description

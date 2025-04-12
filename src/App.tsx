@@ -68,6 +68,7 @@ const App = () => (
                     </AnalyticsTracker>
                   </ProtectedRoute>
                 } />
+                {/* This catch-all route ensures any unknown routes are handled by NotFound */}
                 <Route path="*" element={
                   <ProtectedRoute>
                     <AnalyticsTracker>

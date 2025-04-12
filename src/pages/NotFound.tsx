@@ -11,9 +11,10 @@ const NotFound = () => {
     // We'll identify this by checking the navigation type
     const isDirectNavigation = window.performance
       ?.getEntriesByType('navigation')
-      .some((nav) => (nav as any).type === 'reload');
+      ?.some((nav) => (nav as any).type === 'reload');
     
     if (isDirectNavigation) {
+      console.log('Refresh detected in NotFound component. Redirecting to homepage...');
       setIsRefresh(true);
     } else {
       // Log the 404 error only if it's not a refresh

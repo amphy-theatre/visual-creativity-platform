@@ -1,34 +1,14 @@
 
-import { useLocation, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 const NotFound = () => {
   const location = useLocation();
-  const [isRefresh, setIsRefresh] = useState(false);
-
-  useEffect(() => {
-    // If this is a direct page load (refresh or direct URL access)
-    // We'll identify this by checking the navigation type
-    const isDirectNavigation = window.performance
-      ?.getEntriesByType('navigation')
-      ?.some((nav) => (nav as any).type === 'reload');
-    
-    if (isDirectNavigation) {
-      console.log('Refresh detected in NotFound component. Redirecting to homepage...');
-      setIsRefresh(true);
-    } else {
-      // Log the 404 error only if it's not a refresh
-      console.error(
-        "404 Error: User attempted to access non-existent route:",
-        location.pathname
-      );
-    }
-  }, [location.pathname]);
-
-  // If it's a refresh, redirect to the home page
-  if (isRefresh) {
-    return <Navigate to="/" replace />;
-  }
+  
+  // Log the 404 error
+  console.error(
+    "404 Error: User attempted to access non-existent route:",
+    location.pathname
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

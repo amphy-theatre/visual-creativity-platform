@@ -47,13 +47,16 @@ export async function getMovieRecommendations(
 
   try {
     // Build the instructions for OpenAI - simplified and clearer formatting requirements
-    let instructions = `Generate EXACTLY 3 movie recommendations (include one indie movie) based on the quote, emotional state`;
+    let instructions = `Search the web and Generate EXACTLY 3 movie recommendations (include one indie movie) based on:
+    The meaning and theme of the prompt 
+    The meaning and theme of the quote 
+    The inferred emotional state of the user`;
     
     if (sanitizedUserPreferences) {
-      instructions += `, and user preferences from their viewing history`;
+      instructions += `\nuser preferences from their viewing history`;
     }
     
-    instructions += `. Format your response as a numbered list with EXACTLY 3 items.
+    instructions += `\nFormat your response as a numbered list with EXACTLY 3 items.
 
       For each movie, use this exact format:
       1. [Movie Name]
@@ -75,7 +78,7 @@ export async function getMovieRecommendations(
 
     // Build the input for OpenAI
     let input = `Quote: "${sanitizedQuote}"
-          Emotional state: ${sanitizedEmotion || 'Unknown'}`;
+          Prompt: ${sanitizedEmotion || 'Unknown'}`;
     
     // Add user preferences if available
     if (sanitizedUserPreferences) {

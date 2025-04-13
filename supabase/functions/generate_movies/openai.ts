@@ -1,3 +1,4 @@
+
 import { extractMoviesFromResponse } from './extract_movies.ts';
 import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
@@ -45,30 +46,39 @@ export async function getMovieRecommendations(
   const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
   try {
-    // Build the instructions for OpenAI
-    let instructions = `Search the web and generate EXACTLY 3 movie recommendations (include one indie movie) based on the quote, emotional state`;
+    // Build the instructions for OpenAI - simplified and clearer formatting requirements
+    let instructions = `Search the web and Generate EXACTLY 3 movie recommendations (include one indie movie) based on:
+    The meaning and theme of the prompt 
+    The meaning and theme of the quote 
+    The inferred emotional state of the user`;
     
     if (sanitizedUserPreferences) {
-      instructions += `, and user preferences from their viewing history`;
+      instructions += `\nuser preferences from their viewing history`;
     }
     
-    instructions += ` and list of movies provided.
-      You must search the web, don't rely on in-built generation.
-      For each movie, include:
-      - The movie name (no prefixes like 'Title:')
-      - A brief description (1-2 sentences, no label needed)
+    instructions += `\nFormat your response as a numbered list with EXACTLY 3 items.
+
+      For each movie, use this exact format:
+      1. [Movie Name]
+      [Brief description - one or two sentences]
+      
+      2. [Movie Name]
+      [Brief description - one or two sentences]
+      
+      3. [Movie Name]
+      [Brief description - one or two sentences]
 
       ${sanitizedPreviousMovies.length > 0 ? `DO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}` : ''}
 
-      DO NOT include any links, URLs, references, or citations in your response.
+      DO NOT include any links, URLs, references, or citations.
       DO NOT use phrases like "According to..." or "Based on...".
-      Format each movie as a numbered list item (1., 2., 3.) with clear separation between movies.
-      Do not use any special formatting characters like asterisks, quotes, stars, or brackets.
-      `;
+      DO NOT use any special formatting characters like asterisks, quotes, stars, or brackets.
+      DO NOT add any introduction or conclusion text.
+      ONLY respond with a numbered list of 3 movies.`;
 
     // Build the input for OpenAI
     let input = `Quote: "${sanitizedQuote}"
-          Emotional state: ${sanitizedEmotion || 'Unknown'}`;
+          Prompt: ${sanitizedEmotion || 'Unknown'}`;
     
     // Add user preferences if available
     if (sanitizedUserPreferences) {

@@ -62,6 +62,7 @@ export async function getMovieRecommendations(
 
       DO NOT include any links, URLs, references, or citations in your response.
       DO NOT use phrases like "According to..." or "Based on...".
+      The response you output is being sent to a function that expects the response to be a numbered list, so do not include anything other than a numbered list.
       Format each movie as a numbered list item (1., 2., 3.) with clear separation between movies.
       Do not use any special formatting characters like asterisks, quotes, stars, or brackets.
       `;

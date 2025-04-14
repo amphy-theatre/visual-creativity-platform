@@ -94,6 +94,35 @@ export async function getMovieRecommendations(
       input: input,
       temperature: 1.2,
       max_output_tokens: 300,
+      text: {
+        format: {
+          type: "json_schema",
+          name: "movie_coconut",
+          schema: {
+            type: "object",
+            properties: {
+              items: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { 
+                      type: "string" 
+                    },
+                    description: { 
+                      type: "string" 
+                    },
+                  },
+                  required: ["title", "description"],
+                  additionalProperties: false,
+                }
+              }
+            },
+            required: ["items"],
+            additionalProperties: false,
+          }
+        }
+      }
     });
   
     // Safely access the response content

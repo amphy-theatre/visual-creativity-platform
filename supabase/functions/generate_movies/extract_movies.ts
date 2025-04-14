@@ -3,11 +3,47 @@ import { Movie } from './types.ts';
 
 export function extractMoviesFromResponse(response: string): Movie[] {
   if (!response || typeof response !== 'string') {
+    console.log('Invalid response received:', response);
     return [];
   }
 
   try {
-    // First, try to directly extract movie data without JSON parsing
+    // Clean the response string - remove any potential issues that might break JSON parsing
+    let cleanedResponse = response;
+    
+    // Remove URL citations that might contain unescaped quotes
+    cleanedResponse = cleanedResponse.replace(/\[\([^)]*\)\]/g, '');
+    cleanedResponse = cleanedResponse.replace(/\([^)]*\)/g, '');
+    
+    // Remove URL patterns that might break JSON parsing
+    cleanedResponse = cleanedResponse.replace(/https?:\/\/\S+/g, '');
+    
+    // Try to parse the cleaned JSON
+    console.log('Attempting to parse cleaned JSON response');
+    const parsedData = JSON.parse(cleanedResponse);
+    
+    // Check if the expected structure exists
+    if (parsedData && parsedData.items && Array.isArray(parsedData.items)) {
+      const movies: Movie[] = parsedData.items.map((item: any) => ({
+        title: item.title ? String(item.title).trim() : '',
+        description: item.description ? String(item.description).trim() : '',
+        link: '',
+        streamingProviders: []
+      }));
+      
+      console.log(`Successfully extracted ${movies.length} movies from JSON structure`);
+      return movies;
+    }
+    
+    console.log('JSON did not contain expected "items" array structure, using fallback extraction');
+  } catch (error) {
+    console.error('Error parsing JSON response:', error);
+    console.log('Falling back to regex extraction methods');
+  }
+
+  // Fallback to regex extraction if JSON parsing fails
+  try {
+    // First, try to extract movie data with regex
     const movies: Movie[] = [];
     const movieTitleRegex = /"title":\s*"([^"]+)"/g;
     const movieDescriptionRegex = /"description":\s*"([^"]+)"/g;
@@ -31,7 +67,10 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     for (let i = 0; i < Math.min(titles.length, descriptions.length); i++) {
       movies.push({
         title: titles[i].replace(/\\"/g, '"'),
-        description: descriptions[i].replace(/\\"/g, '"'),
+        description: descriptions[i].replace(/\\"/g, '"')
+          .replace(/\[\([^)]*\)\]/g, '') // Remove citations like [(example.com)]
+          .replace(/\([^)]*\)/g, '')     // Remove citations like (example.com)
+          .replace(/https?:\/\/\S+/g, ''), // Remove URLs
         link: '',
         streamingProviders: []
       });

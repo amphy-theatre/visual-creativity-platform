@@ -1,3 +1,4 @@
+
 import { extractMoviesFromResponse } from './extract_movies.ts';
 import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
@@ -45,10 +46,12 @@ export async function getMovieRecommendations(
   const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
   try {
-    // Simplified prompt to avoid JSON parsing issues
+    // Build the input for OpenAI with improved instructions
     let instructions = `Generate EXACTLY 3 movie recommendations based on the input provided.
-    For each movie, provide only the title and a brief description without any citations, URLs, or references.
-    Format your response as a simple structured output for easier parsing.`;
+    For each movie, provide ONLY the title and a brief description without ANY citations, URLs, or references.
+    Format your response as a structured JSON output with an 'items' array containing objects with 'title' and 'description' fields.
+    DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
+    NEVER include any text outside of the JSON structure.`;
     
     if (sanitizedPreviousMovies.length > 0) {
       instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;

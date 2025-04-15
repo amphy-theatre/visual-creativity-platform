@@ -46,54 +46,66 @@ export async function getMovieRecommendations(
   const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
   try {
-    // Build the instructions for OpenAI - simplified and clearer formatting requirements
-    let instructions = `Search the web and Generate EXACTLY 3 movie recommendations (include one indie movie) based on:
-    The meaning and theme of the prompt 
-    The meaning and theme of the quote 
-    The inferred emotional state of the user`;
+    // Build the input for OpenAI with improved instructions
+    let instructions = `Generate EXACTLY 3 movie recommendations based on the input provided.
+    For each movie, provide ONLY the title and a brief description without ANY citations, URLs, or references.
+    Format your response as a structured JSON output with an 'items' array containing objects with 'title' and 'description' fields.
+    DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
+    NEVER include any text outside of the JSON structure.`;
     
-    if (sanitizedUserPreferences) {
-      instructions += `\nuser preferences from their viewing history`;
+    if (sanitizedPreviousMovies.length > 0) {
+      instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;
     }
     
-    instructions += `\nFormat your response as a numbered list with EXACTLY 3 items.
-
-      For each movie, use this exact format:
-      1. [Movie Name]
-      [Brief description - one or two sentences]
-      
-      2. [Movie Name]
-      [Brief description - one or two sentences]
-      
-      3. [Movie Name]
-      [Brief description - one or two sentences]
-
-      ${sanitizedPreviousMovies.length > 0 ? `DO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}` : ''}
-
-      DO NOT include any links, URLs, references, or citations.
-      DO NOT use phrases like "According to..." or "Based on...".
-      DO NOT use any special formatting characters like asterisks, quotes, stars, or brackets.
-      DO NOT add any introduction or conclusion text.
-      ONLY respond with a numbered list of 3 movies.`;
-
     // Build the input for OpenAI
     let input = `Quote: "${sanitizedQuote}"
-          Prompt: ${sanitizedEmotion || 'Unknown'}`;
+    Emotion/Mood: ${sanitizedEmotion || 'Not specified'}`;
     
     // Add user preferences if available
     if (sanitizedUserPreferences) {
-      input += `\nUser Preferences (from viewing history): ${sanitizedUserPreferences}`;
+      input += `\nUser Preferences: ${sanitizedUserPreferences}`;
     }
     
-    input += `\nRecommend movies that connect with these themes and emotions.`;
-
+    console.log("Sending request to OpenAI with model: gpt-4o-mini");
+    
     const openAIData = await openai.responses.create({
       model: "gpt-4o-mini",
       tools: [{ type: "web_search_preview" }],
       instructions: instructions,
       input: input,
-      temperature: 1.2,
-      max_output_tokens: 300,
+      temperature: 1.0,
+      max_output_tokens: 500,
+      text: {
+        format: {
+          type: "json_schema",
+          name: "movie_recommendations",
+          schema: {
+            type: "object",
+            properties: {
+              items: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { 
+                      type: "string",
+                      description: "Movie title only, no other text"
+                    },
+                    description: { 
+                      type: "string",
+                      description: "Brief description without any URLs, citations, or references"
+                    },
+                  },
+                  required: ["title", "description"],
+                  additionalProperties: false,
+                }
+              }
+            },
+            required: ["items"],
+            additionalProperties: false,
+          }
+        }
+      }
     });
   
     // Safely access the response content
@@ -107,7 +119,7 @@ export async function getMovieRecommendations(
     
     console.log("Raw OpenAI response:", content);
   
-    // Extract movies from the content
+    // Extract movies from the content using our more robust extraction
     let movies = extractMoviesFromResponse(content);
     
     console.log(`Extracted ${movies.length} movies from the response`);

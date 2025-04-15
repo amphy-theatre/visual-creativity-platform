@@ -21,7 +21,7 @@ const FreeTrialBanner: React.FC = () => {
           {isTrialUsed ? (
             <p>You've used your trial prompt. Sign up to continue using Amphytheatre. It's completely free!</p>
           ) : (
-            <p>You're using a trial prompt. Sign up for more prompts and features!</p>
+            <p>You're using a trial prompt. Sign up (free!) for more prompts and features!</p>
           )}
         </div>
         <Button 
@@ -38,3 +38,4 @@ const FreeTrialBanner: React.FC = () => {
 };
 
 export default FreeTrialBanner;
+

@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading, isGuestMode, setGuestMode } = useAuth();
+  const { user, loading, isGuestMode, setGuestMode, isTrialUsed } = useAuth();
 
   // If the auth state is still loading, show the loading spinner
   if (loading) {
@@ -17,6 +17,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  // If they're in guest mode and have used their trial, redirect to auth page
+  if (isGuestMode && isTrialUsed) {
+    return <Navigate to="/auth" />;
   }
 
   // If there's no authenticated user, automatically set guest mode

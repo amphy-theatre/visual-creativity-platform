@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { user, getRedirectUrl } = useAuth();
+  const { user, getRedirectUrl, isTrialUsed } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -80,8 +80,11 @@ const Auth = () => {
               variant="secondary"
               className="w-full"
               onClick={handleTryForFree}
+              disabled={isTrialUsed}
             >
-              Try one recommendation for free
+              {isTrialUsed 
+                ? "Sign-up free for more prompts and features!" 
+                : "Try one recommendation for free"}
             </Button>
           </div>
         </div>

@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,12 +9,24 @@ import { useAuth } from "@/context/AuthContext";
 const Auth = () => {
   const navigate = useNavigate();
   const { user, getRedirectUrl, isTrialUsed } = useAuth();
+  const [blinkText, setBlinkText] = useState("x __ x");
 
   useEffect(() => {
     if (user) {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Create blinking effect for the button text when trial is used
+  useEffect(() => {
+    if (!isTrialUsed) return;
+
+    const interval = setInterval(() => {
+      setBlinkText(prev => prev === "x __ x" ? "- __ -" : "x __ x");
+    }, 800); // Toggle every 800ms
+
+    return () => clearInterval(interval);
+  }, [isTrialUsed]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -82,7 +95,7 @@ const Auth = () => {
               disabled={isTrialUsed}
             >
               {isTrialUsed 
-                ? "Sign-up free for more prompts and features!" 
+                ? blinkText
                 : "Try"}
             </Button>
           </div>

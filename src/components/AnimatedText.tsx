@@ -1,10 +1,9 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import TypeIt from 'typeit';
 
 interface AnimatedTextProps {
-  texts?: string[];
-  phrasesFile?: string;
+  texts: string[];
   typingSpeed?: number;
   deletingSpeed?: number;
   delayBetweenTexts?: number;
@@ -12,8 +11,7 @@ interface AnimatedTextProps {
 }
 
 const AnimatedText: React.FC<AnimatedTextProps> = ({
-  texts = [],
-  phrasesFile,
+  texts,
   typingSpeed = 100,
   deletingSpeed = 50,
   delayBetweenTexts = 2000,
@@ -21,34 +19,10 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const typeItRef = useRef<TypeIt | null>(null);
-  const [phrases, setPhrases] = useState<string[]>(texts);
-  
-  // Load phrases from file if provided
-  useEffect(() => {
-    if (phrasesFile) {
-      fetch(phrasesFile)
-        .then(response => response.text())
-        .then(data => {
-          const loadedPhrases = data
-            .split('\n')
-            .filter(line => line.trim() !== '');
-          if (loadedPhrases.length > 0) {
-            setPhrases(loadedPhrases);
-          }
-        })
-        .catch(error => {
-          console.error('Error loading phrases file:', error);
-          // Fallback to provided texts if file loading fails
-          if (texts.length > 0) {
-            setPhrases(texts);
-          }
-        });
-    }
-  }, [phrasesFile, texts]);
   
   useEffect(() => {
-    // Only proceed if we have a DOM element and at least one phrase
-    if (!elementRef.current || phrases.length === 0) return;
+    // Only proceed if we have a DOM element and at least one text
+    if (!elementRef.current || texts.length === 0) return;
     
     // Safely clean up previous instance to avoid null reference errors
     if (typeItRef.current) {
@@ -69,10 +43,6 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       if (!elementRef.current) return; // Double-check element still exists
       
       try {
-        // Get random phrases to start with
-        const getRandomPhrase = () => phrases[Math.floor(Math.random() * phrases.length)];
-        let currentPhrase = getRandomPhrase();
-        
         // Initialize TypeIt with an empty element
         const instance = new TypeIt(elementRef.current, {
           speed: typingSpeed,
@@ -84,20 +54,19 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
           startDelay: 250 // Small delay before starting
         });
         
-        // Type the first phrase
-        instance.type(currentPhrase).pause(delayBetweenTexts).delete();
+        // Setup the animation loop for all texts
+        let currentInstance = instance.type(texts[0]).pause(delayBetweenTexts).delete();
         
-        // Setup a callback to get a new random phrase each time
-        instance.exec(async (instance) => {
-          const continueTyping = () => {
-            const newPhrase = getRandomPhrase();
-            instance.type(newPhrase).pause(delayBetweenTexts).delete().exec(continueTyping);
-          };
-          continueTyping();
-        });
+        // For each additional text, add type and delete actions
+        for (let i = 1; i < texts.length; i++) {
+          currentInstance = currentInstance
+            .type(texts[i])
+            .pause(delayBetweenTexts)
+            .delete();
+        }
         
         // Start the animation
-        instance.go();
+        currentInstance.go();
         
         // Save the instance for cleanup
         typeItRef.current = instance;
@@ -118,7 +87,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         }
       }
     };
-  }, [phrases, typingSpeed, deletingSpeed, delayBetweenTexts]);
+  }, [texts, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
   return <div ref={elementRef} className={className}></div>;
 };

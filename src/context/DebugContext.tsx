@@ -17,11 +17,9 @@ const originalConsole = {
   error: console.error,
 };
 
-// Helper to determine if we're in production
+// Helper to determine if we're in production environment
 const isProduction = () => {
-  return window.location.hostname.includes('vercel.app') || 
-         process.env.NODE_ENV === 'production' ||
-         import.meta.env.VITE_DISABLE_DEBUG === 'true';
+  return import.meta.env.VITE_DEPLOYMENT_ENVIRONMENT !== 'testing';
 };
 
 export function DebugProvider({ children }: { children: React.ReactNode }) {
@@ -31,13 +29,15 @@ export function DebugProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
     
-    // Otherwise, check localStorage
-    const savedDebugMode = localStorage.getItem("debug-mode");
-    return savedDebugMode === "true";
+    // In testing environment, default to true
+    return true;
   });
 
   useEffect(() => {
-    localStorage.setItem("debug-mode", debugMode.toString());
+    // Only store in localStorage in testing env where it can be toggled
+    if (!isProduction()) {
+      localStorage.setItem("debug-mode", debugMode.toString());
+    }
     
     // Override console methods based on debug mode
     if (debugMode) {
@@ -65,7 +65,10 @@ export function DebugProvider({ children }: { children: React.ReactNode }) {
   }, [debugMode]);
 
   const toggleDebugMode = () => {
-    setDebugMode((prevMode) => !prevMode);
+    // Only allow toggling in testing environment
+    if (!isProduction()) {
+      setDebugMode((prevMode) => !prevMode);
+    }
   };
 
   return (

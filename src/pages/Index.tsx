@@ -76,19 +76,18 @@ const Index: React.FC = () => {
                   seamlessInput={true}
                   maxLength={200}
                 />
-                
-                <div className="space-y-4">
-                  <CSVUploader onCsvDataChange={handleCsvDataChange} />
-                  
-                  <SubmitButton
-                    onClick={handleSubmit}
-                    isLoading={isLoading}
-                    isDisabled={!inputValue.trim() && !csvData}
-                  />
-                </div>
               </div>
             )}
           </h1>
+          <div className="space-y-4">
+          <CSVUploader onCsvDataChange={handleCsvDataChange} />
+        
+          <SubmitButton
+            onClick={handleSubmit}
+            isLoading={isLoading}
+            isDisabled={!inputValue.trim() && !csvData}
+            />
+          </div>
         </div>
         
         <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.2s" }}>

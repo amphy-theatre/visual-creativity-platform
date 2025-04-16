@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,7 +83,7 @@ const Auth = () => {
             >
               {isTrialUsed 
                 ? "Sign-up free for more prompts and features!" 
-                : "Try one recommendation for free"}
+                : "Try"}
             </Button>
           </div>
         </div>

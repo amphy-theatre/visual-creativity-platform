@@ -8,6 +8,7 @@ interface AnimatedTextProps {
   deletingSpeed?: number;
   delayBetweenTexts?: number;
   className?: string;
+  onUserInput?: (input: string) => void;
 }
 
 const AnimatedText: React.FC<AnimatedTextProps> = ({
@@ -16,11 +17,14 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   deletingSpeed = 50,
   delayBetweenTexts = 2000,
   className = "",
+  onUserInput,
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const typeItRef = useRef<TypeIt | null>(null);
   const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
   const cycleCountRef = useRef<number>(0);
+  const [isTyping, setIsTyping] = useState<boolean>(true);
+  const [userInput, setUserInput] = useState<string>('');
   
   // Function to get 5 random phrases from the text array
   const getRandomPhrases = () => {
@@ -34,7 +38,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   }, [texts]);
   
   useEffect(() => {
-    if (!elementRef.current || !selectedPhrases.length) return;
+    if (!elementRef.current || !selectedPhrases.length || !isTyping) return;
     
     // Clean up previous instance
     if (typeItRef.current) {
@@ -100,9 +104,44 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         }
       }
     };
-  }, [selectedPhrases, typingSpeed, deletingSpeed, delayBetweenTexts]);
+  }, [selectedPhrases, typingSpeed, deletingSpeed, delayBetweenTexts, isTyping]);
+
+  const handleClick = () => {
+    setIsTyping(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserInput(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && userInput.trim() && onUserInput) {
+      onUserInput(userInput);
+    }
+  };
+
+  if (isTyping) {
+    return (
+      <div 
+        ref={elementRef} 
+        className={`${className} cursor-pointer`} 
+        onClick={handleClick}
+        aria-label="Click to enter your own prompt"
+      ></div>
+    );
+  }
   
-  return <div ref={elementRef} className={className}></div>;
+  return (
+    <input
+      type="text"
+      value={userInput}
+      onChange={handleInputChange}
+      onKeyDown={handleKeyDown}
+      placeholder="Type how you feel..."
+      className={`${className} border-none bg-transparent focus:outline-none text-center w-full`}
+      autoFocus
+    />
+  );
 };
 
 export default AnimatedText;

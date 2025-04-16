@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useRef } from "react";
 import Layout from "../components/Layout";
 import MoodInput from "../components/MoodInput";
 import PresetMood from "../components/PresetMood";
@@ -10,6 +10,40 @@ import { phrases } from "../phrases";
 
 const Index: React.FC = () => {
   const { isGuestMode } = useAuth();
+  const moodInputRef = useRef<HTMLDivElement>(null);
+  
+  const handleUserInput = (input: string) => {
+    if (moodInputRef.current) {
+      // Find textarea in MoodInput and set its value
+      const textarea = moodInputRef.current.querySelector('textarea');
+      if (textarea) {
+        // Set the value using the input API
+        const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLTextAreaElement.prototype,
+          "value"
+        )?.set;
+        
+        if (nativeTextAreaValueSetter) {
+          nativeTextAreaValueSetter.call(textarea, input);
+          
+          // Dispatch input event to trigger React's onChange
+          textarea.dispatchEvent(
+            new Event('input', { bubbles: true })
+          );
+          
+          // Find and click the submit button
+          const button = moodInputRef.current.querySelector('button[type="submit"]') || 
+                          moodInputRef.current.querySelector('button');
+          
+          if (button) {
+            setTimeout(() => {
+              button.click();
+            }, 100); // Small delay to ensure state is updated
+          }
+        }
+      }
+    }
+  };
   
   return (
     <Layout>
@@ -24,12 +58,15 @@ const Index: React.FC = () => {
               deletingSpeed={40} 
               delayBetweenTexts={2000}
               className="inline-block"
+              onUserInput={handleUserInput}
             />
           </h1>
           <p className="text-xl text-foreground/70">Let's find the perfect content to match your mood</p>
         </div>
         
-        <MoodInput />
+        <div ref={moodInputRef}>
+          <MoodInput />
+        </div>
         
         <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <div className="text-lg text-foreground/80">Or choose a preset prompt:</div>

@@ -109,7 +109,12 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       ref={elementRef} 
       className={`${className} cursor-pointer`}
       onClick={onTextClick}
-      style={{ minHeight: "2.5rem", display: "inline-block" }}
+      style={{ 
+        minHeight: "2.5rem", 
+        display: "inline-block",
+        transition: "all 0.3s ease"
+      }}
+      title="Click to type your own"
     ></div>
   );
 };

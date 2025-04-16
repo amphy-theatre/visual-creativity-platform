@@ -58,7 +58,7 @@ const Index: React.FC = () => {
         {isGuestMode && <FreeTrialBanner />}
         
         <div className="text-center space-y-4 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
             {showAnimatedText ? (
               <AnimatedText 
                 texts={phrases}
@@ -80,9 +80,11 @@ const Index: React.FC = () => {
               />
             )}
           </h1>
+          
           {showAnimatedText && (
             <p className="text-xl text-foreground/70">Let's find the perfect content to match your mood</p>
           )}
+          
           {!showAnimatedText && inputMood && (
             <Button 
               ref={generateButtonRef}

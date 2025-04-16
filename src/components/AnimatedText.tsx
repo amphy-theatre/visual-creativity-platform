@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TypeIt from 'typeit';
 
 interface AnimatedTextProps {
@@ -19,10 +19,22 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const typeItRef = useRef<TypeIt | null>(null);
+  const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
+  const cycleCountRef = useRef<number>(0);
+  
+  // Function to get 5 random phrases from the text array
+  const getRandomPhrases = () => {
+    const shuffled = [...texts].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 5);
+  };
+  
+  // Initialize or reset selected phrases
+  useEffect(() => {
+    setSelectedPhrases(getRandomPhrases());
+  }, [texts]);
   
   useEffect(() => {
-    // Only proceed if we have a DOM element and at least one text
-    if (!elementRef.current || texts.length === 0) return;
+    if (!elementRef.current || !selectedPhrases.length) return;
     
     // Clean up previous instance
     if (typeItRef.current) {
@@ -33,59 +45,52 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       }
     }
     
-    // Clear any existing content from the element
+    // Clear any existing content
     if (elementRef.current) {
       elementRef.current.innerHTML = '';
     }
     
-    // Get a random text from the array
-    const getRandomText = () => texts[Math.floor(Math.random() * texts.length)];
-    
-    // Setup TypeIt with a small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      if (!elementRef.current) return;
-      
-      try {
-        // Initialize TypeIt with proper configuration
-        const instance = new TypeIt(elementRef.current, {
-          speed: typingSpeed,
-          deleteSpeed: deletingSpeed,
-          lifeLike: true,
-          loop: true,
-          waitUntilVisible: true,
-          cursor: true,
-          afterStep: (instance) => {
-            // Check if this step completed a deletion sequence
-            const queueItems = instance.getQueue();
-            if (queueItems.length === 0) {
-              // When queue is empty (after delete completes), add a new random text
-              instance
-                .type(getRandomText())
-                .pause(delayBetweenTexts)
-                .delete();
-            }
-          }
-        });
+    // Create new TypeIt instance
+    const instance = new TypeIt(elementRef.current, {
+      speed: typingSpeed,
+      deleteSpeed: deletingSpeed,
+      lifeLike: true,
+      waitUntilVisible: true,
+      cursor: true,
+      afterComplete: (instance) => {
+        // After completing all phrases, get new ones
+        cycleCountRef.current += 1;
         
-        // Start with a random text
-        instance
-          .type(getRandomText())
-          .pause(delayBetweenTexts)
-          .delete();
+        // After showing all five phrases, get a new batch
+        if (cycleCountRef.current >= selectedPhrases.length) {
+          cycleCountRef.current = 0;
+          setSelectedPhrases(getRandomPhrases());
+          
+          // This will cause a re-render and initialize a new TypeIt instance
+          return;
+        }
         
-        // Start the animation
+        // Continue with next phrase in current batch
+        instance.reset();
         instance.go();
-        
-        // Save the instance for cleanup
-        typeItRef.current = instance;
-      } catch (error) {
-        console.log('Error initializing TypeIt:', error);
       }
-    }, 100);
+    });
+    
+    // Add each phrase to the instance
+    selectedPhrases.forEach((phrase, index) => {
+      instance.type(phrase)
+        .pause(delayBetweenTexts)
+        .delete();
+    });
+    
+    // Start the animation
+    instance.go();
+    
+    // Save the instance for cleanup
+    typeItRef.current = instance;
     
     // Cleanup function
     return () => {
-      clearTimeout(timer);
       if (typeItRef.current) {
         try {
           typeItRef.current.destroy();
@@ -95,7 +100,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         }
       }
     };
-  }, [texts, typingSpeed, deletingSpeed, delayBetweenTexts]);
+  }, [selectedPhrases, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
   return <div ref={elementRef} className={className}></div>;
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -187,7 +186,6 @@ const MoodInput: React.FC = () => {
       <Button 
         className="w-full"
         onClick={handleSubmit}
-        type="submit"
         disabled={((!mood.trim() && !csvData) || isLoading || (!isGuestMode && promptUsage.limit_reached) || (isGuestMode && isTrialUsed))}
         variant="default"
       >

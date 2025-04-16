@@ -1,20 +1,54 @@
 
 import React, { useState, useRef } from "react";
 import Layout from "../components/Layout";
-import MoodInput from "../components/MoodInput";
 import PresetMood from "../components/PresetMood";
 import FreeTrialBanner from "../components/FreeTrialBanner";
 import AnimatedText from "../components/AnimatedText";
 import { useAuth } from "../context/AuthContext";
 import { phrases } from "../phrases";
+import TextAreaInput from "../components/TextAreaInput";
+import SubmitButton from "../components/SubmitButton";
+import CSVUploader from "../components/CSVUploader";
+import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Index: React.FC = () => {
   const { isGuestMode } = useAuth();
   const [showAnimatedText, setShowAnimatedText] = useState(true);
   const [inputValue, setInputValue] = useState("");
-  
+  const [isLoading, setIsLoading] = useState(false);
+  const [csvData, setCsvData] = useState<string | null>(null);
+  const navigate = useNavigate();
+
   const handleAnimatedTextClick = () => {
     setShowAnimatedText(false);
+  };
+  
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+  };
+  
+  const handleCsvDataChange = (data: string | null) => {
+    setCsvData(data);
+  };
+  
+  const handleSubmit = () => {
+    if (!inputValue.trim() && !csvData) {
+      toast({
+        title: "Error",
+        description: "Please enter a mood or upload a CSV file",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Store the input value in session storage for use in the quotes page
+    sessionStorage.setItem("userMood", inputValue);
+    
+    // Navigate to the quotes page
+    navigate("/quotes");
   };
   
   return (
@@ -34,7 +68,25 @@ const Index: React.FC = () => {
                 onTextClick={handleAnimatedTextClick}
               />
             ) : (
-              <MoodInput initialValue={inputValue}/>
+              <div className="space-y-8">
+                <TextAreaInput
+                  initialValue={inputValue}
+                  onChange={handleInputChange}
+                  onSubmit={handleSubmit}
+                  seamlessInput={true}
+                  maxLength={200}
+                />
+                
+                <div className="space-y-4">
+                  <CSVUploader onCsvDataChange={handleCsvDataChange} />
+                  
+                  <SubmitButton
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    isDisabled={!inputValue.trim() && !csvData}
+                  />
+                </div>
+              </div>
             )}
           </h1>
         </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "../components/Layout";
 import MoodInput from "../components/MoodInput";
@@ -113,8 +114,8 @@ const Index: React.FC = () => {
           )}
         </div>
         
-        {/* Hide the original MoodInput visually but keep it in the DOM for functionality */}
-        <div className={showAnimatedText ? "" : "hidden"}>
+        {/* Hide the original MoodInput entirely until showAnimatedText is false */}
+        <div className={showAnimatedText ? "hidden" : ""}>
           <MoodInput />
         </div>
         

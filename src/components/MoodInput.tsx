@@ -14,7 +14,6 @@ import { useAppConfig } from "@/hooks/useAppConfig";
 
 interface MoodInputProps {
   initialValue?: string;
-  seamlessInput?: boolean;
 }
 
 const MoodInput: React.FC<MoodInputProps> = ({ initialValue = "", seamlessInput = false }) => {
@@ -33,12 +32,6 @@ const MoodInput: React.FC<MoodInputProps> = ({ initialValue = "", seamlessInput 
     showLimitModal,
     setShowLimitModal,
   } = usePromptUsage();
-  
-  useEffect(() => {
-    if (seamlessInput && textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, [seamlessInput]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -169,28 +162,14 @@ const MoodInput: React.FC<MoodInputProps> = ({ initialValue = "", seamlessInput 
     }
   };
 
-  if (seamlessInput) {
-    return (
-      <Textarea
-        ref={textareaRef}
-        autoFocus
-        className="w-full resize-none text-4xl md:text-5xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[2.5rem]"
-        placeholder="How are you feeling today?"
-        value={mood}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        maxLength={200}
-      />
-    );
-  }
-
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="space-y-2">
         <Textarea
           ref={textareaRef}
-          className="h-32 resize-none"
-          placeholder="How are you feeling? (e.g., I feel like a yellow balloon, On top of the world, I think I am James Bond)"
+          autoFocus
+          className="w-full resize-none text-4xl md:text-5xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[2.5rem]"
+          placeholder="How are you feeling today?"
           value={mood}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}

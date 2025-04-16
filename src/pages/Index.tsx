@@ -1,5 +1,5 @@
 
-import React, { useMemo } from "react";
+import React from "react";
 import Layout from "../components/Layout";
 import MoodInput from "../components/MoodInput";
 import PresetMood from "../components/PresetMood";
@@ -11,13 +11,6 @@ import { phrases } from "../phrases";
 const Index: React.FC = () => {
   const { isGuestMode } = useAuth();
   
-  // Select a random set of phrases each time the component renders
-  const randomPhrases = useMemo(() => {
-    // Shuffle array and take first 5 elements
-    const shuffled = [...phrases].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 5);
-  }, []);
-  
   return (
     <Layout>
       <div className="space-y-16 pb-12">
@@ -26,11 +19,12 @@ const Index: React.FC = () => {
         <div className="text-center space-y-4 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground">
             <AnimatedText 
-              texts={randomPhrases} 
+              texts={phrases}
               typingSpeed={80} 
               deletingSpeed={40} 
               delayBetweenTexts={2000}
               className="inline-block"
+              useRandomSelection={true}
             />
           </h1>
           <p className="text-xl text-foreground/70">Let's find the perfect content to match your mood</p>

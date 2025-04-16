@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, KeyboardEvent, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,12 +12,18 @@ import PromptLimitModal from "./modals/PromptLimitModal";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAppConfig } from "@/hooks/useAppConfig";
 
-const MoodInput: React.FC = () => {
-  const [mood, setMood] = useState("");
-  const [charCount, setCharCount] = useState(0);
+interface MoodInputProps {
+  initialValue?: string;
+  seamlessInput?: boolean;
+}
+
+const MoodInput: React.FC<MoodInputProps> = ({ initialValue = "", seamlessInput = false }) => {
+  const [mood, setMood] = useState(initialValue);
+  const [charCount, setCharCount] = useState(initialValue.length);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
   const { user, session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { trackEvent } = useAnalytics();
@@ -27,6 +33,12 @@ const MoodInput: React.FC = () => {
     showLimitModal,
     setShowLimitModal,
   } = usePromptUsage();
+  
+  useEffect(() => {
+    if (seamlessInput && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [seamlessInput]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
@@ -44,7 +56,6 @@ const MoodInput: React.FC = () => {
       return;
     }
     
-    // Check if guest user has already used their free trial
     if (isGuestMode && isTrialUsed) {
       toast({
         title: "Free Trial Used",
@@ -54,7 +65,6 @@ const MoodInput: React.FC = () => {
       return;
     }
     
-    // For signed-in users, check prompt limit
     if (!isGuestMode && promptUsage.limit_reached) {
       setShowLimitModal(true);
       return;
@@ -63,13 +73,10 @@ const MoodInput: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData && user) {
-        // Get the session token for authentication
         const accessToken = session?.access_token;
         
         try {
-          // Call the edge function to summarize the CSV asynchronously
           await fetch(config.edgeFunctions.summarizeCsv, {
             method: 'POST',
             headers: {
@@ -82,11 +89,9 @@ const MoodInput: React.FC = () => {
           });
         } catch (csvError) {
           console.error('Error processing CSV:', csvError);
-          // Continue even if CSV processing fails
         }
       }
       
-      // Always use the actual mood input for generating quotes
       const moodText = mood.trim();
       
       if (moodText) {
@@ -108,7 +113,6 @@ const MoodInput: React.FC = () => {
         const data = await response.json();
         console.log('Received quotes:', data);
         
-        // Track the quotes generated event
         trackEvent('quotes_generated', {
           mood: moodText,
           source: 'custom_input',
@@ -119,12 +123,10 @@ const MoodInput: React.FC = () => {
           state: { 
             mood: moodText, 
             quotes: data, 
-            promptUsage: promptUsage // Pass the current prompt usage data
+            promptUsage: promptUsage
           }
         });
       } else {
-        // If no mood text, but we have CSV data, simply go to quotes with empty data
-        // This allows the background CSV processing to continue
         navigate("/quotes", { state: { mood: "Processing your data", quotes: { quotes: [] } } });
       }
     } catch (error) {
@@ -167,10 +169,26 @@ const MoodInput: React.FC = () => {
     }
   };
 
+  if (seamlessInput) {
+    return (
+      <Textarea
+        ref={textareaRef}
+        autoFocus
+        className="w-full resize-none text-4xl md:text-5xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[2.5rem]"
+        placeholder="How are you feeling today?"
+        value={mood}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        maxLength={200}
+      />
+    );
+  }
+
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="space-y-2">
         <Textarea
+          ref={textareaRef}
           className="h-32 resize-none"
           placeholder="How are you feeling? (e.g., I feel like a yellow balloon, On top of the world, I think I am James Bond)"
           value={mood}

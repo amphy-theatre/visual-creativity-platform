@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 import MoodInput from "../components/MoodInput";
 import PresetMood from "../components/PresetMood";
 import FreeTrialBanner from "../components/FreeTrialBanner";
+import AnimatedText from "../components/AnimatedText";
 import { useAuth } from "../context/AuthContext";
 
 const Index: React.FC = () => {
@@ -15,7 +16,14 @@ const Index: React.FC = () => {
         {isGuestMode && <FreeTrialBanner />}
         
         <div className="text-center space-y-4 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">How are you feeling today?</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+            <AnimatedText 
+              texts={["How are you feeling today?", "How do you want to feel today?"]} 
+              typingSpeed={80} 
+              deletingSpeed={40} 
+              delayBetweenTexts={2000}
+            />
+          </h1>
           <p className="text-xl text-foreground/70">Let's find the perfect content to match your mood</p>
         </div>
         

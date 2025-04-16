@@ -80,14 +80,14 @@ const Index: React.FC = () => {
             )}
           </h1>
           <div className="space-y-4">
-          <CSVUploader onCsvDataChange={handleCsvDataChange} />
-        
           <SubmitButton
             onClick={handleSubmit}
             isLoading={isLoading}
             isDisabled={!inputValue.trim() && !csvData}
             />
           </div>
+          
+          <CSVUploader onCsvDataChange={handleCsvDataChange} />
         </div>
         
         <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.2s" }}>

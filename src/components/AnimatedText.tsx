@@ -1,5 +1,6 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import TypeIt from 'typeit';
 
 interface AnimatedTextProps {
   texts: string[];
@@ -16,75 +17,53 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   delayBetweenTexts = 2000,
   className = "",
 }) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const elementRef = useRef<HTMLSpanElement>(null);
+  const typeItRef = useRef<TypeIt | null>(null);
   
   useEffect(() => {
-    if (texts.length === 0) return;
+    if (!elementRef.current || texts.length === 0) return;
     
-    const animateText = () => {
-      const currentFullText = texts[currentTextIndex];
-      
-      if (isDeleting) {
-        // Deleting phase
-        if (displayedText.length > 0) {
-          // Remove one character at a time
-          setDisplayedText(prev => prev.substring(0, prev.length - 1));
-          timeoutRef.current = setTimeout(animateText, deletingSpeed);
-        } else {
-          // When fully deleted, move to next text
-          setIsDeleting(false);
-          // Update the index for the next text
-          setCurrentTextIndex(prevIndex => (prevIndex + 1) % texts.length);
-          // Start typing the next phrase after a short delay
-          timeoutRef.current = setTimeout(animateText, 200);
-        }
-      } else {
-        // Typing phase
-        if (displayedText.length < currentFullText.length) {
-          // Add one character at a time
-          setDisplayedText(prev => currentFullText.substring(0, prev.length + 1));
-          timeoutRef.current = setTimeout(animateText, typingSpeed);
-        } else {
-          // When fully typed, pause before deleting
-          setIsPaused(true);
-          timeoutRef.current = setTimeout(() => {
-            setIsPaused(false);
-            setIsDeleting(true);
-            animateText();
-          }, delayBetweenTexts);
-        }
-      }
-    };
-    
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+    // Clean up previous instance if it exists
+    if (typeItRef.current) {
+      typeItRef.current.destroy();
     }
     
-    // Start the animation if not paused
-    if (!isPaused) {
-      timeoutRef.current = setTimeout(animateText, 50);
+    // Initialize TypeIt
+    const instance = new TypeIt(elementRef.current, {
+      speed: typingSpeed,
+      deleteSpeed: deletingSpeed,
+      lifeLike: true,
+      loop: true,
+      waitUntilVisible: true,
+      cursor: true,
+    });
+    
+    // Setup the animation loop for all texts
+    let currentInstance = instance.type(texts[0]).pause(delayBetweenTexts).delete();
+    
+    // For each additional text, add type and delete actions
+    for (let i = 1; i < texts.length; i++) {
+      currentInstance = currentInstance
+        .type(texts[i])
+        .pause(delayBetweenTexts)
+        .delete();
     }
     
+    // Start the animation
+    currentInstance.go();
+    
+    // Save the instance for cleanup
+    typeItRef.current = instance;
+    
+    // Cleanup function
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (typeItRef.current) {
+        typeItRef.current.destroy();
       }
     };
-  }, [displayedText, isDeleting, currentTextIndex, isPaused, texts, typingSpeed, deletingSpeed, delayBetweenTexts]);
+  }, [texts, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
-  // Add a blinking cursor effect with CSS
-  return (
-    <span className={className}>
-      {displayedText}
-      <span className="border-r-2 border-current ml-0.5 animate-[blink_1s_step-end_infinite]"></span>
-    </span>
-  );
+  return <span ref={elementRef} className={className}></span>;
 };
 
 export default AnimatedText;

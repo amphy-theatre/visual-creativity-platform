@@ -28,7 +28,7 @@ const Auth = () => {
       currentTimeout = setTimeout(() => {
         setBlinkText("x __ x");
         currentTimeout = setTimeout(blink, 800);
-      }, 100);
+      }, 200);
     };
 
     blink();

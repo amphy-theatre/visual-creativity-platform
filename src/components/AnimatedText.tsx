@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import TypeIt from 'typeit';
 
@@ -7,7 +8,6 @@ interface AnimatedTextProps {
   deletingSpeed?: number;
   delayBetweenTexts?: number;
   className?: string;
-  useRandomSelection?: boolean;
 }
 
 const AnimatedText: React.FC<AnimatedTextProps> = ({
@@ -16,7 +16,6 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   deletingSpeed = 50,
   delayBetweenTexts = 2000,
   className = "",
-  useRandomSelection = false,
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const typeItRef = useRef<TypeIt | null>(null);
@@ -25,7 +24,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     // Only proceed if we have a DOM element and at least one text
     if (!elementRef.current || texts.length === 0) return;
     
-    // Safely clean up previous instance to avoid null reference errors
+    // Clean up previous instance
     if (typeItRef.current) {
       try {
         typeItRef.current.destroy();
@@ -39,12 +38,15 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       elementRef.current.innerHTML = '';
     }
     
-    // Initialize TypeIt with a small delay to ensure DOM is ready
+    // Get a random text from the array
+    const getRandomText = () => texts[Math.floor(Math.random() * texts.length)];
+    
+    // Setup TypeIt with a small delay to ensure DOM is ready
     const timer = setTimeout(() => {
-      if (!elementRef.current) return; // Double-check element still exists
+      if (!elementRef.current) return;
       
       try {
-        // Initialize TypeIt with an empty element
+        // Initialize TypeIt with proper configuration
         const instance = new TypeIt(elementRef.current, {
           speed: typingSpeed,
           deleteSpeed: deletingSpeed,
@@ -52,54 +54,24 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
           loop: true,
           waitUntilVisible: true,
           cursor: true,
-          startDelay: 250 // Small delay before starting
+          afterStep: (instance) => {
+            // Check if this step completed a deletion sequence
+            const queueItems = instance.getQueue();
+            if (queueItems.length === 0) {
+              // When queue is empty (after delete completes), add a new random text
+              instance
+                .type(getRandomText())
+                .pause(delayBetweenTexts)
+                .delete();
+            }
+          }
         });
         
-        // Function to get a random item from the texts array
-        const getRandomText = () => {
-          return texts[Math.floor(Math.random() * texts.length)];
-        };
-        
-        // If we're using random selection, get a random text each time
-        // Otherwise use the sequential texts provided
-        if (useRandomSelection) {
-          // For random mode, we need to set up a special handler
-          // Start with a random text
-          let firstText = getRandomText();
-          instance.type(firstText).pause(delayBetweenTexts).delete();
-          
-          // After each deletion, queue a new random text
-          // We need to use the after method to insert dynamic content
-          instance.after(() => {
-            // This function runs each time after the delete completes
-            // It inserts a new randomly selected text
-            const typeAndDelete = () => {
-              const randomText = getRandomText();
-              instance
-                .type(randomText)
-                .pause(delayBetweenTexts)
-                .delete()
-                .after(typeAndDelete);
-            };
-            
-            // Start the first iteration
-            typeAndDelete();
-            
-            // Return the instance to continue the chain
-            return instance;
-          });
-        } else {
-          // Standard sequential mode
-          let currentInstance = instance.type(texts[0]).pause(delayBetweenTexts).delete();
-          
-          // For each additional text, add type and delete actions
-          for (let i = 1; i < texts.length; i++) {
-            currentInstance = currentInstance
-              .type(texts[i])
-              .pause(delayBetweenTexts)
-              .delete();
-          }
-        }
+        // Start with a random text
+        instance
+          .type(getRandomText())
+          .pause(delayBetweenTexts)
+          .delete();
         
         // Start the animation
         instance.go();
@@ -109,7 +81,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       } catch (error) {
         console.log('Error initializing TypeIt:', error);
       }
-    }, 100); // Small delay to ensure DOM ready
+    }, 100);
     
     // Cleanup function
     return () => {
@@ -123,7 +95,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         }
       }
     };
-  }, [texts, typingSpeed, deletingSpeed, delayBetweenTexts, useRandomSelection]);
+  }, [texts, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
   return <div ref={elementRef} className={className}></div>;
 };

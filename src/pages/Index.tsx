@@ -24,7 +24,6 @@ const Index: React.FC = () => {
               deletingSpeed={40} 
               delayBetweenTexts={2000}
               className="inline-block"
-              useRandomSelection={true}
             />
           </h1>
           <p className="text-xl text-foreground/70">Let's find the perfect content to match your mood</p>

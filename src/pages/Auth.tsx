@@ -21,11 +21,21 @@ const Auth = () => {
   useEffect(() => {
     if (!isTrialUsed) return;
 
-    const interval = setInterval(() => {
-      setBlinkText(prev => prev === "x __ x" ? "- __ -" : "x __ x");
-    }, 400); // Faster toggle speed (reduced from 800ms)
+    let currentTimeout: NodeJS.Timeout;
 
-    return () => clearInterval(interval);
+    const blink = () => {
+      setBlinkText("- __ -");
+      currentTimeout = setTimeout(() => {
+        setBlinkText("x __ x");
+        currentTimeout = setTimeout(blink, 800);
+      }, 100);
+    };
+
+    blink();
+
+    return () => {
+      if (currentTimeout) clearTimeout(currentTimeout);
+    };
   }, [isTrialUsed]);
 
   const handleGoogleSignIn = async () => {

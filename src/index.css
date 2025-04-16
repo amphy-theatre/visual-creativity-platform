@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -5,9 +6,6 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply font-luminari;
-  }
   :root {
     /* Light mode colors */
     --background: 210 40% 98%;

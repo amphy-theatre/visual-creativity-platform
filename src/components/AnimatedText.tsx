@@ -17,7 +17,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   delayBetweenTexts = 2000,
   className = "",
 }) => {
-  const elementRef = useRef<HTMLSpanElement>(null);
+  const elementRef = useRef<HTMLDivElement>(null);
   const typeItRef = useRef<TypeIt | null>(null);
   
   useEffect(() => {
@@ -33,12 +33,17 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       }
     }
     
+    // Clear any existing content from the element
+    if (elementRef.current) {
+      elementRef.current.innerHTML = '';
+    }
+    
     // Initialize TypeIt with a small delay to ensure DOM is ready
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (!elementRef.current) return; // Double-check element still exists
       
       try {
-        // Initialize TypeIt
+        // Initialize TypeIt with an empty element
         const instance = new TypeIt(elementRef.current, {
           speed: typingSpeed,
           deleteSpeed: deletingSpeed,
@@ -46,6 +51,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
           loop: true,
           waitUntilVisible: true,
           cursor: true,
+          startDelay: 250 // Small delay before starting
         });
         
         // Setup the animation loop for all texts
@@ -67,10 +73,11 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       } catch (error) {
         console.log('Error initializing TypeIt:', error);
       }
-    }, 50); // Small delay to ensure DOM ready
+    }, 100); // Small delay to ensure DOM ready
     
     // Cleanup function
     return () => {
+      clearTimeout(timer);
       if (typeItRef.current) {
         try {
           typeItRef.current.destroy();
@@ -82,7 +89,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     };
   }, [texts, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
-  return <span ref={elementRef} className={className}></span>;
+  return <div ref={elementRef} className={className}></div>;
 };
 
 export default AnimatedText;

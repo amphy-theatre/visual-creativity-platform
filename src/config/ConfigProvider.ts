@@ -13,23 +13,16 @@ class ConfigProvider {
   }
 
   private detectEnvironment(): 'production' | 'testing' {
-    // Check for URL parameters - useful for testing in the same domain
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('env') === 'testing') {
+    // Check for DEPLOYMENT_ENVIRONMENT variable
+    // In a browser context, environment variables need to be exposed to the client
+    // through import.meta.env (for Vite) with VITE_ prefix
+    const deploymentEnv = import.meta.env.VITE_DEPLOYMENT_ENVIRONMENT;
+    
+    if (deploymentEnv === 'testing') {
       return 'testing';
     }
-
-    // Check for hostname patterns
-    const hostname = window.location.hostname;
-    if (
-      hostname.includes('staging') || 
-      hostname.includes('test') || 
-      hostname.includes('dev') ||
-      hostname === 'localhost'
-    ) {
-      return 'testing';
-    }
-
+    
+    // Default to production if not explicitly set to testing
     return 'production';
   }
 

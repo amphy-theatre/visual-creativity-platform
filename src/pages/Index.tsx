@@ -18,7 +18,7 @@ const Index: React.FC = () => {
         <div className="text-center space-y-4 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground">
             <AnimatedText 
-              texts={["How are you feeling today?", "How do you want to feel today?"]} 
+              phrasesFile="/src/expressive_phrases.txt"
               typingSpeed={80} 
               deletingSpeed={40} 
               delayBetweenTexts={2000}

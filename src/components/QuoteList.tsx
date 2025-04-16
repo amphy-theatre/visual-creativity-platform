@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import QuoteCard from "./QuoteCard";
 import { Button } from "./ui/button";
@@ -10,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
 import { useUserPreferences } from "../hooks/useUserPreferences";
 import { useAnalytics } from "../hooks/useAnalytics";
+import { useAppConfig } from "@/hooks/useAppConfig";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -42,6 +42,7 @@ const QuoteList: React.FC<QuoteListProps> = ({
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
   const { userPreferences } = useUserPreferences();
   const { trackEvent } = useAnalytics();
+  const config = useAppConfig();
 
   const handleQuoteSelection = async (quote: string) => {
     // Check if user has reached their monthly limit
@@ -54,11 +55,11 @@ const QuoteList: React.FC<QuoteListProps> = ({
     
     try {
       // Generate movie recommendations first
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
+      const response = await fetch(config.edgeFunctions.generateMovies, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+          'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
         },
         body: JSON.stringify({
           selectedQuote: quote,

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
@@ -6,6 +5,7 @@ import { usePromptUsage, MONTHLY_PROMPT_LIMIT } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "@/components/modals/PromptLimitModal";
 import { useAuth } from "@/context/AuthContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useAppConfig } from "@/hooks/useAppConfig";
 
 interface PresetMoodProps {
   title: string;
@@ -19,6 +19,7 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading } = usePromptUsage();
   const { session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { trackEvent } = useAnalytics();
+  const config = useAppConfig();
   
   const handleClick = async () => {
     // Check if guest user has already used their free trial
@@ -55,11 +56,11 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
         }
       }
       
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
+      const response = await fetch(config.edgeFunctions.generateQuotes, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+          'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
         },
         body: JSON.stringify({ emotion: description }),
       });

@@ -1,4 +1,3 @@
-
 import React, { useState, KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { readFileAsText } from "@/utils/csvUtils";
 import { usePromptUsage } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "./modals/PromptLimitModal";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useAppConfig } from "@/hooks/useAppConfig";
 
 const MoodInput: React.FC = () => {
   const [mood, setMood] = useState("");
@@ -21,6 +21,7 @@ const MoodInput: React.FC = () => {
   const navigate = useNavigate();
   const { user, session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { trackEvent } = useAnalytics();
+  const config = useAppConfig();
   const {
     promptUsage,
     showLimitModal,
@@ -69,7 +70,7 @@ const MoodInput: React.FC = () => {
         
         try {
           // Call the edge function to summarize the CSV asynchronously
-          await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/summarize_csv', {
+          await fetch(config.edgeFunctions.summarizeCsv, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -89,11 +90,11 @@ const MoodInput: React.FC = () => {
       const moodText = mood.trim();
       
       if (moodText) {
-        const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
+        const response = await fetch(config.edgeFunctions.generateQuotes, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+            'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
           },
           body: JSON.stringify({ emotion: moodText }),
         });
@@ -138,11 +139,9 @@ const MoodInput: React.FC = () => {
     }
   };
   
-  // Handle key press events on the textarea
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // If Enter is pressed without Shift (for new line)
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); // Prevent default to avoid newline
+      e.preventDefault();
       handleSubmit();
     }
   };
@@ -150,14 +149,12 @@ const MoodInput: React.FC = () => {
   const handleFileChange = async (file: File | null) => {
     setUploadedFile(file);
     
-    // If file is removed, clear the CSV data
     if (!file) {
       setCsvData(null);
       return;
     }
     
     try {
-      // Read the file and store its content
       const content = await readFileAsText(file);
       setCsvData(content);
     } catch (error) {
@@ -216,10 +213,8 @@ const MoodInput: React.FC = () => {
         </div>
       )}
       
-      {/* File Dropbox Component */}
       <FileDropbox onChange={handleFileChange} maxSize={10} />
-
-      {/* Monthly Limit Modal */}
+      
       <PromptLimitModal
         open={showLimitModal}
         onOpenChange={setShowLimitModal}

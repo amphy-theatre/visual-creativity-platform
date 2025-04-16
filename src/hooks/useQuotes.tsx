@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "../components/ui/use-toast";
 import { MONTHLY_PROMPT_LIMIT } from "./usePromptUsage";
+import { useAppConfig } from "./useAppConfig";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -26,6 +27,7 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
   const [promptUsage, setPromptUsage] = useState<PromptUsageType | null>(initialPromptUsage);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const { user, session } = useAuth();
+  const config = useAppConfig();
 
   // Process quotes from the API response structure or use fallback quotes
   const displayQuotes = quotes && quotes.quotes && Array.isArray(quotes.quotes) && quotes.quotes.length > 0 ? 
@@ -53,11 +55,11 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
       // REMOVED: No longer incrementing prompt count for quote generation
       // We only increment prompt count when generating movies now
       
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
+      const response = await fetch(config.edgeFunctions.generateQuotes, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+          'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
         },
         body: JSON.stringify({ emotion: mood }),
       });

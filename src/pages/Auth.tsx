@@ -23,7 +23,7 @@ const Auth = () => {
 
     const interval = setInterval(() => {
       setBlinkText(prev => prev === "x __ x" ? "- __ -" : "x __ x");
-    }, 800); // Toggle every 800ms
+    }, 400); // Faster toggle speed (reduced from 800ms)
 
     return () => clearInterval(interval);
   }, [isTrialUsed]);

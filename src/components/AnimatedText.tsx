@@ -8,6 +8,7 @@ interface AnimatedTextProps {
   deletingSpeed?: number;
   delayBetweenTexts?: number;
   className?: string;
+  onTextClick?: () => void;
 }
 
 const AnimatedText: React.FC<AnimatedTextProps> = ({
@@ -16,6 +17,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   deletingSpeed = 50,
   delayBetweenTexts = 2000,
   className = "",
+  onTextClick,
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const typeItRef = useRef<TypeIt | null>(null);
@@ -102,7 +104,13 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     };
   }, [selectedPhrases, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
-  return <div ref={elementRef} className={className}></div>;
+  return (
+    <div 
+      ref={elementRef} 
+      className={`${className} cursor-pointer`}
+      onClick={onTextClick}
+    ></div>
+  );
 };
 
 export default AnimatedText;

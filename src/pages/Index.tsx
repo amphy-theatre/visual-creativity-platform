@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Layout from "../components/Layout";
 import MoodInput from "../components/MoodInput";
 import PresetMood from "../components/PresetMood";
@@ -14,17 +13,40 @@ const Index: React.FC = () => {
   const { isGuestMode } = useAuth();
   const [showAnimatedText, setShowAnimatedText] = useState(true);
   const [inputMood, setInputMood] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const generateButtonRef = useRef<HTMLButtonElement>(null);
   
   const handleAnimatedTextClick = () => {
     setShowAnimatedText(false);
+    // Focus the textarea after it appears
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    }, 10);
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (generateButtonRef.current) {
-        generateButtonRef.current.click();
+      
+      // Find the hidden MoodInput's generate button and simulate click
+      const moodInputContainer = document.querySelector('.w-full.max-w-3xl.mx-auto');
+      if (moodInputContainer) {
+        const generateButton = moodInputContainer.querySelector('button');
+        if (generateButton && generateButton instanceof HTMLButtonElement) {
+          // First update the hidden textarea with our input value
+          const originalTextarea = moodInputContainer.querySelector('textarea');
+          if (originalTextarea) {
+            originalTextarea.value = inputMood;
+            // Trigger input event to update internal state
+            const event = new Event('input', { bubbles: true });
+            originalTextarea.dispatchEvent(event);
+          }
+          
+          // Now click the button
+          generateButton.click();
+        }
       }
     }
   };
@@ -47,9 +69,10 @@ const Index: React.FC = () => {
               />
             ) : (
               <Textarea
+                ref={textareaRef}
                 autoFocus
-                className="w-full h-24 resize-none text-xl p-4 bg-background border-2 border-primary/30 rounded-lg focus:border-primary/50 focus:ring-0 transition-all duration-200"
-                placeholder="How are you feeling today? (e.g., I feel like a yellow balloon, On top of the world...)"
+                className="w-full resize-none text-4xl md:text-5xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[2.5rem]"
+                placeholder="How are you feeling today?"
                 value={inputMood}
                 onChange={(e) => setInputMood(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -59,24 +82,26 @@ const Index: React.FC = () => {
           {showAnimatedText && (
             <p className="text-xl text-foreground/70">Let's find the perfect content to match your mood</p>
           )}
-          {!showAnimatedText && (
+          {!showAnimatedText && inputMood && (
             <Button 
               ref={generateButtonRef}
-              className="mt-4 bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="mt-4 bg-primary hover:bg-primary/90 text-primary-foreground animate-fade-in"
               onClick={() => {
                 // Find the MoodInput's generate button and call its handleSubmit
-                const originalInput = document.querySelector('textarea');
-                if (originalInput) {
-                  originalInput.value = inputMood;
-                  // Trigger a change event to update the MoodInput component's state
-                  const event = new Event('input', { bubbles: true });
-                  originalInput.dispatchEvent(event);
-                }
-                
-                // Find and click the generate button
-                const generateButton = document.querySelector('.w-full.max-w-3xl.mx-auto button');
-                if (generateButton && generateButton instanceof HTMLButtonElement) {
-                  generateButton.click();
+                const moodInputContainer = document.querySelector('.w-full.max-w-3xl.mx-auto');
+                if (moodInputContainer) {
+                  const originalTextarea = moodInputContainer.querySelector('textarea');
+                  if (originalTextarea) {
+                    originalTextarea.value = inputMood;
+                    // Trigger a change event to update the MoodInput component's state
+                    const event = new Event('input', { bubbles: true });
+                    originalTextarea.dispatchEvent(event);
+                  }
+                  
+                  const generateButton = moodInputContainer.querySelector('button');
+                  if (generateButton && generateButton instanceof HTMLButtonElement) {
+                    generateButton.click();
+                  }
                 }
               }}
             >
@@ -88,8 +113,10 @@ const Index: React.FC = () => {
           )}
         </div>
         
-        {/* Hide the original MoodInput when our custom input is shown */}
-        {showAnimatedText && <MoodInput />}
+        {/* Hide the original MoodInput visually but keep it in the DOM for functionality */}
+        <div className={showAnimatedText ? "" : "hidden"}>
+          <MoodInput />
+        </div>
         
         <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.2s" }}>
           <div className="text-lg text-foreground/80">Or choose a preset prompt:</div>

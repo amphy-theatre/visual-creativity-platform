@@ -31,13 +31,14 @@ const Index: React.FC = () => {
             new Event('input', { bubbles: true })
           );
           
-          // Find and click the submit button
+          // Find and click the submit button - with proper type assertion
           const button = moodInputRef.current.querySelector('button[type="submit"]') || 
                           moodInputRef.current.querySelector('button');
           
           if (button) {
             setTimeout(() => {
-              button.click();
+              // Use proper HTMLButtonElement type assertion
+              (button as HTMLButtonElement).click();
             }, 100); // Small delay to ensure state is updated
           }
         }

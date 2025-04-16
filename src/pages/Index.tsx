@@ -1,5 +1,4 @@
-
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import Layout from "../components/Layout";
 import MoodInput from "../components/MoodInput";
 import PresetMood from "../components/PresetMood";
@@ -81,10 +80,6 @@ const Index: React.FC = () => {
             )}
           </h1>
           
-          {showAnimatedText && (
-            <p className="text-xl text-foreground/70">Let's find the perfect content to match your mood</p>
-          )}
-          
           {!showAnimatedText && inputMood && (
             <Button 
               ref={generateButtonRef}
@@ -116,7 +111,6 @@ const Index: React.FC = () => {
           )}
         </div>
         
-        {/* Hide the original MoodInput entirely until showAnimatedText is false */}
         <div className={showAnimatedText ? "hidden" : ""}>
           <MoodInput />
         </div>

@@ -24,24 +24,30 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
-    const currentFullText = texts[currentTextIndex];
+    if (texts.length === 0) return;
     
     const animateText = () => {
+      const currentFullText = texts[currentTextIndex];
+      
       if (isDeleting) {
         // Deleting phase
         if (displayedText.length > 0) {
-          setDisplayedText(displayedText.slice(0, -1));
+          // Remove one character at a time
+          setDisplayedText(prev => prev.substring(0, prev.length - 1));
           timeoutRef.current = setTimeout(animateText, deletingSpeed);
         } else {
           // When fully deleted, move to next text
           setIsDeleting(false);
-          const nextIndex = (currentTextIndex + 1) % texts.length;
-          setCurrentTextIndex(nextIndex);
+          // Update the index for the next text
+          setCurrentTextIndex(prevIndex => (prevIndex + 1) % texts.length);
+          // Start typing the next phrase after a short delay
+          timeoutRef.current = setTimeout(animateText, 200);
         }
       } else {
         // Typing phase
         if (displayedText.length < currentFullText.length) {
-          setDisplayedText(currentFullText.slice(0, displayedText.length + 1));
+          // Add one character at a time
+          setDisplayedText(prev => currentFullText.substring(0, prev.length + 1));
           timeoutRef.current = setTimeout(animateText, typingSpeed);
         } else {
           // When fully typed, pause before deleting
@@ -60,7 +66,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       clearTimeout(timeoutRef.current);
     }
     
-    // Only start animation if not paused
+    // Start the animation if not paused
     if (!isPaused) {
       timeoutRef.current = setTimeout(animateText, 50);
     }
@@ -72,7 +78,13 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     };
   }, [displayedText, isDeleting, currentTextIndex, isPaused, texts, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
-  return <span className={className}>{displayedText}</span>;
+  // Add a blinking cursor effect with CSS
+  return (
+    <span className={className}>
+      {displayedText}
+      <span className="border-r-2 border-current ml-0.5 animate-[blink_1s_step-end_infinite]"></span>
+    </span>
+  );
 };
 
 export default AnimatedText;

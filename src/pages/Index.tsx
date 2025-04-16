@@ -59,14 +59,16 @@ const Index: React.FC = () => {
         <div className="text-center space-y-4 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
             {showAnimatedText ? (
-              <AnimatedText 
-                texts={phrases}
-                typingSpeed={80} 
-                deletingSpeed={40} 
-                delayBetweenTexts={2000}
-                className="inline-block"
-                onTextClick={handleAnimatedTextClick}
-              />
+              <div className="min-h-[120px] flex items-center justify-center">
+                <AnimatedText 
+                  texts={phrases}
+                  typingSpeed={80} 
+                  deletingSpeed={40} 
+                  delayBetweenTexts={2000}
+                  className="inline-block"
+                  onTextClick={handleAnimatedTextClick}
+                />
+              </div>
             ) : (
               <div className="space-y-8">
                 <TextAreaInput

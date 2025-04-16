@@ -169,7 +169,7 @@ const MoodInput: React.FC<MoodInputProps> = ({ initialValue = "", seamlessInput 
           ref={textareaRef}
           autoFocus
           className="w-full resize-none text-4xl md:text-5xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[2.5rem]"
-          placeholder="How are you feeling today?"
+          placeholder=""
           value={mood}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}

@@ -34,7 +34,7 @@ const Index: React.FC = () => {
                 onTextClick={handleAnimatedTextClick}
               />
             ) : (
-              <MoodInput initialValue={inputValue} seamlessInput={true} />
+              <MoodInput initialValue={inputValue}/>
             )}
           </h1>
         </div>

@@ -41,7 +41,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       // If animation is still running, complete it instantly
       typeItRef.current.destroy();
       if (elementRef.current) {
-        elementRef.current.value = selectedPhrases[cycleCountRef.current];
+        elementRef.current.value = "";
       }
       setIsTypingDone(true);
       onTextClick?.();

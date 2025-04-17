@@ -59,7 +59,7 @@ const Index: React.FC = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
               <div className="min-h-[120px] flex items-center justify-center">
                 <AnimatedText
-                  initialValue=""
+                  initialValue={inputValue}
                   texts={phrases}
                   typingSpeed={80} 
                   deletingSpeed={40} 

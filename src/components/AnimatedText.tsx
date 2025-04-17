@@ -29,6 +29,18 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
   const cycleCountRef = useRef<number>(0);
   const [isTypingDone, setIsTypingDone] = useState(false);
+    
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    onChange(text);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSubmit();
+    }
+  };
   
   // Function to get 5 random phrases from the text array
   const getRandomPhrases = () => {
@@ -125,8 +137,8 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       ref={elementRef}
       readOnly={!isTypingDone}
       onClick={handleClick}
-      onChange={onChange}
-      onSubmit={onSubmit}
+      onChange={handleInputChange}
+      onKeyDown={handleClick}
       className={`${className} resize-none bg-transparent text-center border-none focus:ring-0 outline-none text-4xl md:text-5xl font-bold w-full`}
       style={{ 
         minHeight: "2.5rem",

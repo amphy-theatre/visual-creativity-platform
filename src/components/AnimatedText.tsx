@@ -9,7 +9,6 @@ interface AnimatedTextProps {
   deletingSpeed?: number;
   delayBetweenTexts?: number;
   className?: string;
-  onTextClick?: () => void;
   onChange: (value: string) => void;
   onSubmit: () => void;
   maxLength?: number;
@@ -22,7 +21,6 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   deletingSpeed = 50,
   delayBetweenTexts = 2000,
   className = "",
-  onTextClick,
   onChange,
   onSubmit,
   maxLength = 200
@@ -68,7 +66,6 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         elementRef.current.value = "";
       }
       setIsTypingDone(true);
-      onTextClick?.();
     }
   };
   

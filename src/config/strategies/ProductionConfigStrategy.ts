@@ -14,6 +14,7 @@ export class ProductionConfigStrategy {
       name: 'Cineflect',
       version: '1.0.0',
       description: 'Movie recommendations based on your mood',
+      environment: 'production',
       supabase: {
         url: supabaseUrl,
         publishableKey: supabaseAnonKey
@@ -24,6 +25,7 @@ export class ProductionConfigStrategy {
         generateMovies: `${edgeFunctionsBaseUrl}/generate_movies`,
         summarizeCsv: `${edgeFunctionsBaseUrl}/summarize_csv`,
         analyzePrompt: `${edgeFunctionsBaseUrl}/analyze_prompt`,
+        trackAnalytics: `${edgeFunctionsBaseUrl}/track_analytics`,
       },
       app: {
         defaultTheme: 'system',

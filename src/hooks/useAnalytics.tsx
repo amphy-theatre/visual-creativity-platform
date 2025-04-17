@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useAppConfig } from "./useAppConfig";
@@ -7,7 +6,8 @@ export type AnalyticsEvent =
   | 'quotes_generated'
   | 'movies_generated'
   | 'page_view'
-  | 'button_click';
+  | 'button_click'
+  | 'prompt_analyzed';
 
 export const useAnalytics = () => {
   const { user } = useAuth();

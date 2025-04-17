@@ -14,6 +14,7 @@ export class TestingConfigStrategy {
       name: 'Cineflect [TEST]',
       version: '1.0.0',
       description: 'Movie recommendations based on your mood (Test Environment)',
+      environment: 'testing',
       supabase: {
         url: supabaseUrl,
         publishableKey: supabaseAnonKey
@@ -24,6 +25,7 @@ export class TestingConfigStrategy {
         generateMovies: `${edgeFunctionsBaseUrl}/generate_movies`,
         summarizeCsv: `${edgeFunctionsBaseUrl}/summarize_csv`,
         analyzePrompt: `${edgeFunctionsBaseUrl}/analyze_prompt`,
+        trackAnalytics: `${edgeFunctionsBaseUrl}/track_analytics`,
       },
       app: {
         defaultTheme: 'system',

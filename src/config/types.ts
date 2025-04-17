@@ -4,6 +4,8 @@ export interface AppConfig {
   version: string;
   description: string;
   repo?: string;
+  // Environment information
+  environment: 'production' | 'testing';
   // Supabase configuration
   supabase: {
     url: string;
@@ -16,10 +18,15 @@ export interface AppConfig {
     generateMovies: string;
     summarizeCsv: string;
     analyzePrompt: string;
+    trackAnalytics: string; // Added missing trackAnalytics endpoint
   };
   // App configuration
   app: {
     defaultTheme: 'light' | 'dark' | 'system';
     debug: boolean;
   };
+}
+
+export interface ConfigStrategy {
+  getConfig(): AppConfig;
 }

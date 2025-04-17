@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Layout from "../components/Layout";
 import PresetMood from "../components/PresetMood";
 import FreeTrialBanner from "../components/FreeTrialBanner";
@@ -58,37 +57,28 @@ const Index: React.FC = () => {
         
         <div className="text-center space-y-4 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
-            {showAnimatedText ? (
-              <AnimatedText 
-                texts={phrases}
-                typingSpeed={80} 
-                deletingSpeed={40} 
-                delayBetweenTexts={2000}
-                className="inline-block"
-                onTextClick={handleAnimatedTextClick}
-              />
-            ) : (
-              <div className="space-y-8">
-                <TextAreaInput
+              <div className="min-h-[120px] flex items-center justify-center">
+                <AnimatedText
                   initialValue={inputValue}
+                  texts={phrases}
+                  typingSpeed={80} 
+                  deletingSpeed={40} 
+                  delayBetweenTexts={2000}
+                  className="w-full"
+                  onTextClick={handleAnimatedTextClick}
                   onChange={handleInputChange}
                   onSubmit={handleSubmit}
-                  seamlessInput={true}
-                  maxLength={200}
                 />
-                
-                <div className="space-y-4">
-                  <CSVUploader onCsvDataChange={handleCsvDataChange} />
-                  
-                  <SubmitButton
-                    onClick={handleSubmit}
-                    isLoading={isLoading}
-                    isDisabled={!inputValue.trim() && !csvData}
-                  />
-                </div>
               </div>
-            )}
           </h1>
+          
+          <SubmitButton
+            onClick={handleSubmit}
+            isLoading={isLoading}
+            isDisabled={!inputValue.trim() && !csvData}
+            />
+          
+          <CSVUploader onCsvDataChange={handleCsvDataChange} />
         </div>
         
         <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.2s" }}>

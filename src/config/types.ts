@@ -1,20 +1,25 @@
 
-export interface SupabaseConfig {
-  url: string;
-  publishableKey: string;
-}
-
 export interface AppConfig {
-  environment: 'production' | 'testing';
-  supabase: SupabaseConfig;
+  name: string;
+  version: string;
+  description: string;
+  repo?: string;
+  // Supabase configuration
+  supabase: {
+    url: string;
+    publishableKey: string;
+  };
+  // Edge functions URL
   edgeFunctions: {
+    baseUrl: string;
     generateQuotes: string;
     generateMovies: string;
     summarizeCsv: string;
-    trackAnalytics: string;
+    analyzePrompt: string;
   };
-}
-
-export interface ConfigStrategy {
-  getConfig(): AppConfig;
+  // App configuration
+  app: {
+    defaultTheme: 'light' | 'dark' | 'system';
+    debug: boolean;
+  };
 }

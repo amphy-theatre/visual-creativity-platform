@@ -1,21 +1,33 @@
 
-import { AppConfig, ConfigStrategy } from "../types";
+import { AppConfig } from "../types";
 
-export class ProductionConfigStrategy implements ConfigStrategy {
+/**
+ * Production environment configuration strategy
+ */
+export class ProductionConfigStrategy {
   getConfig(): AppConfig {
-    const supabaseUrl = "https://sdwuhuuyyrwzwyqdtdkb.supabase.co";
+    const supabaseUrl = 'https://sdwuhuuyyrwzwyqdtdkb.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28';
+    const edgeFunctionsBaseUrl = `${supabaseUrl}/functions/v1`;
     
     return {
-      environment: 'production',
+      name: 'Cineflect',
+      version: '1.0.0',
+      description: 'Movie recommendations based on your mood',
       supabase: {
         url: supabaseUrl,
-        publishableKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28"
+        publishableKey: supabaseAnonKey
       },
       edgeFunctions: {
-        generateQuotes: `${supabaseUrl}/functions/v1/generate_quotes`,
-        generateMovies: `${supabaseUrl}/functions/v1/generate_movies`,
-        summarizeCsv: `${supabaseUrl}/functions/v1/summarize_csv`,
-        trackAnalytics: `${supabaseUrl}/functions/v1/track_analytics`
+        baseUrl: edgeFunctionsBaseUrl,
+        generateQuotes: `${edgeFunctionsBaseUrl}/generate_quotes`,
+        generateMovies: `${edgeFunctionsBaseUrl}/generate_movies`,
+        summarizeCsv: `${edgeFunctionsBaseUrl}/summarize_csv`,
+        analyzePrompt: `${edgeFunctionsBaseUrl}/analyze_prompt`,
+      },
+      app: {
+        defaultTheme: 'system',
+        debug: false,
       }
     };
   }

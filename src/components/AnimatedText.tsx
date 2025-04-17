@@ -33,11 +33,28 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   const cycleCountRef = useRef<number>(0);
   const [isTypingDone, setIsTypingDone] = useState(false);
     
+  const updateTextAreaHeight = (text = '') => {
+    if (elementRef.current) {
+      // Reset height to auto to get a correct scrollHeight measurement
+      elementRef.current.style.height = 'auto';
+      
+      // Set a minimum height to avoid the textarea becoming too small
+      const minHeight = '2.5rem';
+      
+      // Apply the scrollHeight as the new height, but not less than the minimum height
+      const scrollHeight = elementRef.current.scrollHeight;
+      elementRef.current.style.height = `${Math.max(parseInt(minHeight), scrollHeight)}px`;
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     setValue(text);
     setCharCount(text.length);
     onChange(text);
+    
+    // Update height when user types
+    updateTextAreaHeight(text);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -64,10 +81,24 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       typeItRef.current.destroy();
       if (elementRef.current) {
         elementRef.current.value = "";
+        updateTextAreaHeight("");
       }
       setIsTypingDone(true);
     }
   };
+  
+  // Initial textarea setup
+  useEffect(() => {
+    // Set initial height for the textarea
+    if (elementRef.current) {
+      updateTextAreaHeight(initialValue);
+      
+      // Add a small delay to ensure the textarea is properly rendered before measuring height
+      setTimeout(() => {
+        updateTextAreaHeight(initialValue);
+      }, 50);
+    }
+  }, [initialValue]);
   
   useEffect(() => {
     if (!elementRef.current || !selectedPhrases.length) return;
@@ -84,6 +115,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     // Clear any existing content
     if (elementRef.current) {
       elementRef.current.value = '';
+      updateTextAreaHeight('');
     }
     
     // Create new TypeIt instance
@@ -93,6 +125,12 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       lifeLike: true,
       waitUntilVisible: true,
       cursor: true,
+      afterStep: (instance) => {
+        // Update height after each typing step
+        if (elementRef.current) {
+          updateTextAreaHeight(elementRef.current.value);
+        }
+      },
       afterComplete: (instance) => {
         // After completing all phrases, get new ones
         cycleCountRef.current += 1;
@@ -112,9 +150,19 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     
     // Add each phrase to the instance
     selectedPhrases.forEach((phrase, index) => {
-      instance.type(phrase)
-        .pause(delayBetweenTexts)
-        .delete();
+      instance.type(phrase, {
+        afterComplete: () => {
+          // Update height after typing a complete phrase
+          updateTextAreaHeight(phrase);
+        }
+      })
+      .pause(delayBetweenTexts)
+      .delete(null, {
+        afterComplete: () => {
+          // Update height after deleting
+          updateTextAreaHeight('');
+        }
+      });
     });
     
     // Start the animation
@@ -147,7 +195,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         className={`${className} resize-none bg-transparent text-center border-none focus:ring-0 outline-none text-4xl md:text-5xl font-bold w-full`}
         style={{ 
           minHeight: "2.5rem",
-          transition: "all 0.3s ease"
+          transition: "height 0.15s ease"
         }}
         title="Click to type your own"
       />

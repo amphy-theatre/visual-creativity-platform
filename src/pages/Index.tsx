@@ -57,7 +57,6 @@ const Index: React.FC = () => {
         
         <div className="text-center space-y-4 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
-            {showAnimatedText ? (
               <div className="min-h-[120px] flex items-center justify-center">
                 <AnimatedText 
                   texts={phrases}
@@ -68,17 +67,6 @@ const Index: React.FC = () => {
                   onTextClick={handleAnimatedTextClick}
                 />
               </div>
-            ) : (
-              <div className="space-y-8">
-                <TextAreaInput
-                  initialValue={inputValue}
-                  onChange={handleInputChange}
-                  onSubmit={handleSubmit}
-                  seamlessInput={true}
-                  maxLength={200}
-                />
-              </div>
-            )}
           </h1>
           
           <SubmitButton

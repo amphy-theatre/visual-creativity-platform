@@ -40,6 +40,7 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
 
   const handleRefresh = async () => {
     setMood(sessionStorage.getItem("userMood") || "");
+    console.log(mood);
     if (!mood.trim()) {
       return false;
     }

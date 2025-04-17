@@ -65,6 +65,8 @@ const Index: React.FC = () => {
                   delayBetweenTexts={2000}
                   className="w-full"
                   onTextClick={handleAnimatedTextClick}
+                  onChange={handleInputChange}
+                  onSubmit={handleSubmit}
                 />
               </div>
           </h1>

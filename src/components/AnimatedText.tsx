@@ -9,6 +9,8 @@ interface AnimatedTextProps {
   delayBetweenTexts?: number;
   className?: string;
   onTextClick?: () => void;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
 }
 
 const AnimatedText: React.FC<AnimatedTextProps> = ({
@@ -18,6 +20,9 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   delayBetweenTexts = 2000,
   className = "",
   onTextClick,
+  onChange,
+  onSubmit,
+
 }) => {
   const elementRef = useRef<HTMLTextAreaElement>(null);
   const typeItRef = useRef<TypeIt | null>(null);
@@ -120,6 +125,8 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       ref={elementRef}
       readOnly={!isTypingDone}
       onClick={handleClick}
+      onChange={onChange}
+      onSubmit={onSubmit}
       className={`${className} resize-none bg-transparent text-center border-none focus:ring-0 outline-none text-4xl md:text-5xl font-bold w-full`}
       style={{ 
         minHeight: "2.5rem",

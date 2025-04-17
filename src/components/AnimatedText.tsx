@@ -126,7 +126,6 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         transition: "all 0.3s ease"
       }}
       title="Click to type your own"
-      rows={1}
     />
   );
 };

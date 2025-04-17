@@ -138,7 +138,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       readOnly={!isTypingDone}
       onClick={handleClick}
       onChange={handleInputChange}
-      onKeyDown={handleClick}
+      onKeyDown={handleKeyDown}
       className={`${className} resize-none bg-transparent text-center border-none focus:ring-0 outline-none text-4xl md:text-5xl font-bold w-full`}
       style={{ 
         minHeight: "2.5rem",

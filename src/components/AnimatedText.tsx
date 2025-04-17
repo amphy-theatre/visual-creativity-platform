@@ -35,7 +35,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     onChange(text);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       onSubmit();
@@ -59,13 +59,9 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       typeItRef.current.destroy();
       if (elementRef.current) {
         elementRef.current.value = "";
-        onChange(""); // Reset the input value in parent component
       }
       setIsTypingDone(true);
       onTextClick?.();
-      
-      // Focus the textarea
-      elementRef.current?.focus();
     }
   };
   
@@ -84,7 +80,6 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     // Clear any existing content
     if (elementRef.current) {
       elementRef.current.value = '';
-      onChange(""); // Reset the input value in parent component
     }
     
     // Create new TypeIt instance
@@ -135,7 +130,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         }
       }
     };
-  }, [selectedPhrases, typingSpeed, deletingSpeed, delayBetweenTexts, onChange]);
+  }, [selectedPhrases, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
   return (
     <textarea

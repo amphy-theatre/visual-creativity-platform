@@ -22,7 +22,6 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   const config = useAppConfig();
   
   const handleClick = async () => {
-    // Check if guest user has already used their free trial
     if (isGuestMode && isTrialUsed) {
       toast({
         title: "Free Trial Used",
@@ -32,24 +31,20 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
       return;
     }
     
-    // Check if signed-in user is over their monthly prompt limit
     if (!isGuestMode && promptUsage?.limit_reached) {
       setShowLimitModal(true);
       return;
     }
     
     try {
-      // Show loading toast
       toast({
         title: "Generating quotes",
         description: `Finding quotes for "${description}"`,
       });
       
-      // Increment the prompt count for signed-in users
       if (!isGuestMode) {
         const updatedUsage = await incrementPromptCount();
         
-        // Check if the user has reached their limit after incrementing
         if (updatedUsage?.limit_reached) {
           setShowLimitModal(true);
           return;
@@ -69,17 +64,14 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
         throw new Error(`Failed to generate quotes: ${response.status}`);
       }
       
-      // Parse the response
       const data = await response.json();
       
-      // Track the quotes generated event
       trackEvent('quotes_generated', {
         mood: description,
         genre: genre,
         source: 'preset_mood'
       });
       
-      // Navigate to the quotes page with the mood and quotes data
       navigate("/quotes", { 
         state: { 
           mood: description, 
@@ -97,18 +89,16 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
     }
   };
   
-  // Generate card styles based on genre
   const getGenreStyles = () => {
     const baseClasses = "preset-card border-2 p-6 rounded-lg cursor-pointer transition-all duration-300 flex flex-col items-center text-center";
     
-    // Map of genre-specific border and text styles
     const genreStyles: Record<string, string> = {
-      inspiration: "border-amber-500 text-amber-600 hover:bg-amber-50",
-      thriller: "border-orange-500 text-orange-600 hover:bg-orange-50",
-      drama: "border-blue-500 text-blue-600 hover:bg-blue-50",
-      romance: "border-pink-500 text-pink-600 hover:bg-pink-50",
-      philosophical: "border-violet-500 text-violet-600 hover:bg-violet-50",
-      comedy: "border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+      inspiration: "border-amber-500 hover:bg-amber-50/50 [&_*]:bg-gradient-to-r [&_*]:from-amber-500 [&_*]:to-yellow-400 [&_*]:bg-clip-text [&_*]:text-transparent",
+      thriller: "border-orange-500 hover:bg-orange-50/50 [&_*]:bg-gradient-to-r [&_*]:from-orange-500 [&_*]:to-red-500 [&_*]:bg-clip-text [&_*]:text-transparent",
+      drama: "border-blue-500 hover:bg-blue-50/50 [&_*]:bg-gradient-to-r [&_*]:from-blue-500 [&_*]:to-indigo-600 [&_*]:bg-clip-text [&_*]:text-transparent",
+      romance: "border-pink-500 hover:bg-pink-50/50 [&_*]:bg-gradient-to-r [&_*]:from-pink-500 [&_*]:to-rose-400 [&_*]:bg-clip-text [&_*]:text-transparent",
+      philosophical: "border-violet-500 hover:bg-violet-50/50 [&_*]:bg-gradient-to-r [&_*]:from-violet-500 [&_*]:to-purple-600 [&_*]:bg-clip-text [&_*]:text-transparent",
+      comedy: "border-emerald-500 hover:bg-emerald-50/50 [&_*]:bg-gradient-to-r [&_*]:from-emerald-400 [&_*]:to-teal-500 [&_*]:bg-clip-text [&_*]:text-transparent"
     };
     
     return `${baseClasses} ${genreStyles[genre]}`;
@@ -121,7 +111,7 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
         onClick={handleClick}
       >
         <div className="space-y-4">
-          <div className="text-sm text-foreground/80 font-medium">"{description}"</div>
+          <div className="text-sm font-medium">"{description}"</div>
           <div className="text-xl font-semibold">{title}</div>
         </div>
       </div>

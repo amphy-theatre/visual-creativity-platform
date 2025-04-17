@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Layout from "../components/Layout";
 import PresetMood from "../components/PresetMood";
 import FreeTrialBanner from "../components/FreeTrialBanner";
@@ -65,7 +64,7 @@ const Index: React.FC = () => {
                   typingSpeed={80} 
                   deletingSpeed={40} 
                   delayBetweenTexts={2000}
-                  className="inline-block"
+                  className="w-full"
                   onTextClick={handleAnimatedTextClick}
                 />
               </div>
@@ -81,13 +80,12 @@ const Index: React.FC = () => {
               </div>
             )}
           </h1>
-          <div className="space-y-4">
+          
           <SubmitButton
             onClick={handleSubmit}
             isLoading={isLoading}
             isDisabled={!inputValue.trim() && !csvData}
             />
-          </div>
           
           <CSVUploader onCsvDataChange={handleCsvDataChange} />
         </div>

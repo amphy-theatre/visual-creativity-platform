@@ -19,10 +19,11 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   className = "",
   onTextClick,
 }) => {
-  const elementRef = useRef<HTMLDivElement>(null);
+  const elementRef = useRef<HTMLTextAreaElement>(null);
   const typeItRef = useRef<TypeIt | null>(null);
   const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
   const cycleCountRef = useRef<number>(0);
+  const [isTypingDone, setIsTypingDone] = useState(false);
   
   // Function to get 5 random phrases from the text array
   const getRandomPhrases = () => {
@@ -34,6 +35,18 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   useEffect(() => {
     setSelectedPhrases(getRandomPhrases());
   }, [texts]);
+  
+  const handleClick = () => {
+    if (!isTypingDone && typeItRef.current) {
+      // If animation is still running, complete it instantly
+      typeItRef.current.destroy();
+      if (elementRef.current) {
+        elementRef.current.value = selectedPhrases[cycleCountRef.current];
+      }
+      setIsTypingDone(true);
+      onTextClick?.();
+    }
+  };
   
   useEffect(() => {
     if (!elementRef.current || !selectedPhrases.length) return;
@@ -49,7 +62,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     
     // Clear any existing content
     if (elementRef.current) {
-      elementRef.current.innerHTML = '';
+      elementRef.current.value = '';
     }
     
     // Create new TypeIt instance
@@ -67,8 +80,6 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
         if (cycleCountRef.current >= selectedPhrases.length) {
           cycleCountRef.current = 0;
           setSelectedPhrases(getRandomPhrases());
-          
-          // This will cause a re-render and initialize a new TypeIt instance
           return;
         }
         
@@ -105,17 +116,18 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   }, [selectedPhrases, typingSpeed, deletingSpeed, delayBetweenTexts]);
   
   return (
-    <div 
-      ref={elementRef} 
-      className={`${className} cursor-pointer`}
-      onClick={onTextClick}
+    <textarea
+      ref={elementRef}
+      readOnly={!isTypingDone}
+      onClick={handleClick}
+      className={`${className} resize-none bg-transparent text-center border-none focus:ring-0 outline-none text-4xl md:text-5xl font-bold w-full`}
       style={{ 
-        minHeight: "2.5rem", 
-        display: "inline-block",
+        minHeight: "2.5rem",
         transition: "all 0.3s ease"
       }}
       title="Click to type your own"
-    ></div>
+      rows={1}
+    />
   );
 };
 

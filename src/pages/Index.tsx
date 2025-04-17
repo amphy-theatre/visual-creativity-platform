@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import PresetMood from "../components/PresetMood";
@@ -11,7 +10,6 @@ import SubmitButton from "../components/SubmitButton";
 import CSVUploader from "../components/CSVUploader";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useAppConfig } from "../hooks/useAppConfig";
 
 const Index: React.FC = () => {
   const { isGuestMode } = useAuth();
@@ -20,7 +18,6 @@ const Index: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [csvData, setCsvData] = useState<string | null>(null);
   const navigate = useNavigate();
-  const config = useAppConfig();
 
   const handleAnimatedTextClick = () => {
     setShowAnimatedText(false);
@@ -34,7 +31,7 @@ const Index: React.FC = () => {
     setCsvData(data);
   };
   
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!inputValue.trim() && !csvData) {
       toast({
         title: "Error",
@@ -46,42 +43,11 @@ const Index: React.FC = () => {
     
     setIsLoading(true);
     
-    try {
-      // Store the input value in session storage for use in the quotes page
-      sessionStorage.setItem("userMood", inputValue);
-      
-      // Generate quotes using the input value
-      const response = await fetch(config.edgeFunctions.generateQuotes, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ emotion: inputValue }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to generate quotes: ${response.status}`);
-      }
-      
-      // Parse the response
-      const data = await response.json();
-      
-      // Navigate to the quotes page with the mood and quotes
-      navigate("/quotes", { 
-        state: { 
-          mood: inputValue, 
-          quotes: data
-        }
-      });
-    } catch (error) {
-      console.error('Error generating quotes:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate quotes. Please try again.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-    }
+    // Store the input value in session storage for use in the quotes page
+    sessionStorage.setItem("userMood", inputValue);
+    
+    // Navigate to the quotes page
+    navigate("/quotes");
   };
   
   return (

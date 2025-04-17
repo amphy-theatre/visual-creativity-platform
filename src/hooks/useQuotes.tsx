@@ -39,15 +39,7 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
     ];
 
   const handleRefresh = async () => {
-    // Use current mood state or get it from session storage as a backup
-    const currentMood = mood || sessionStorage.getItem("userMood") || "";
-    
-    if (!currentMood.trim()) {
-      toast({
-        title: "Error",
-        description: "No mood specified. Please go back and enter your mood.",
-        variant: "destructive",
-      });
+    if (!mood.trim()) {
       return false;
     }
     
@@ -69,7 +61,7 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
         },
-        body: JSON.stringify({ emotion: currentMood }),
+        body: JSON.stringify({ emotion: mood }),
       });
       
       if (!response.ok) {

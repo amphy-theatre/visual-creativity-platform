@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import PresetMood from "../components/PresetMood";
@@ -5,7 +6,6 @@ import FreeTrialBanner from "../components/FreeTrialBanner";
 import AnimatedText from "../components/AnimatedText";
 import { useAuth } from "../context/AuthContext";
 import { phrases } from "../phrases";
-import TextAreaInput from "../components/TextAreaInput";
 import SubmitButton from "../components/SubmitButton";
 import CSVUploader from "../components/CSVUploader";
 import { toast } from "@/components/ui/use-toast";
@@ -57,26 +57,27 @@ const Index: React.FC = () => {
         
         <div className="text-center space-y-4 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
-              <div className="min-h-[120px] flex items-center justify-center">
-                <AnimatedText
-                  initialValue={inputValue}
-                  texts={phrases}
-                  typingSpeed={80} 
-                  deletingSpeed={40} 
-                  delayBetweenTexts={2000}
-                  className="w-full"
-                  onTextClick={handleAnimatedTextClick}
-                  onChange={handleInputChange}
-                  onSubmit={handleSubmit}
-                />
-              </div>
+            <div className="min-h-[120px] flex items-center justify-center">
+              <AnimatedText
+                initialValue={inputValue}
+                texts={phrases}
+                typingSpeed={80} 
+                deletingSpeed={40} 
+                delayBetweenTexts={2000}
+                className="w-full"
+                onTextClick={handleAnimatedTextClick}
+                onChange={handleInputChange}
+                onSubmit={handleSubmit}
+                maxLength={200}
+              />
+            </div>
           </h1>
           
           <SubmitButton
             onClick={handleSubmit}
             isLoading={isLoading}
             isDisabled={!inputValue.trim() && !csvData}
-            />
+          />
           
           <CSVUploader onCsvDataChange={handleCsvDataChange} />
         </div>

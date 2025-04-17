@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import TypeIt from 'typeit';
 
@@ -39,16 +40,12 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     if (!isTypingDone && typeItRef.current) {
       // If animation is still running, complete it instantly
       typeItRef.current.destroy();
+      if (elementRef.current) {
+        elementRef.current.value = selectedPhrases[cycleCountRef.current];
+      }
+      setIsTypingDone(true);
+      onTextClick?.();
     }
-    
-    // Clear the textarea and make it editable
-    if (elementRef.current) {
-      elementRef.current.value = '';
-      elementRef.current.focus();
-    }
-    
-    setIsTypingDone(true);
-    onTextClick?.();
   };
   
   useEffect(() => {

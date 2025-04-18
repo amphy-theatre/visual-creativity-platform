@@ -3,8 +3,8 @@ name: Deploy Edge Functions
 
 on:
   push:
-    paths:
-      - 'supabase/functions/**'  # Trigger on changes to any function
+    branches:
+      - main  # Only trigger on main branch pushes
 
 jobs:
   deploy:
@@ -13,24 +13,17 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 2  # Ensure at least one previous commit is available
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: Get previous commit
-        id: prev_commit
-        run: echo "PREV_COMMIT=$(git rev-parse HEAD^)" >> $GITHUB_ENV
-
-      - name: Detect changed functions
-        id: changed-functions
+      - name: List all functions
+        id: list-functions
         run: |
-          git fetch --unshallow || true  # Ensure history is available
-          CHANGED_DIRS=$(git diff --name-only ${{ env.PREV_COMMIT }} HEAD | grep '^supabase/functions/' | awk -F'/' '{print $3}' | sort -u | xargs)
-          echo "CHANGED_DIRS=${CHANGED_DIRS}" >> $GITHUB_ENV
+          FUNCTIONS=$(ls supabase/functions/)
+          echo "FUNCTIONS=${FUNCTIONS}" >> $GITHUB_ENV
 
       - name: Set Supabase project variables
         id: set-vars
@@ -45,10 +38,9 @@ jobs:
             echo "Deploying to production environment"
           fi
 
-      - name: Deploy changed functions
-        if: env.CHANGED_DIRS != ''
+      - name: Deploy all functions
         run: |
-          for function in $CHANGED_DIRS; do
+          for function in $FUNCTIONS; do
             echo "Deploying function: $function to project: $SUPABASE_PROJECT_ID"
             supabase functions deploy $function --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt
           done

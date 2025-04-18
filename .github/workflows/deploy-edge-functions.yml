@@ -40,5 +40,5 @@ jobs:
         run: |
           for function in $(ls supabase/functions/); do
             echo "Deploying function: $function to project: $SUPABASE_PROJECT_ID"
-            supabase functions deploy "$function" --project-ref "$SUPABASE_PROJECT_ID" --no-verify-jwt
+            supabase functions deploy $function --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt --debug
           done

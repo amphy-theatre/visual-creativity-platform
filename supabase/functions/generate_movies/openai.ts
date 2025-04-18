@@ -12,7 +12,7 @@ export async function getMovieRecommendations(
   previousMovies: string[] = []
 ): Promise<Movie[]> {
   // Input validation
-  if (!selectedQuote || typeof selectedQuote !== 'string') {
+  if (typeof selectedQuote !== 'string') {
     throw new Error('Valid quote text is required');
   }
 

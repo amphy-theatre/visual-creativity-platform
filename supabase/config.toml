@@ -1,33 +1,29 @@
-
-project_id = "sdwuhuuyyrwzwyqdtdkb"
-
 [api]
 enabled = true
-port = 8000
-schemas = ["public", "storage", "auth"]
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
 
 [db]
-port = 5432
-shadow_port = 54320
+port = 54322
 
 [studio]
-port = 8001
-
-[[db.remote_schemas]]
-name = "supabase_functions"
-equals_schemas = ["supabase_functions"]
-
-[functions]
-enabled = true
-port = 9000
-hook_port = 9001
-
-[realtime]
-enabled = false
+port = 54323
 
 [inbucket]
-enabled = false
+port = 54324
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
 
 [storage]
-enabled = false
-file_size_limit_bytes = 52428800 # 50 MiB
+enabled = true
+
+[realtime]
+enabled = true
+
+[analytics]
+enabled = true
+
+[functions.track_analytics]
+verify_jwt = false

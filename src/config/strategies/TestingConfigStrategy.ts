@@ -6,8 +6,8 @@ import { AppConfig } from "../types";
  */
 export class TestingConfigStrategy {
   getConfig(): AppConfig {
-    const supabaseUrl = 'https://sdwuhuuyyrwzwyqdtdkb.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28';
+    const supabaseUrl = 'https://ncxxegaimrmaltrxjgxc.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jeHhlZ2FpbXJtYWx0cnhqZ3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDc2ODEsImV4cCI6MjA2MDMyMzY4MX0._3QvhXKEg6-dt8aYaASANivOHVKihzh8h_bBvVa1UlE';
     const edgeFunctionsBaseUrl = `${supabaseUrl}/functions/v1`;
     
     return {

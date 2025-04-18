@@ -16,10 +16,6 @@ serve(async (req) => {
   try {
     const { selectedQuote, originalEmotion, userPreferences, previousMovies = [] } = await req.json();
     
-    if (!selectedQuote) {
-      throw new Error('Selected quote is required');
-    }
-    
     // Note: Prompt usage counting is handled in the client code
     // through incrementPromptUsage in the usePromptLimits hook
     const movies = await getMovieRecommendations(selectedQuote, originalEmotion, userPreferences, previousMovies);

@@ -128,7 +128,8 @@ const MoodInput: React.FC<MoodInputProps> = ({
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
+              selectedQuote: "",
               originalEmotion: moodText,
               userPreferences: null,
               previousMovies: [] 

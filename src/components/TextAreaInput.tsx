@@ -37,14 +37,14 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
 
   return (
     <div className="space-y-2 w-full">
-      <div className="rainbow-spin-border">
+      <div className="rainbow-border">
         <Textarea
           ref={textareaRef}
           autoFocus
           className={`${seamlessInput ? 
-            "w-full resize-none text-9xl md:text-10xl font-bold bg-transparent focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[12rem]" : 
+            "w-full resize-none text-18xl md:text-20xl font-bold bg-transparent focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[12rem]" : 
             "w-full resize-none text-xl"}`}
-          placeholder=""
+          placeholder="Type anything..."
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}

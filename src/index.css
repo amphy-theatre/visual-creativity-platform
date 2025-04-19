@@ -119,33 +119,31 @@
 
   .rainbow-border {
     position: relative;
-    border: none;
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    background-clip: padding-box;
+    outline: none;
   }
 
   .rainbow-border::before {
-    content: '';
+    content: "";
     position: absolute;
-    inset: -2px;
+    top: -2px; 
+    left: -2px; 
+    right: -2px; 
+    bottom: -2px;
     z-index: -1;
     border-radius: calc(var(--radius) + 2px);
     background: linear-gradient(
       90deg,
-      #ea384c,
-      #F97316,
-      #FEF7CD,
-      #F2FCE2,
-      #33C3F0,
-      #8B5CF6,
-      #D946EF,
-      #ea384c
+      #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000
     );
-    background-size: 400% 100%;
-    animation: rainbow-border 8s linear infinite;
+    background-size: 400%;
+    animation: moveBorder 4s linear infinite;
   }
 
-  @keyframes rainbow-border {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  @keyframes moveBorder {
+    0%   { background-position: 0%   50%; }
+    100% { background-position: 400% 50%; }
   }
 }

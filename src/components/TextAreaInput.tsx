@@ -37,18 +37,19 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
 
   return (
     <div className="space-y-2 w-full">
-      <div className="rainbow-border-container">
+      <div className="rainbow-border-container" style={{ minHeight: seamlessInput ? '60vh' : 'auto' }}>
         <Textarea
           ref={textareaRef}
           autoFocus
           className={`${seamlessInput ? 
-            "w-full resize-none text-6xl md:text-8xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[80rem]" : 
+            "w-full resize-none text-7xl md:text-9xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[100vh]" : 
             "w-full resize-none text-xl"}`}
           placeholder=""
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           maxLength={maxLength}
+          style={{ lineHeight: seamlessInput ? '1.2' : 'normal' }}
         />
       </div>
       <div className="flex justify-end">
@@ -59,4 +60,3 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
 };
 
 export default TextAreaInput;
-

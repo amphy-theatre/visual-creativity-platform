@@ -118,58 +118,62 @@
     @apply glass-card overflow-hidden animate-fade-in;
   }
   
-  /* Spin animation */
-  @keyframes rotate {
-    to { transform: rotate(1turn); }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
   }
-
-  /* The input itself */
-  .rainbow-input {
+  
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  
+  @keyframes rotate {
+    100% { transform: rotate(1turn); }
+  }
+  
+  .rainbow {
     position: relative;
     padding: 0.75em 1em;
-    border: none;
-    border-radius: 6px;
     background: white;
     font-size: 1rem;
-    outline: none;
     z-index: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
   }
-
-  /* Outer rotating rainbow ring */
-  .rainbow-input::before {
-    content: "";
+  
+  .rainbow::before {
+    content: '';
     position: absolute;
     z-index: -2;
-    top: -50%;
     left: -50%;
+    top: -50%;
     width: 200%;
     height: 200%;
-    background-repeat: no-repeat;
-    background-size: 50% 50%, 50% 50%;
-    background-position:
-      0    0,
-      100% 0,
-      100% 100%,
-      0    100%;
-    background-image:
-      linear-gradient(#399953, #399953),
-      linear-gradient(#fbb300, #fbb300),
-      linear-gradient(#d53e33, #d53e33),
-      linear-gradient(#377af5, #377af5);
-    border-radius: 10px; /* radius = input radius + border width */
+    background: conic-gradient(
+      red,
+      orange,
+      yellow,
+      green,
+      blue,
+      indigo,
+      violet,
+      red
+    );
     animation: rotate 4s linear infinite;
   }
-
-  /* Inner fill to mask the center */
-  .rainbow-input::after {
-    content: "";
+  
+  .rainbow::after {
+    content: '';
     position: absolute;
     z-index: -1;
-    top: 6px;
     left: 6px;
+    top: 6px;
     width: calc(100% - 12px);
     height: calc(100% - 12px);
     background: white;
-    border-radius: 4px;  /* radius = input radius - border width */
+    border-radius: 5px;
   }
 }

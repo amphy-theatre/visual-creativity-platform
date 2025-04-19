@@ -37,7 +37,7 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
 
   return (
     <div className="space-y-2 w-full">
-      <div className="rainbow-input">
+      <div className="rainbow">
         <Textarea
           ref={textareaRef}
           autoFocus

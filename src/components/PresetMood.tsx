@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
@@ -6,6 +5,7 @@ import { usePromptUsage, MONTHLY_PROMPT_LIMIT } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "@/components/modals/PromptLimitModal";
 import { useAuth } from "@/context/AuthContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useAppConfig } from "@/hooks/useAppConfig";
 
 interface PresetMoodProps {
   title: string;
@@ -19,9 +19,9 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading } = usePromptUsage();
   const { session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { trackEvent } = useAnalytics();
+  const config = useAppConfig();
   
   const handleClick = async () => {
-    // Check if guest user has already used their free trial
     if (isGuestMode && isTrialUsed) {
       toast({
         title: "Free Trial Used",
@@ -31,35 +31,31 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
       return;
     }
     
-    // Check if signed-in user is over their monthly prompt limit
     if (!isGuestMode && promptUsage?.limit_reached) {
       setShowLimitModal(true);
       return;
     }
     
     try {
-      // Show loading toast
       toast({
         title: "Generating quotes",
         description: `Finding quotes for "${description}"`,
       });
       
-      // Increment the prompt count for signed-in users
       if (!isGuestMode) {
         const updatedUsage = await incrementPromptCount();
         
-        // Check if the user has reached their limit after incrementing
         if (updatedUsage?.limit_reached) {
           setShowLimitModal(true);
           return;
         }
       }
       
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
+      const response = await fetch(config.edgeFunctions.generateQuotes, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+          'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
         },
         body: JSON.stringify({ emotion: description }),
       });
@@ -68,17 +64,14 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
         throw new Error(`Failed to generate quotes: ${response.status}`);
       }
       
-      // Parse the response
       const data = await response.json();
       
-      // Track the quotes generated event
       trackEvent('quotes_generated', {
         mood: description,
         genre: genre,
         source: 'preset_mood'
       });
       
-      // Navigate to the quotes page with the mood and quotes data
       navigate("/quotes", { 
         state: { 
           mood: description, 
@@ -96,18 +89,16 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
     }
   };
   
-  // Generate card colors based on genre
   const getGenreStyles = () => {
-    const baseClasses = "preset-card p-6 rounded-lg cursor-pointer transition-all duration-300 flex flex-col items-center text-center";
+    const baseClasses = "preset-card border-2 p-6 rounded-lg cursor-pointer transition-all duration-300 flex flex-col items-center text-center";
     
-    // Map of genre-specific background styles with vibrant colors by default
     const genreStyles: Record<string, string> = {
-      inspiration: "bg-gradient-to-br from-amber-500 to-yellow-400 text-white hover:from-amber-600 hover:to-yellow-500",
-      thriller: "bg-gradient-to-br from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600",
-      drama: "bg-gradient-to-br from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700",
-      romance: "bg-gradient-to-br from-pink-500 to-rose-400 text-white hover:from-pink-600 hover:to-rose-500",
-      philosophical: "bg-gradient-to-br from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700",
-      comedy: "bg-gradient-to-br from-emerald-400 to-teal-500 text-white hover:from-emerald-500 hover:to-teal-600"
+      inspiration: "border-amber-500 hover:bg-amber-50/50 [&_*]:bg-gradient-to-r [&_*]:from-amber-500 [&_*]:to-yellow-400 [&_*]:bg-clip-text [&_*]:text-transparent",
+      thriller: "border-orange-500 hover:bg-orange-50/50 [&_*]:bg-gradient-to-r [&_*]:from-orange-500 [&_*]:to-red-500 [&_*]:bg-clip-text [&_*]:text-transparent",
+      drama: "border-blue-500 hover:bg-blue-50/50 [&_*]:bg-gradient-to-r [&_*]:from-blue-500 [&_*]:to-indigo-600 [&_*]:bg-clip-text [&_*]:text-transparent",
+      romance: "border-pink-500 hover:bg-pink-50/50 [&_*]:bg-gradient-to-r [&_*]:from-pink-500 [&_*]:to-rose-400 [&_*]:bg-clip-text [&_*]:text-transparent",
+      philosophical: "border-violet-500 hover:bg-violet-50/50 [&_*]:bg-gradient-to-r [&_*]:from-violet-500 [&_*]:to-purple-600 [&_*]:bg-clip-text [&_*]:text-transparent",
+      comedy: "border-emerald-500 hover:bg-emerald-50/50 [&_*]:bg-gradient-to-r [&_*]:from-emerald-400 [&_*]:to-teal-500 [&_*]:bg-clip-text [&_*]:text-transparent"
     };
     
     return `${baseClasses} ${genreStyles[genre]}`;
@@ -120,8 +111,8 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
         onClick={handleClick}
       >
         <div className="space-y-4">
-          <div className="text-sm text-white/90 font-medium">"{description}"</div>
-          <div className="text-xl font-semibold text-white">{title}</div>
+          <div className="text-sm font-medium">"{description}"</div>
+          <div className="text-xl font-semibold">{title}</div>
         </div>
       </div>
       

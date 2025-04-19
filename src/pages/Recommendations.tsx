@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -43,7 +42,7 @@ interface RecommendationsResponse {
 const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset } = location.state || {};
+  const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset, fromLiteralPrompt } = location.state || {};
   const { user, session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { userPreferences } = useUserPreferences();
   const { trackEvent } = useAnalytics();
@@ -92,6 +91,8 @@ const Recommendations: React.FC = () => {
   let headerText = "Based on your mood";
   if (selectedQuote) {
     headerText = "Based on your selected quote";
+  } else if (fromLiteralPrompt && mood) {
+    headerText = "Based on your specific request";
   } else if (fromPreset && selectedGenre) {
     const genreMap: Record<string, string> = {
       inspiration: "Inspirational",
@@ -105,7 +106,11 @@ const Recommendations: React.FC = () => {
   }
   
   const handleBackToQuotes = () => {
-    navigate(-1);
+    if (fromLiteralPrompt) {
+      navigate("/");
+    } else {
+      navigate(-1);
+    }
   };
   
   const handleRegenerateMovies = async () => {
@@ -180,7 +185,6 @@ const Recommendations: React.FC = () => {
       const newRecommendations = await response.json();
       console.log('Received new movie recommendations:', newRecommendations);
       
-      // Track the movie regeneration event
       trackEvent('movies_generated', {
         quote: selectedQuote,
         originalMood: mood,
@@ -219,7 +223,7 @@ const Recommendations: React.FC = () => {
             onClick={handleBackToQuotes}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Quotes
+            {fromLiteralPrompt ? "Back to Input" : "Back to Quotes"}
           </Button>
         </div>
         
@@ -248,6 +252,12 @@ const Recommendations: React.FC = () => {
         {selectedQuote && (
           <div className="italic text-xl text-foreground/80 max-w-full px-4 overflow-hidden break-words">
             "{selectedQuote}"
+          </div>
+        )}
+        
+        {fromLiteralPrompt && mood && (
+          <div className="italic text-xl text-foreground/80 max-w-full px-4 overflow-hidden break-words">
+            "{mood}"
           </div>
         )}
         

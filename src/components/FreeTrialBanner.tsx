@@ -4,12 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useAppConfig } from "@/hooks/useAppConfig";
 
 const FreeTrialBanner: React.FC = () => {
   const { isGuestMode, isTrialUsed } = useAuth();
   const navigate = useNavigate();
+  const config = useAppConfig();
   
-  if (!isGuestMode) {
+  // Only show the banner if user is in guest mode AND has used their trial
+  if (!isGuestMode || !isTrialUsed) {
     return null;
   }
   
@@ -18,10 +21,12 @@ const FreeTrialBanner: React.FC = () => {
       <div className="flex items-center gap-3">
         <AlertCircle className="h-5 w-5" />
         <div className="flex-1">
-          {isTrialUsed ? (
-            <p>You've used your trial prompt. Sign up to continue using Amphytheatre. It's completely free!</p>
-          ) : (
-            <p>You're using a trial prompt. Sign up (free!) for more prompts and features!</p>
+          <p>You've used your trial prompt. Sign up to continue using Amphytheatre. It's completely free!</p>
+          {config.environment === 'testing' && (
+            <p className="mt-1 text-xs">
+              <span className="font-semibold">Environment:</span> {config.environment} 
+              <span className="ml-2 font-semibold">DB:</span> {config.supabase.url.split("//")[1]}
+            </p>
           )}
         </div>
         <Button 
@@ -38,4 +43,3 @@ const FreeTrialBanner: React.FC = () => {
 };
 
 export default FreeTrialBanner;
-

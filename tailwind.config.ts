@@ -20,7 +20,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Fredoka", "system-ui", "sans-serif"],
+        fredoka: ["Fredoka", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -6,13 +6,13 @@ import { enrichMoviesWithTMDBData } from './tmdb.ts';
 import { OpenAI } from "npm:openai";
 
 export async function getMovieRecommendations(
-  selectedQuote: string, 
+  selectedQuote?: string, 
   originalEmotion?: string,
   userPreferences?: string,
   previousMovies: string[] = []
 ): Promise<Movie[]> {
   // Input validation
-  if (!selectedQuote || typeof selectedQuote !== 'string') {
+  if (typeof selectedQuote !== 'string') {
     throw new Error('Valid quote text is required');
   }
 
@@ -24,10 +24,6 @@ export async function getMovieRecommendations(
     ? previousMovies.filter(m => typeof m === 'string').map(m => String(m).trim())
     : [];
 
-  // Check for empty quote after trimming
-  if (sanitizedQuote === '') {
-    throw new Error('Quote cannot be empty');
-  }
 
   // Length limitations to prevent excessively long inputs
   if (sanitizedQuote.length > 1000) {
@@ -47,7 +43,7 @@ export async function getMovieRecommendations(
 
   try {
     // Build the input for OpenAI with improved instructions
-    let instructions = `Generate EXACTLY 3 movie recommendations based on the input provided.
+    let instructions = `SEARCH THE WEB to generate EXACTLY 3 movie recommendations based on the input provided.
     For each movie, provide ONLY the title and a brief description without ANY citations, URLs, or references.
     Format your response as a structured JSON output with an 'items' array containing objects with 'title' and 'description' fields.
     DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
@@ -58,8 +54,8 @@ export async function getMovieRecommendations(
     }
     
     // Build the input for OpenAI
-    let input = `Quote: "${sanitizedQuote}"
-    Emotion/Mood: ${sanitizedEmotion || 'Not specified'}`;
+    let input = sanitizedEmotion != `` ? `Quote: "${sanitizedQuote}"\n` : ``;
+    input += `Emotion/Mood: ${sanitizedEmotion || 'Not specified'}`;
     
     // Add user preferences if available
     if (sanitizedUserPreferences) {

@@ -1,16 +1,18 @@
-
 import { useCallback, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useAppConfig } from "./useAppConfig";
 
 export type AnalyticsEvent = 
   | 'quotes_generated'
   | 'movies_generated'
   | 'page_view'
-  | 'button_click';
+  | 'button_click'
+  | 'prompt_analyzed';
 
 export const useAnalytics = () => {
   const { user } = useAuth();
   const viewedPages = useRef<Set<string>>(new Set());
+  const config = useAppConfig();
   
   const trackEvent = useCallback(async (
     eventName: AnalyticsEvent,
@@ -38,7 +40,7 @@ export const useAnalytics = () => {
         return;
       }
       
-      await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/track_analytics', {
+      await fetch(config.edgeFunctions.trackAnalytics, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +55,7 @@ export const useAnalytics = () => {
       // Silent fail for analytics to not disrupt user experience
       console.error('Analytics error:', error);
     }
-  }, [user]);
+  }, [user, config]);
   
   // Helper function to map paths to readable page names
   const getPageNameFromPath = (path: string): string => {

@@ -19,4 +19,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    'import.meta.env.VITE_DEPLOYMENT_ENVIRONMENT': JSON.stringify(
+      mode === 'development' ? 'testing' : 'production'
+    )
+  },
 }));

@@ -1,36 +1,39 @@
-
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import FileDropbox from "./FileDropbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { readFileAsText } from "@/utils/csvUtils";
 import { usePromptUsage } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "./modals/PromptLimitModal";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useAppConfig } from "@/hooks/useAppConfig";
+import SubmitButton from "./SubmitButton";
+import CSVUploader from "./CSVUploader";
+import TextAreaInput from "./TextAreaInput";
 
-const MoodInput: React.FC = () => {
-  const [mood, setMood] = useState("");
-  const [charCount, setCharCount] = useState(0);
+interface MoodInputProps {
+  initialValue?: string;
+}
+
+const MoodInput: React.FC<MoodInputProps> = ({ 
+  initialValue = "", 
+}) => {
+  const [mood, setMood] = useState(initialValue);
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [csvData, setCsvData] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user, session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { trackEvent } = useAnalytics();
+  const config = useAppConfig();
   const {
     promptUsage,
     showLimitModal,
     setShowLimitModal,
   } = usePromptUsage();
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    setMood(text);
-    setCharCount(text.length);
+  const handleMoodChange = (value: string) => {
+    setMood(value);
   };
   
   const handleSubmit = async () => {
@@ -43,7 +46,6 @@ const MoodInput: React.FC = () => {
       return;
     }
     
-    // Check if guest user has already used their free trial
     if (isGuestMode && isTrialUsed) {
       toast({
         title: "Free Trial Used",
@@ -53,23 +55,20 @@ const MoodInput: React.FC = () => {
       return;
     }
     
-    // For signed-in users, check prompt limit
     if (!isGuestMode && promptUsage.limit_reached) {
       setShowLimitModal(true);
       return;
     }
     
     setIsLoading(true);
+    setIsAnalyzing(true);
     
     try {
-      // If we have CSV data, send it to the summarize_csv function asynchronously
       if (csvData && user) {
-        // Get the session token for authentication
         const accessToken = session?.access_token;
         
         try {
-          // Call the edge function to summarize the CSV asynchronously
-          await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/summarize_csv', {
+          await fetch(config.edgeFunctions.summarizeCsv, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -81,49 +80,131 @@ const MoodInput: React.FC = () => {
           });
         } catch (csvError) {
           console.error('Error processing CSV:', csvError);
-          // Continue even if CSV processing fails
         }
       }
       
-      // Always use the actual mood input for generating quotes
       const moodText = mood.trim();
       
       if (moodText) {
-        const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_quotes', {
+        // First analyze the prompt to determine if it's figurative or literal
+        const analyzeResponse = await fetch(config.edgeFunctions.baseUrl + '/analyze_prompt', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+            'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
           },
-          body: JSON.stringify({ emotion: moodText }),
+          body: JSON.stringify({ prompt: moodText }),
         });
         
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.error('Error response:', errorData);
-          throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
+        if (!analyzeResponse.ok) {
+          const errorData = await analyzeResponse.text();
+          console.error('Error analyzing prompt:', errorData);
+          throw new Error(`Failed to analyze prompt: ${analyzeResponse.status} ${analyzeResponse.statusText}`);
         }
         
-        const data = await response.json();
-        console.log('Received quotes:', data);
+        const analysisResult = await analyzeResponse.json();
+        const isLiteral = analysisResult.type === 'literal';
         
-        // Track the quotes generated event
-        trackEvent('quotes_generated', {
-          mood: moodText,
-          source: 'custom_input',
+        setIsAnalyzing(false);
+        
+        trackEvent('prompt_analyzed', {
+          prompt: moodText,
+          type: analysisResult.type,
           has_csv: csvData !== null
         });
         
-        navigate("/quotes", { 
-          state: { 
-            mood: moodText, 
-            quotes: data, 
-            promptUsage: promptUsage // Pass the current prompt usage data
+        // For literal prompts, skip quotes and go directly to movie recommendations
+        if (isLiteral) {
+          setIsLoading(true);
+          
+          // Generate movies directly for literal prompts
+          const movieResponse = await fetch(config.edgeFunctions.generateMovies, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
+            },
+            body: JSON.stringify({
+              selectedQuote: "",
+              originalEmotion: moodText,
+              userPreferences: null,
+              previousMovies: [] 
+            }),
+          });
+          
+          if (!movieResponse.ok) {
+            const errorData = await movieResponse.text();
+            console.error('Error response:', errorData);
+            throw new Error(`Failed to generate recommendations: ${movieResponse.status} ${movieResponse.statusText}`);
           }
-        });
+          
+          const recommendations = await movieResponse.json();
+          
+          trackEvent('movies_generated', {
+            originalMood: moodText,
+            bypassQuotes: true,
+            promptType: 'literal',
+            recommendedMovies: recommendations.movies.map((m: any) => m.title).join(', ')
+          });
+          
+          if (user) {
+            const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
+              uid: user.id,
+              monthly_limit: promptUsage.monthly_limit
+            });
+            
+            if (usageError) {
+              throw new Error(`Failed to update prompt usage: ${usageError.message}`);
+            }
+          } else if (isGuestMode) {
+            setTrialUsed(true);
+          }
+          
+          // Navigate directly to recommendations page
+          navigate("/recommendations", { 
+            state: { 
+              selectedQuote: null,
+              recommendations: recommendations,
+              mood: moodText,
+              fromLiteralPrompt: true
+            } 
+          });
+        } else {
+          // For figurative prompts, follow the original flow through quotes
+          const response = await fetch(config.edgeFunctions.generateQuotes, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
+            },
+            body: JSON.stringify({ emotion: moodText }),
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.text();
+            console.error('Error response:', errorData);
+            throw new Error(`Failed to generate quotes: ${response.status} ${response.statusText}`);
+          }
+          
+          const data = await response.json();
+          console.log('Received quotes:', data);
+          
+          trackEvent('quotes_generated', {
+            mood: moodText,
+            source: 'custom_input',
+            has_csv: csvData !== null,
+            promptType: 'figurative'
+          });
+          
+          navigate("/quotes", { 
+            state: { 
+              mood: moodText, 
+              quotes: data, 
+              promptUsage: promptUsage
+            }
+          });
+        }
       } else {
-        // If no mood text, but we have CSV data, simply go to quotes with empty data
-        // This allows the background CSV processing to continue
         navigate("/quotes", { state: { mood: "Processing your data", quotes: { quotes: [] } } });
       }
     } catch (error) {
@@ -135,91 +216,37 @@ const MoodInput: React.FC = () => {
       });
     } finally {
       setIsLoading(false);
+      setIsAnalyzing(false);
     }
   };
-  
-  // Handle key press events on the textarea
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // If Enter is pressed without Shift (for new line)
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); // Prevent default to avoid newline
-      handleSubmit();
-    }
-  };
-  
-  const handleFileChange = async (file: File | null) => {
-    setUploadedFile(file);
-    
-    // If file is removed, clear the CSV data
-    if (!file) {
-      setCsvData(null);
-      return;
-    }
-    
-    try {
-      // Read the file and store its content
-      const content = await readFileAsText(file);
-      setCsvData(content);
-    } catch (error) {
-      console.error("Error reading file:", error);
-      toast({
-        title: "File Error",
-        description: "Failed to read the uploaded file",
-        variant: "destructive",
-      });
-    }
-  };
+
+  const isButtonDisabled = ((!mood.trim() && !csvData) || isLoading || 
+    (!isGuestMode && promptUsage.limit_reached) || 
+    (isGuestMode && isTrialUsed));
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <div className="space-y-2">
-        <Textarea
-          className="h-32 resize-none"
-          placeholder="How are you feeling? (e.g., I feel like a yellow balloon, On top of the world, I think I am James Bond)"
-          value={mood}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          maxLength={200}
-        />
-        <div className="flex justify-end">
-          <span className="text-sm text-muted-foreground">{charCount}/200 characters</span>
+      <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
+        <div className="min-h-[120px] flex items-center justify-center py-8">
+          <TextAreaInput
+            initialValue={initialValue}
+            onSubmit={handleSubmit}
+            onChange={handleMoodChange}
+            maxLength={200}
+         />
         </div>
-      </div>
-      
-      <Button 
-        className="w-full"
+      </h1>
+      <SubmitButton 
         onClick={handleSubmit}
-        disabled={((!mood.trim() && !csvData) || isLoading || (!isGuestMode && promptUsage.limit_reached) || (isGuestMode && isTrialUsed))}
-        variant="default"
-      >
-        {isLoading ? (
-          <>
-            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Generating Quotes...
-          </>
-        ) : (
-          <>
-            <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 4V20M12 4L6 10M12 4L18 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Get Personalized Recommendations
-          </>
-        )}
-      </Button>
+        isLoading={isLoading}
+        isDisabled={isButtonDisabled}
+        remainingPrompts={promptUsage.remaining}
+        showPromptCount={!isGuestMode}
+        loadingText={isAnalyzing ? "Analyzing your prompt..." : "Generating..."}
+      />
       
-      {!isGuestMode && (
-        <div className="text-sm text-foreground/50 text-center">
-          {promptUsage.remaining} prompt{promptUsage.remaining !== 1 ? 's' : ''} remaining this month
-        </div>
-      )}
+      <CSVUploader onCsvDataChange={setCsvData} />
       
-      {/* File Dropbox Component */}
-      <FileDropbox onChange={handleFileChange} maxSize={10} />
-
-      {/* Monthly Limit Modal */}
       <PromptLimitModal
         open={showLimitModal}
         onOpenChange={setShowLimitModal}

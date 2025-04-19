@@ -1,11 +1,12 @@
+
 name: Deploy Edge Functions
 
 on:
   push:
     branches:
-      - main  # Adjust as needed
+      - main  # Only trigger on main branch pushes
     paths:
-      - 'supabase/functions/**'  # Trigger on changes to any function
+      - 'supabase/functions/**'  # Only trigger when functions are modified
 
 jobs:
   deploy:
@@ -14,31 +15,38 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 2  # Ensure at least one previous commit is available
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: Get previous commit
-        id: prev_commit
-        run: echo "PREV_COMMIT=$(git rev-parse HEAD^)" >> $GITHUB_ENV
-
-      - name: Detect changed functions
-        id: changed-functions
+      - name: List modified functions
+        id: changed-files
         run: |
-          git fetch --unshallow || true  # Ensure history is available
-          CHANGED_DIRS=$(git diff --name-only ${{ env.PREV_COMMIT }} HEAD | grep '^supabase/functions/' | awk -F'/' '{print $3}' | sort -u | xargs)
-          echo "CHANGED_DIRS=${CHANGED_DIRS}" >> $GITHUB_ENV
+          MODIFIED_FUNCTIONS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "supabase/functions/" | cut -d'/' -f3 | sort -u)
+          echo "Modified functions: $MODIFIED_FUNCTIONS"
+          echo "functions=$MODIFIED_FUNCTIONS" >> $GITHUB_OUTPUT
 
-      - name: Deploy changed functions
-        if: env.CHANGED_DIRS != ''
+      - name: Set Supabase project variables
         run: |
-          for function in $CHANGED_DIRS; do
-            echo "Deploying function: $function"
-            supabase functions deploy $function --project-ref ${{ secrets.SUPABASE_PROJECT_ID }} --no-verify-jwt
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Using testing environment credentials"
+            echo "SUPABASE_PROJECT_ID=${{ secrets.TESTING_PROJECT_ID }}" >> $GITHUB_ENV
+            echo "SUPABASE_ACCESS_TOKEN=${{ secrets.TESTING_ACCESS_TOKEN }}" >> $GITHUB_ENV
+          else
+            echo "Using production environment credentials"
+            echo "SUPABASE_PROJECT_ID=${{ secrets.SUPABASE_PROJECT_ID }}" >> $GITHUB_ENV
+            echo "SUPABASE_ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy modified functions
+        run: |
+          IFS=' ' read -ra FUNCTIONS <<< "${{ steps.changed-files.outputs.functions }}"
+          for function in "${FUNCTIONS[@]}"; do
+            if [ ! -z "$function" ]; then
+              echo "Deploying function: $function to project: $SUPABASE_PROJECT_ID"
+              supabase functions deploy $function --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt --debug
+            fi
           done
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+

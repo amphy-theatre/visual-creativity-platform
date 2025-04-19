@@ -21,13 +21,15 @@ const Index: React.FC = () => {
         {isGuestMode && <FreeTrialBanner />}
         
         <div className="text-center space-y-4 animate-fade-in">
-          <AnimatedText 
-            texts={phrases}
-            typingSpeed={80} 
-            deletingSpeed={40} 
-            delayBetweenTexts={2000}
-            className="inline-block"
-          />
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
+            <AnimatedText 
+              texts={phrases}
+              typingSpeed={80} 
+              deletingSpeed={40} 
+              delayBetweenTexts={2000}
+              className="inline-block"
+            />
+          </h1>
           <MoodInput initialValue={inputValue}/>
         </div>
         

@@ -122,11 +122,11 @@
     border-radius: var(--radius);
     padding: 2px;
     background: linear-gradient(
-      90deg,
+      0deg,
       #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000
     );
-    background-size: 400%;
-    animation: moveBorder 4s linear infinite;
+    background-size: 400% 400%;
+    animation: rotateBorder 4s linear infinite;
   }
 
   .rainbow-border-container::after {
@@ -146,8 +146,8 @@
     z-index: 1;
   }
 
-  @keyframes moveBorder {
-    0%   { background-position: 0%   50%; }
-    100% { background-position: 400% 50%; }
+  @keyframes rotateBorder {
+    0% { background-position: 50% 0%; }
+    100% { background-position: 50% 400%; }
   }
 }

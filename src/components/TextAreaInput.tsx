@@ -42,7 +42,7 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
           ref={textareaRef}
           autoFocus
           className={`${seamlessInput ? 
-            "w-full resize-none text-6xl md:text-7xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[4rem]" : 
+            "w-full resize-none text-8xl md:text-9xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[8rem]" : 
             "w-full resize-none text-xl"}`}
           placeholder=""
           value={value}

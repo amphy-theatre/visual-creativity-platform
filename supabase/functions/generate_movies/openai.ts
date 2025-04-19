@@ -44,6 +44,17 @@ export async function getMovieRecommendations(
   try {
     // Build the input for OpenAI with improved instructions
     let instructions = `SEARCH THE WEB to generate EXACTLY 3 movie recommendations based on the input provided.
+    
+    Analyse the user's prompt with the following guidelines:
+    - If the user references any movies, extract information about the TONE, plot devices, THEMES and characters.
+    - How abstract or literal the prompt is,
+    - How specific the prompt is.
+    - The user's style of writing.
+
+    The user may also provide a quote. If so, then analyze the quote for it's meaning, themes and tone.
+    
+    Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
+
     For each movie, provide ONLY the title and a brief description without ANY citations, URLs, or references.
     Format your response as a structured JSON output with an 'items' array containing objects with 'title' and 'description' fields.
     DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.

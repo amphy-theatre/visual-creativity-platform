@@ -17,7 +17,7 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
-      <div className="space-y-32 pb-12">
+      <div className="space-y-24 pb-12">
         {isGuestMode && <FreeTrialBanner />}
         
         <div className="text-center space-y-16 animate-fade-in">

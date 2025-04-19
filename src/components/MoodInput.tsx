@@ -233,6 +233,7 @@ const MoodInput: React.FC<MoodInputProps> = ({
             onSubmit={handleSubmit}
             onChange={handleMoodChange}
             maxLength={200}
+            placeholder="Type here..."
          />
         </div>
       </h1>

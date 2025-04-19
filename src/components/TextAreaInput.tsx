@@ -6,13 +6,15 @@ interface TextAreaInputProps {
   onSubmit: () => void;
   onChange: (value: string) => void;
   maxLength?: number;
+  placeholder?: string;
 }
 
 const TextAreaInput: React.FC<TextAreaInputProps> = ({
   initialValue = "",
   onSubmit,
   onChange,
-  maxLength = 200
+  maxLength = 200,
+  placeholder = ""
 }) => {
   const [value, setValue] = useState(initialValue);
   const [charCount, setCharCount] = useState(initialValue.length);
@@ -40,8 +42,8 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
         <Textarea
           ref={textareaRef}
           autoFocus
-          className={`w-full resize-none text-xl md:text-2xl font-bold bg-card border-none outline-none shadow-none focus:ring-0 focus:border-nonefocus:outline-none p-0 px-4 py-4 placeholder:text-foreground/50 min-h-[10rem]`}
-          placeholder=""
+          className={`w-full resize-none text-xl md:text-2xl bg-card border-none outline-none shadow-none focus:ring-0 focus:border-nonefocus:outline-none p-0 px-4 py-4 placeholder:text-foreground/50 min-h-[10rem] focus-visible:outline-none focus-visible:ring-0`}
+          placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}

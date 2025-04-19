@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -117,63 +116,38 @@
   .movie-card {
     @apply glass-card overflow-hidden animate-fade-in;
   }
-  
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-  
-  @keyframes rotate {
-    100% { transform: rotate(1turn); }
-  }
-  
-  .rainbow {
+
+  .rainbow-border-container {
     position: relative;
-    padding: 0.75em 1em;
-    background: white;
-    font-size: 1rem;
-    z-index: 0;
-    border-radius: 10px;
-    overflow: hidden;
-    display: flex;
-  }
-  
-  .rainbow::before {
-    content: '';
-    position: absolute;
-    z-index: -2;
-    left: -50%;
-    top: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(
-      red,
-      orange,
-      yellow,
-      green,
-      blue,
-      indigo,
-      violet,
-      red
+    border-radius: var(--radius);
+    padding: 2px;
+    background: linear-gradient(
+      0deg,
+      #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000
     );
-    animation: rotate 4s linear infinite;
+    background-size: 400% 400%;
+    animation: rotateBorder 4s linear infinite;
   }
-  
-  .rainbow::after {
-    content: '';
+
+  .rainbow-border-container::after {
+    content: "";
     position: absolute;
-    z-index: -1;
-    left: 6px;
-    top: 6px;
-    width: calc(100% - 12px);
-    height: calc(100% - 12px);
-    background: white;
-    border-radius: 5px;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: var(--background);
+    border-radius: calc(var(--radius) - 2px);
+    z-index: 0;
+  }
+
+  .rainbow-border-container textarea {
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes rotateBorder {
+    0% { background-position: 50% 0%; }
+    100% { background-position: 50% 400%; }
   }
 }

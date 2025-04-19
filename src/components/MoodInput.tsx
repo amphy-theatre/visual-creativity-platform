@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
@@ -228,7 +227,7 @@ const MoodInput: React.FC<MoodInputProps> = ({
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
-        <div className="min-h-[120px] flex items-center justify-center">
+        <div className="min-h-[120px] flex items-center justify-center py-8">
           <TextAreaInput
             initialValue={initialValue}
             onSubmit={handleSubmit}

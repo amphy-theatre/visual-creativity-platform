@@ -118,44 +118,38 @@
     @apply glass-card overflow-hidden animate-fade-in;
   }
 
-  .rainbow-border-container {
+  .rainbow-spin-border {
     position: relative;
-    border-radius: var(--radius);
-    padding: 2px;
-    overflow: hidden;
+    padding: 0.5em 0.75em;
+    border: 2px solid transparent;       /* reserve space for the pseudo-element */
+    border-radius: 6px;
+    background-clip: padding-box;         /* keep the input’s own background from bleeding into the border */
+    font-size: 1rem;
+    outline: none;
   }
 
-  .rainbow-border-container::before {
+  .rainbow-spin-border::before {
     content: "";
     position: absolute;
-    inset: 0;
-    border-radius: var(--radius);
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 8px;                   /* = input’s radius + border width */
     background: conic-gradient(
       from 0deg,
-      #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000
+      red, orange, yellow, green, blue, indigo, violet, red
     );
+    /* cover the entire pseudo‑element */
+    background-size: 100% 100%;
+    
+    /* center the rotation */
     transform-origin: center center;
-    animation: spinBorder 4s linear infinite;
-    z-index: 0;
+    /* start with no rotation */
+    transform: rotate(0deg);
+    
+    /* animate a full spin */
+    animation: spinBorder 3s linear infinite;
+    z-index: -1;                          /* put it behind the input */
   }
-
-  .rainbow-border-container::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    right: 2px;
-    bottom: 2px;
-    background: var(--background);
-    border-radius: calc(var(--radius) - 2px);
-    z-index: 0;
-  }
-
-  .rainbow-border-container textarea {
-    position: relative;
-    z-index: 1;
-  }
-
+  
   @keyframes spinBorder {
     to {
       transform: rotate(360deg);

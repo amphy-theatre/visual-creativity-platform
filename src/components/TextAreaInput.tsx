@@ -37,20 +37,18 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
 
   return (
     <div className="space-y-2 w-full">
-      <div className="rainbow-border-container">
-        <Textarea
-          ref={textareaRef}
-          autoFocus
-          className={`${seamlessInput ? 
-            "w-full resize-none text-9xl md:text-10xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[12rem]" : 
-            "w-full resize-none text-xl"}`}
-          placeholder=""
-          value={value}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          maxLength={maxLength}
-        />
-      </div>
+      <Textarea
+        ref={textareaRef}
+        autoFocus
+        className={`${seamlessInput ? 
+          "w-full resize-none text-9xl md:text-10xl font-bold bg-transparent rainbow-spin-border focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[12rem]" : 
+          "w-full resize-none text-xl"}`}
+        placeholder=""
+        value={value}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        maxLength={maxLength}
+      />
       <div className="flex justify-end">
         <span className="text-sm text-muted-foreground">{charCount}/{maxLength} characters</span>
       </div>

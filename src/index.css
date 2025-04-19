@@ -117,29 +117,33 @@
     @apply glass-card overflow-hidden animate-fade-in;
   }
 
-  .rainbow-border {
+  .rainbow-border-container {
     position: relative;
-    border: 2px solid transparent;
     border-radius: var(--radius);
-    background-clip: padding-box;
-    outline: none;
-  }
-
-  .rainbow-border::before {
-    content: "";
-    position: absolute;
-    top: -2px; 
-    left: -2px; 
-    right: -2px; 
-    bottom: -2px;
-    z-index: -1;
-    border-radius: calc(var(--radius) + 2px);
+    padding: 2px;
     background: linear-gradient(
       90deg,
       #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000
     );
     background-size: 400%;
     animation: moveBorder 4s linear infinite;
+  }
+
+  .rainbow-border-container::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: var(--background);
+    border-radius: calc(var(--radius) - 2px);
+    z-index: 0;
+  }
+
+  .rainbow-border-container textarea {
+    position: relative;
+    z-index: 1;
   }
 
   @keyframes moveBorder {

@@ -123,42 +123,16 @@
     border-radius: var(--radius);
     padding: 2px;
     overflow: hidden;
-  }
-
-  .rainbow-border-container::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius);
     background: conic-gradient(
       from 0deg,
       #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000
     );
     transform-origin: center center;
-    animation: spinBorder 20s linear infinite;
-    z-index: 0;
-  }
-
-  .rainbow-border-container::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    right: 2px;
-    bottom: 2px;
-    background: var(--background);
-    border-radius: calc(var(--radius) - 2px);
     z-index: 0;
   }
 
   .rainbow-border-container textarea {
     position: relative;
-    z-index: 1;
-  }
-
-  @keyframes spinBorder {
-    to {
-      transform: rotate(360deg);
-    }
+    z-index: -1;
   }
 }

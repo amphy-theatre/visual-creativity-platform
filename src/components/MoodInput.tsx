@@ -14,12 +14,10 @@ import TextAreaInput from "./TextAreaInput";
 
 interface MoodInputProps {
   initialValue?: string;
-  seamlessInput?: boolean;
 }
 
 const MoodInput: React.FC<MoodInputProps> = ({ 
   initialValue = "", 
-  seamlessInput = false 
 }) => {
   const [mood, setMood] = useState(initialValue);
   const [isLoading, setIsLoading] = useState(false);
@@ -233,7 +231,6 @@ const MoodInput: React.FC<MoodInputProps> = ({
         <div className="min-h-[120px] flex items-center justify-center">
           <TextAreaInput
             initialValue={initialValue}
-            seamlessInput={seamlessInput}
             onSubmit={handleSubmit}
             onChange={handleMoodChange}
             maxLength={200}

@@ -4,7 +4,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface TextAreaInputProps {
   initialValue: string;
-  seamlessInput?: boolean;
   onSubmit: () => void;
   onChange: (value: string) => void;
   maxLength?: number;
@@ -12,7 +11,6 @@ interface TextAreaInputProps {
 
 const TextAreaInput: React.FC<TextAreaInputProps> = ({
   initialValue = "",
-  seamlessInput = false,
   onSubmit,
   onChange,
   maxLength = 200
@@ -41,9 +39,7 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
         <Textarea
           ref={textareaRef}
           autoFocus
-          className={`${seamlessInput ? 
-            "w-full resize-none text-7xl md:text-9xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[100vh]" : 
-            "w-full resize-none text-xl"}`}
+          className={`w-full resize-none text-3xl md:text-4xl font-bold bg-transparent border-none shadow-none focus:ring-0 p-0 text-center placeholder:text-foreground/50 min-h-[40rem]`}
           placeholder=""
           value={value}
           onChange={handleInputChange}

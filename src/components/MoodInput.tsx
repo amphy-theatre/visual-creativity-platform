@@ -8,10 +8,9 @@ import { usePromptUsage } from "@/hooks/usePromptUsage";
 import PromptLimitModal from "./modals/PromptLimitModal";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAppConfig } from "@/hooks/useAppConfig";
-import AnimatedText from "./AnimatedText";
 import SubmitButton from "./SubmitButton";
 import CSVUploader from "./CSVUploader";
-import { phrases } from "../phrases";
+import TextAreaInput from "./TextAreaInput";
 
 interface MoodInputProps {
   initialValue?: string;
@@ -232,16 +231,13 @@ const MoodInput: React.FC<MoodInputProps> = ({
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
         <div className="min-h-[120px] flex items-center justify-center">
-          <AnimatedText
+          <TextAreaInput
             initialValue={initialValue}
-            texts={phrases}
-            typingSpeed={80} 
-            deletingSpeed={40} 
-            delayBetweenTexts={2000}
-            className="w-full"
-            onChange={handleMoodChange}
+            seamlessInput={seamlessInput}
             onSubmit={handleSubmit}
-          />
+            onChange={handleMoodChange}
+            maxLength={200}
+         />
         </div>
       </h1>
       <SubmitButton 

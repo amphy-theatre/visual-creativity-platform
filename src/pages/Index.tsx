@@ -4,12 +4,16 @@ import PresetMood from "../components/PresetMood";
 import FreeTrialBanner from "../components/FreeTrialBanner";
 import MoodInput from "../components/MoodInput";
 import { useAuth } from "../context/AuthContext";
-import { toast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
+import AnimatedText from "@/components/AnimatedText";
+import { phrases } from "../phrases";
 
 const Index: React.FC = () => {
   const { isGuestMode } = useAuth();
   const [inputValue, setInputValue] = useState("");
+  
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+  };
 
   return (
     <Layout>
@@ -17,6 +21,13 @@ const Index: React.FC = () => {
         {isGuestMode && <FreeTrialBanner />}
         
         <div className="text-center space-y-4 animate-fade-in">
+          <AnimatedText 
+            texts={phrases}
+            typingSpeed={80} 
+            deletingSpeed={40} 
+            delayBetweenTexts={2000}
+            className="inline-block"
+          />
           <MoodInput initialValue={inputValue}/>
         </div>
         

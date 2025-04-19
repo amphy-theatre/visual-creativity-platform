@@ -18,10 +18,10 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
-      <div className="space-y-16 pb-12">
+      <div className="space-y-24 pb-12">
         {isGuestMode && <FreeTrialBanner />}
         
-        <div className="text-center space-y-16 animate-fade-in">
+        <div className="text-center space-y-32 animate-fade-in">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
             <AnimatedText 
               texts={phrases}

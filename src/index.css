@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -121,12 +122,21 @@
     position: relative;
     border-radius: var(--radius);
     padding: 2px;
-    background: linear-gradient(
-      0deg,
+    overflow: hidden;
+  }
+
+  .rainbow-border-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    background: conic-gradient(
+      from 0deg,
       #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000
     );
-    background-size: 400% 400%;
-    animation: rotateBorder 4s linear infinite;
+    transform-origin: center center;
+    animation: spinBorder 4s linear infinite;
+    z-index: 0;
   }
 
   .rainbow-border-container::after {
@@ -146,8 +156,9 @@
     z-index: 1;
   }
 
-  @keyframes rotateBorder {
-    0% { background-position: 50% 0%; }
-    100% { background-position: 50% 400%; }
+  @keyframes spinBorder {
+    to {
+      transform: rotate(360deg);
+    }
   }
 }

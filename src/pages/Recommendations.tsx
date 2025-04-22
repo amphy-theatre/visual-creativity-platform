@@ -159,7 +159,9 @@ const Recommendations: React.FC = () => {
           return;
         }
       } else if (isGuestMode && !isTrialUsed) {
-        setTrialUsed(true);
+        setTimeout(() => {
+          setTrialUsed(true);
+        }, 20000)
       }
       
       const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {

@@ -12,7 +12,7 @@ const FreeTrialBanner: React.FC = () => {
   const config = useAppConfig();
   
   // Only show the banner if user is in guest mode AND has used their trial
-  if (!isGuestMode || !isTrialUsed) {
+  if (!isGuestMode) {
     return null;
   }
   

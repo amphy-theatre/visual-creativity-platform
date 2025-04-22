@@ -158,7 +158,7 @@ const MoodInput: React.FC<MoodInputProps> = ({
               throw new Error(`Failed to update prompt usage: ${usageError.message}`);
             }
           } else if (isGuestMode) {
-            setTrialUsed(true);
+            //setTrialUsed(true);
           }
           
           // Navigate directly to recommendations page

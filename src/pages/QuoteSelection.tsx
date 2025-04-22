@@ -23,7 +23,7 @@ const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { mood: initialMood, quotes: initialQuotes, promptUsage: initialPromptUsage } = location.state || { mood: "", quotes: [], promptUsage: null };
-  const { user, isGuestMode } = useAuth();
+  const { user, isGuestMode, isTrialUsed } = useAuth();
   
   const {
     displayQuotes,
@@ -70,7 +70,7 @@ const QuoteSelection: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-8">
-        {isGuestMode && <FreeTrialBanner />}
+        {isGuestMode && isTrialUsed && <FreeTrialBanner />}
         
         <div className="flex items-center">
           <Button 

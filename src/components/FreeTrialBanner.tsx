@@ -21,7 +21,7 @@ const FreeTrialBanner: React.FC = () => {
       <div className="flex items-center gap-3">
         <AlertCircle className="h-5 w-5" />
         <div className="flex-1">
-          <p>You've used your trial prompt. Sign up to continue using Amphytheatre. It's completely free!</p>
+          <p>If you like what you see, SIGN UP FOR FREE to continue using Amphytheatre! You get 50 prompts a month.</p>
           {config.environment === 'testing' && (
             <p className="mt-1 text-xs">
               <span className="font-semibold">Environment:</span> {config.environment} 
@@ -35,7 +35,7 @@ const FreeTrialBanner: React.FC = () => {
           onClick={() => navigate("/auth")}
           className="border-amber-800 text-amber-800 hover:bg-amber-100 dark:border-amber-200 dark:text-amber-200 dark:hover:bg-amber-900"
         >
-          Sign in
+          Sign in/up
         </Button>
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import TypeIt from 'typeit';
 
@@ -18,7 +17,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   className = "",
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
-  const typeItRef = useRef<TypeIt | null>(null);
+  const typeItRef = useRef<any>(null);
   const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
   const cycleCountRef = useRef<number>(0);
   
@@ -34,7 +33,9 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   }, [texts]);
   
   useEffect(() => {
-    if (!elementRef.current || !selectedPhrases.length) return;
+    const elementId = `typeit-${Math.random().toString(36).substring(7)}`;
+    if (!elementRef.current) return;
+    elementRef.current.id = elementId; // Assign the ID
     
     // Clean up previous instance
     if (typeItRef.current) {
@@ -50,8 +51,8 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       elementRef.current.innerHTML = '';
     }
     
-    // Create new TypeIt instance
-    const instance = new TypeIt(elementRef.current, {
+    // Create new TypeIt instance using the ID selector
+    const instance = new TypeIt(`#${elementId}`, {
       speed: typingSpeed,
       deleteSpeed: deletingSpeed,
       lifeLike: true,

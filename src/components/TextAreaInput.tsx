@@ -5,6 +5,8 @@ interface TextAreaInputProps {
   initialValue: string;
   onSubmit: () => void;
   onChange: (value: string) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   maxLength?: number;
   placeholder?: string;
 }
@@ -13,6 +15,8 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
   initialValue = "",
   onSubmit,
   onChange,
+  onFocus,
+  onBlur,
   maxLength = 200,
   placeholder = ""
 }) => {
@@ -47,6 +51,8 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onFocus={onFocus}
+          onBlur={onBlur}
           maxLength={maxLength}
           style={{ lineHeight: 'normal' }}
         />

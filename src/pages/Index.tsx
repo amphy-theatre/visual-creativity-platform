@@ -5,7 +5,6 @@ import FreeTrialBanner from "../components/FreeTrialBanner";
 import MoodInput from "../components/MoodInput";
 import { useAuth } from "../context/AuthContext";
 import AnimatedText from "@/components/AnimatedText";
-import { phrases } from "../phrases";
 
 const Index: React.FC = () => {
   const { isGuestMode } = useAuth();
@@ -17,20 +16,27 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
-      <div className="space-y-24 pb-12">
+      <div className="space-y-10 pb-12">
         {isGuestMode && <FreeTrialBanner />}
         
-        <div className="text-center space-y-16 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
-            <AnimatedText 
+        <div className="text-center space-y-2 animate-fade-in">
+          <h1 className="text-5xl md:text-6xl  text-center text-blue-500 mb-2 animate-fade-in">
+            Amphytheatre
+          </h1>
+          <h2 className="text-3xl md:text-4xl text-center text-foreground/80 mb-12 animate-fade-in">
+            Movies to match your mood
+          </h2>
+
+          <h1 className="text-4xl md:text-3xl text-foreground relative">
+            {/* <AnimatedText 
               texts={phrases}
               typingSpeed={80} 
               deletingSpeed={40} 
               delayBetweenTexts={2000}
               className="inline-block"
-            />
+            /> */}
           </h1>
-          <MoodInput initialValue={inputValue}/>
+            <MoodInput initialValue={inputValue}/>
         </div>
         
         <div className="opacity-80">

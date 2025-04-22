@@ -9,7 +9,8 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAppConfig } from "@/hooks/useAppConfig";
 import SubmitButton from "./SubmitButton";
 import CSVUploader from "./CSVUploader";
-import TextAreaInput from "./TextAreaInput";
+import AnimatedPlaceholderTextArea from "./AnimatedPlaceholderTextArea";
+import { phrases } from "../phrases";
 
 interface MoodInputProps {
   initialValue?: string;
@@ -225,15 +226,15 @@ const MoodInput: React.FC<MoodInputProps> = ({
     (isGuestMode && isTrialUsed));
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
+    <div className="w-full max-w-3xl mx-auto animate-fade-in">
       <h1 className="text-4xl md:text-5xl font-bold text-foreground relative">
         <div className="min-h-[120px] flex items-center justify-center py-8">
-          <TextAreaInput
+          <AnimatedPlaceholderTextArea 
             initialValue={initialValue}
             onSubmit={handleSubmit}
             onChange={handleMoodChange}
             maxLength={200}
-            placeholder="Type here..."
+            placeholderPhrases={phrases}
          />
         </div>
       </h1>
@@ -246,7 +247,7 @@ const MoodInput: React.FC<MoodInputProps> = ({
         loadingText={isAnalyzing ? "Analyzing your prompt..." : "Generating..."}
       />
       
-      <CSVUploader onCsvDataChange={setCsvData} />
+      {/* <CSVUploader onCsvDataChange={setCsvData} /> */}
       
       <PromptLimitModal
         open={showLimitModal}

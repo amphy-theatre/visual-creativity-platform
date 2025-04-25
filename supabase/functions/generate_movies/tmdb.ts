@@ -1,6 +1,5 @@
 import { Movie, StreamingProvider } from './types.ts';
 import { getProviderLogoUrl } from './providers.ts';
-import { axios } from "npm:axios";
 
 const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';

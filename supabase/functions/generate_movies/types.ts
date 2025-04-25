@@ -7,6 +7,7 @@ export interface StreamingProvider {
   
   export interface Movie {
     title: string;
+    director: string;
     description: string;
     link: string;
     posterUrl?: string;

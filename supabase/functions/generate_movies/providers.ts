@@ -23,6 +23,7 @@ export function getProviderLogoUrl(providerName: string): string {
     return [
       {
         title: "Inside Out",
+        director: "",
         description: "A heartwarming story about emotions and growing up.",
         posterUrl: "https://image.tmdb.org/t/p/w500/2AT32WI3iaGkVPzjcs9n0hQHtNw.jpg",
         link: "https://www.disneyplus.com/movies/inside-out",
@@ -36,6 +37,7 @@ export function getProviderLogoUrl(providerName: string): string {
       },
       {
         title: "Good Will Hunting",
+        director: "",
         description: "A janitor at MIT has a gift for mathematics but needs help from a psychologist to find direction.",
         posterUrl: "https://image.tmdb.org/t/p/w500/bABCBKYBK7A5G1x0wSB5no4Iscs.jpg",
         link: "https://www.netflix.com/title/17405997",
@@ -49,6 +51,7 @@ export function getProviderLogoUrl(providerName: string): string {
       },
       {
         title: "Soul",
+        director: "",
         description: "A musician who has lost his passion for music is transported out of his body and must find his way back.",
         posterUrl: "https://image.tmdb.org/t/p/w500/hm58Jw4Lw8OIeECIq5qyPYhAeRJ.jpg",
         link: "https://www.disneyplus.com/movies/soul",

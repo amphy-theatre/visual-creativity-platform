@@ -1,6 +1,5 @@
 import { Movie, StreamingProvider } from './types.ts';
 import { getProviderLogoUrl } from './providers.ts';
-import { axios } from "npm:axios";
 
 const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -26,21 +25,23 @@ async function searchMovie(title: string, director: string): Promise<any> {
       const movieId = movie.id;
 
       // Step 2: Get movie credits
-      const creditsResponse = await axios.get(`${TMDB_BASE_URL}/movie/${movieId}/credits`, {
-        params: { api_key: TMDB_API_KEY },
-      });
+      const creditsResponse = await fetch(
+        `${TMDB_BASE_URL}/movie/${movieId}/credits?api_key=${TMDB_API_KEY}`
+      );
 
-      const crew = creditsResponse.data.crew;
+
+      if (!creditsResponse.ok) {
+        console.error(`TMDB search failed for "${title}" credits: ${creditsResponse.status}`);
+        return null;
+      }
+      const creditsData = await creditsResponse.json();
+      const crew = creditsData.crew;
       const directors = crew.filter((person: any) => person.job === "Director");
 
       if (directors.some((d: any) => d.name.toLowerCase() === director.toLowerCase())) {
-        // Step 3: Get full movie details
-        const detailsResponse = await axios.get(`${TMDB_BASE_URL}/movie/${movieId}`, {
-          params: { api_key: TMDB_API_KEY },
-        });
-
-        return detailsResponse.data;
+        return movie;
       }
+      return null;
     }
   } catch (error) {
     console.error(`Error searching for movie "${title}":`, error);

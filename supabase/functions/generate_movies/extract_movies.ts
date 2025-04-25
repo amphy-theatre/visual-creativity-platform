@@ -21,7 +21,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     // Try to parse the cleaned JSON
     console.log('Attempting to parse cleaned JSON response');
     const parsedData = JSON.parse(cleanedResponse);
-    
+    console.log(parsedData)
     // Check if the expected structure exists
     if (parsedData && parsedData.items && Array.isArray(parsedData.items)) {
       const movies: Movie[] = parsedData.items.map((item: any) => ({

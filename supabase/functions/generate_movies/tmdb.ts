@@ -20,7 +20,9 @@ async function searchMovie(title: string): Promise<any> {
     }
     
     const data = await response.json();
-    return data.results && data.results.length > 0 ? data.results[0] : null;
+    if(!data || !data.results || !(data.results.length > 0)) return null;
+    const movies = data.results;
+    console.log(movies);
   } catch (error) {
     console.error(`Error searching for movie "${title}":`, error);
     return null;

@@ -11,6 +11,7 @@ import { useUserPreferences } from "../hooks/useUserPreferences";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
 import { useAnalytics } from "../hooks/useAnalytics";
 import AuthModal from "../components/AuthModal";
+import { useAppConfig } from "@/hooks/useAppConfig";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -46,7 +47,8 @@ const Recommendations: React.FC = () => {
   const { user, session, isGuestMode, isTrialUsed, setTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
   const { userPreferences } = useUserPreferences();
   const { trackEvent } = useAnalytics();
-  
+  const config = useAppConfig();
+
   const [recommendations, setRecommendations] = useState<RecommendationsResponse>(initialRecommendations || {
     movies: [
       {
@@ -158,11 +160,11 @@ const Recommendations: React.FC = () => {
         setTrialUsed(true);
       }
       
-      const response = await fetch('https://sdwuhuuyyrwzwyqdtdkb.supabase.co/functions/v1/generate_movies', {
+      const response = await fetch(config.edgeFunctions.generateMovies, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkd3VodXV5eXJ3end5cWR0ZGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNzQ4MDMsImV4cCI6MjA1NzY1MDgwM30.KChq8B3U0ioBkkK3CjqCmzilveHFTZEHXbE81HGhx28'}`
+          'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
         },
         body: JSON.stringify({
           selectedQuote: selectedQuote || ``,
@@ -271,7 +273,7 @@ const Recommendations: React.FC = () => {
             <div key={index} style={{ animationDelay: `${index * 0.1}s` }}>
               <MovieCard
                 title={movie.title}
-                image={movie.posterUrl || "https://source.unsplash.com/random/800x600/?movie"}
+                image={movie.posterUrl || ""}
                 description={movie.description}
                 rating={movie.rating || 0}
                 platforms={(movie.streamingProviders || []).map(provider => ({

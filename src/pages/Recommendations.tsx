@@ -210,7 +210,7 @@ const Recommendations: React.FC = () => {
   useEffect(() => {
     setTimeout(() => {
       setTrialUsed(true);
-    }, 5000)
+    }, 7500)
   })
 
   return (

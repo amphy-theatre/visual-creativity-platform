@@ -67,7 +67,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[92%] sm:max-w-[80%] md:max-w-[80%] lg:max-w-[80%] xl:max-w-[80%] p-0 border-gray-800 bg-transparent max-h-[90vh] sm:max-h-[80vh] overflow-auto sm:overflow-hidden rounded-lg">
+      <DialogContent className="w-[92%] sm:max-w-[80%] md:max-w-[80%] lg:max-w-[80%] xl:max-w-[80%] p-0 border-gray-800 bg-transparent max-h-[90vh] sm:max-h-[80vh] overflow-auto sm:overflow-hidden rounded-lg bg-[#0C111F]">
         <div className="flex flex-col lg:flex-row bg-[#0C111F] text-white rounded-lg relative">
           <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 bg-[#0C111F] ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-20">
             <X className="h-4 w-4 text-white" />
@@ -169,7 +169,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           </div>
           
           {/* Description area for mobile only - under the login section */}
-          <div className="px-6 py-6 lg:hidden pt-0">
+          <div className="px-6 py-6 lg:hidden pt-0 pb-0">
             <div className="max-w-lg mx-auto">
               <h2 className="text-2xl text-center mb-4">
                 Your Personal, Vibe-Based Movie Guide

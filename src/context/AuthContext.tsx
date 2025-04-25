@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +13,8 @@ type AuthContextType = {
   isGuestMode: boolean;
   setGuestMode: (enabled: boolean) => void;
   getRedirectUrl: () => string;
+  showAuthModal: boolean;
+  setShowAuthModal: (show: boolean) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,12 +28,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return storedValue ? JSON.parse(storedValue) : false;
   });
   const [isGuestMode, setGuestMode] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
 
   // Persist trial usage to session storage when it changes
   useEffect(() => {
     sessionStorage.setItem("trialUsed", JSON.stringify(isTrialUsed));
-  }, [isTrialUsed]);
+    
+    // Show auth modal when trial is used and user is in guest mode
+    if (isTrialUsed && isGuestMode) {
+      setShowAuthModal(true);
+    }
+  }, [isTrialUsed, isGuestMode]);
 
   // Function to determine the redirect URL based on origin
   const getRedirectUrl = (): string => {
@@ -56,7 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
         
         if (event === "SIGNED_OUT") {
-          navigate("/auth");
+          // Instead of redirecting to Auth page, just set guest mode
+          setGuestMode(true);
         }
       }
     );
@@ -86,7 +94,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTrialUsed, 
       isGuestMode, 
       setGuestMode,
-      getRedirectUrl
+      getRedirectUrl,
+      showAuthModal,
+      setShowAuthModal
     }}>
       {children}
     </AuthContext.Provider>

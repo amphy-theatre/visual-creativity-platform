@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound, Bug } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
@@ -7,6 +6,7 @@ import { Toggle } from "./ui/toggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useDebug } from "@/context/DebugContext";
+import AuthModal from "./AuthModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +21,7 @@ const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { debugMode, toggleDebugMode } = useDebug();
   const { user, signOut } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Check if we're in production environment
   const isProduction = () => {
@@ -42,11 +43,14 @@ const Header: React.FC = () => {
         
         <div className="flex-1 flex justify-end items-center space-x-4">
           {!user && location.pathname !== "/auth" && (
-            <Link to="/auth">
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
-                <LogIn className="h-5 w-5 text-primary" />
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-10 w-10 rounded-full"
+              onClick={() => setIsAuthModalOpen(true)}
+            >
+              <LogIn className="h-5 w-5 text-primary" />
+            </Button>
           )}
 
           {!isProduction() && (
@@ -95,6 +99,8 @@ const Header: React.FC = () => {
           )}
         </div>
       </div>
+      
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </header>
   );
 };

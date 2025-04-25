@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import PresetMood from "../components/PresetMood";
-import FreeTrialBanner from "../components/FreeTrialBanner";
 import MoodInput from "../components/MoodInput";
 import { useAuth } from "../context/AuthContext";
 import AnimatedText from "@/components/AnimatedText";
+import AuthModal from "@/components/AuthModal";
 
 const Index: React.FC = () => {
-  const { isGuestMode, isTrialUsed } = useAuth();
+  const { isGuestMode, isTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
   const [inputValue, setInputValue] = useState("");
   
   const handleInputChange = (value: string) => {
@@ -16,8 +16,12 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
-      <div className="space-y-10 pb-12">
-        {isGuestMode && isTrialUsed && <FreeTrialBanner />}
+      <div className="space-y-10 pb-12">        
+        {/* Auth Modal */}
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)} 
+        />
         
         <div className="text-center space-y-2 animate-fade-in">
           <h1 className="text-5xl md:text-6xl  text-center text-blue-500 mb-2 animate-fade-in">

@@ -273,7 +273,7 @@ const Recommendations: React.FC = () => {
             <div key={index} style={{ animationDelay: `${index * 0.1}s` }}>
               <MovieCard
                 title={movie.title}
-                image={movie.posterUrl || "https://source.unsplash.com/random/800x600/?movie"}
+                image={movie.posterUrl || ""}
                 description={movie.description}
                 rating={movie.rating || 0}
                 platforms={(movie.streamingProviders || []).map(provider => ({

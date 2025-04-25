@@ -27,11 +27,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
   const [imageRetries, setImageRetries] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
   
-  const fallbackImages = [
-    "https://source.unsplash.com/random/800x600/?movie",
-    "https://source.unsplash.com/random/800x600/?cinema",
-    "https://source.unsplash.com/random/800x600/?film",
-  ];
+  const fallbackImage = "https://picsum.photos/800/600";
   
   // Reset states when the image prop changes (new movie is loaded)
   useEffect(() => {
@@ -47,7 +43,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
     } else {
       // After 3 failed attempts, use a fallback image
       setImageFailed(true);
-      e.currentTarget.src = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+      e.currentTarget.src = fallbackImage;
     }
   };
 

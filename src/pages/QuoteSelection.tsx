@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -10,7 +9,7 @@ import QuoteList from "../components/QuoteList";
 import { useQuotes } from "../hooks/useQuotes";
 import PromptLimitModal from "../components/modals/PromptLimitModal";
 import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
-import FreeTrialBanner from "../components/FreeTrialBanner";
+import AuthModal from "@/components/AuthModal";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -23,7 +22,7 @@ const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { mood: initialMood, quotes: initialQuotes, promptUsage: initialPromptUsage } = location.state || { mood: "", quotes: [], promptUsage: null };
-  const { user, isGuestMode, isTrialUsed } = useAuth();
+  const { user, isGuestMode, isTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
   
   const {
     displayQuotes,
@@ -69,8 +68,12 @@ const QuoteSelection: React.FC = () => {
   
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto space-y-8">
-        {isGuestMode && isTrialUsed && <FreeTrialBanner />}
+      <div className="max-w-3xl mx-auto space-y-8">        
+        {/* Auth Modal */}
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)} 
+        />
         
         <div className="flex items-center">
           <Button 

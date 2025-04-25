@@ -2,18 +2,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route, useLocation } from "react-router-dom";
+import { HashRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
 import QuoteSelection from "./pages/QuoteSelection";
 import Recommendations from "./pages/Recommendations";
 import NotFound from "./pages/NotFound";
-import Auth from "./pages/Auth";
 import { AuthProvider } from "./context/AuthContext";
 import { DebugProvider } from "./context/DebugContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { useAnalytics } from "./hooks/useAnalytics";
+import AuthModal from "./components/AuthModal";
+import { useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,18 @@ const AnalyticsTracker = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// App wrapper with auth modal
+const AppWithAuth = ({ children }: { children: React.ReactNode }) => {
+  const { showAuthModal, setShowAuthModal } = useAuth();
+  
+  return (
+    <>
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      {children}
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <HashRouter>
@@ -44,38 +57,41 @@ const App = () => (
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <AnalyticsTracker>
-                      <Index />
-                    </AnalyticsTracker>
-                  </ProtectedRoute>
-                } />
-                <Route path="/quotes" element={
-                  <ProtectedRoute>
-                    <AnalyticsTracker>
-                      <QuoteSelection />
-                    </AnalyticsTracker>
-                  </ProtectedRoute>
-                } />
-                <Route path="/recommendations" element={
-                  <ProtectedRoute>
-                    <AnalyticsTracker>
-                      <Recommendations />
-                    </AnalyticsTracker>
-                  </ProtectedRoute>
-                } />
-                {/* This catch-all route ensures any unknown routes are handled by NotFound */}
-                <Route path="*" element={
-                  <ProtectedRoute>
-                    <AnalyticsTracker>
-                      <NotFound />
-                    </AnalyticsTracker>
-                  </ProtectedRoute>
-                } />
-              </Routes>
+              <AppWithAuth>
+                <Routes>
+                  {/* Redirect /auth to home page */}
+                  <Route path="/auth" element={<Navigate to="/" replace />} />
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <AnalyticsTracker>
+                        <Index />
+                      </AnalyticsTracker>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/quotes" element={
+                    <ProtectedRoute>
+                      <AnalyticsTracker>
+                        <QuoteSelection />
+                      </AnalyticsTracker>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/recommendations" element={
+                    <ProtectedRoute>
+                      <AnalyticsTracker>
+                        <Recommendations />
+                      </AnalyticsTracker>
+                    </ProtectedRoute>
+                  } />
+                  {/* This catch-all route ensures any unknown routes are handled by NotFound */}
+                  <Route path="*" element={
+                    <ProtectedRoute>
+                      <AnalyticsTracker>
+                        <NotFound />
+                      </AnalyticsTracker>
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+              </AppWithAuth>
             </TooltipProvider>
           </ThemeProvider>
         </DebugProvider>

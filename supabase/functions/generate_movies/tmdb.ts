@@ -5,11 +5,10 @@ const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 // Search for a movie by title and return basic info
-async function searchMovie(title: string, tmdbId: string): Promise<any> {
+async function searchMovie(title: string, imdbId: string): Promise<any> {
   try {
-    console.log(title, tmdbId)
     const response = await fetch(
-      `${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&include_adult=false`,
+      `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&include_adult=false`,
     );
     
     if (!response.ok) {
@@ -19,9 +18,18 @@ async function searchMovie(title: string, tmdbId: string): Promise<any> {
     
     const data = await response.json();
     if(!data || !data.results || !(data.results.length > 0)) return null;
-    const movie = data.results;
-    console.log(movie);
-    return movie;
+    const movies = data.results;
+    console.log(movies);
+
+    for (const movie of movies) {
+      const movieId = movie.id;
+
+      // Step 2: Get movie imdbId
+      const movieImdbId = movie.imdb_id
+
+
+      if (movieImdbId === imdbId) return movie;
+    }
   } catch (error) {
     console.error(`Error searching for movie "${title}":`, error);
     return null;
@@ -138,10 +146,10 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
     try {
       // Make sure the title is clean before searching
       const cleanTitle = movie.title.replace(/^\*+|\*+$/g, '').trim();
-      const tmdbId = movie.tmdbId.trim();
+      const cleanDirector = movie.director.replace(/^\*+|\*+$/g, '').trim();
       
       // Find the movie in TMDB
-      const tmdbMovie = await searchMovie(cleanTitle, tmdbId);
+      const tmdbMovie = await searchMovie(cleanTitle, cleanDirector);
       
       if (tmdbMovie) {
         // Get streaming providers

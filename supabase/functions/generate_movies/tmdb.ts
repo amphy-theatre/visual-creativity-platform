@@ -7,6 +7,7 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 // Search for a movie by title and return basic info
 async function searchMovie(title: string, tmdbId: string): Promise<any> {
   try {
+    console.log(title, tmdbId)
     const response = await fetch(
       `${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&include_adult=false`,
     );

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import TypeIt from 'typeit';
-
+import { phrases } from '@/phrases';
 interface AnimatedTextProps {
   texts: string[];
   typingSpeed?: number;
@@ -11,97 +11,60 @@ interface AnimatedTextProps {
 
 const AnimatedText: React.FC<AnimatedTextProps> = ({
   texts,
-  typingSpeed = 100,
-  deletingSpeed = 50,
+  typingSpeed = 130,
+  deletingSpeed = 100,
   delayBetweenTexts = 2000,
   className = "",
 }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const typeItRef = useRef<any>(null);
   const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
-  const cycleCountRef = useRef<number>(0);
-  
+  // const [typeItInstance, setTypeItInstance] = useState<typeof TypeIt | null>(null);
+  // const [startup, setStartup] = useState<boolean>(true);
+
   // Function to get 5 random phrases from the text array
   const getRandomPhrases = () => {
     const shuffled = [...texts].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 5);
   };
   
-  // Initialize or reset selected phrases
-  useEffect(() => {
-    setSelectedPhrases(getRandomPhrases());
-  }, [texts]);
-  
   useEffect(() => {
     const elementId = `typeit-${Math.random().toString(36).substring(7)}`;
     if (!elementRef.current) return;
     elementRef.current.id = elementId; // Assign the ID
-    
-    // Clean up previous instance
-    if (typeItRef.current) {
-      try {
-        typeItRef.current.destroy();
-      } catch (error) {
-        console.log('Error cleaning up previous TypeIt instance:', error);
-      }
-    }
-    
-    // Clear any existing content
-    if (elementRef.current) {
-      elementRef.current.innerHTML = '';
-    }
-    
-    // Create new TypeIt instance using the ID selector
+    setSelectedPhrases(getRandomPhrases());
+
     const instance = new TypeIt(`#${elementId}`, {
       speed: typingSpeed,
       deleteSpeed: deletingSpeed,
-      lifeLike: true,
       waitUntilVisible: true,
       cursor: true,
-      afterComplete: (instance) => {
-        // After completing all phrases, get new ones
-        cycleCountRef.current += 1;
-        
-        // After showing all five phrases, get a new batch
-        if (cycleCountRef.current >= selectedPhrases.length) {
-          cycleCountRef.current = 0;
-          setSelectedPhrases(getRandomPhrases());
-          
-          // This will cause a re-render and initialize a new TypeIt instance
-          return;
-        }
-        
-        // Continue with next phrase in current batch
-        instance.reset();
-        instance.go();
-      }
+      loop: true,
     });
-    
-    // Add each phrase to the instance
-    selectedPhrases.forEach((phrase, index) => {
+    instance.type("Ask Amphytheatre for ")
+    phrases.forEach(phrase => {
       instance.type(phrase)
-        .pause(delayBetweenTexts)
-        .delete();
-    });
-    
-    // Start the animation
+      .pause(delayBetweenTexts)
+      .delete(phrase.length)
+    })
+
     instance.go();
+    // setTypeItInstance(instance);
+  },[])
+
+  // // Initialize or reset selected phrases
+  // useEffect(() => {
+  //   setSelectedPhrases(getRandomPhrases());
+  // }, [texts]);
+  
+  // useEffect(() => {
+  //   if(startup) {
+  //     setStartup(false);
+  //   }
     
-    // Save the instance for cleanup
-    typeItRef.current = instance;
-    
-    // Cleanup function
-    return () => {
-      if (typeItRef.current) {
-        try {
-          typeItRef.current.destroy();
-          typeItRef.current = null;
-        } catch (error) {
-          console.log('Error during cleanup:', error);
-        }
-      }
-    };
-  }, [selectedPhrases, typingSpeed, deletingSpeed, delayBetweenTexts]);
+  //   typeItInstance.reset();
+  //   // Start the animation
+  // }, [selectedPhrases]);
   
   return (
     <div 

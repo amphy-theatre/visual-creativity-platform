@@ -20,7 +20,7 @@ const AnimatedPlaceholderTextArea: React.FC<AnimatedPlaceholderTextAreaProps> = 
   const [inputValue, setInputValue] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
 
-  const showPlaceholder = inputValue === "" && !isFocused;
+  const showPlaceholder = inputValue === "";
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
@@ -38,18 +38,18 @@ const AnimatedPlaceholderTextArea: React.FC<AnimatedPlaceholderTextAreaProps> = 
   return (
     <div className="relative w-full">
       {/* Animated Placeholder - Always rendered, controlled by opacity */}
-      {/* <div  */}
-        {/* className={`absolute inset-0 z-10 flex items-start justify-start text-left p-0 px-4 py-4 pointer-events-none transition-opacity duration-200 ${showPlaceholder ? 'opacity-100' : 'opacity-0'}`} */}
-      {/* > */}
+      <div 
+        className={`absolute inset-0 z-10 flex items-start justify-start text-left p-0 px-4 py-4 pointer-events-none transition-opacity duration-200 ${showPlaceholder ? 'opacity-100' : 'opacity-0'}`}
+      >
          {/* Match font size/weight/color with TextAreaInput's placeholder */}
-        {/* <AnimatedText
+        <AnimatedText
           texts={placeholderPhrases}
           typingSpeed={60}
           deletingSpeed={30}
           delayBetweenTexts={1500}
           className="text-xl md:text-2xl text-foreground/50 w-full"
-        /> */}
-      {/* </div> */}
+        />
+      </div>
 
       {/* Actual TextAreaInput */}
       <TextAreaInput
@@ -57,7 +57,7 @@ const AnimatedPlaceholderTextArea: React.FC<AnimatedPlaceholderTextAreaProps> = 
         onSubmit={onSubmit}
         onChange={handleInputChange} // Use the wrapper's handler
         maxLength={maxLength}
-        placeholder="Type anything..." // Clear the default placeholder
+        placeholder="" // Clear the default placeholder
         onFocus={handleFocus}
         onBlur={handleBlur}
       />

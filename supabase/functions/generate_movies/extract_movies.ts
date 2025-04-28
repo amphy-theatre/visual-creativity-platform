@@ -26,7 +26,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     if (parsedData && parsedData.items && Array.isArray(parsedData.items)) {
       const movies: Movie[] = parsedData.items.map((item: any) => ({
         title: item.title ? String(item.title).trim() : '',
-        director: item.director ? String(item.director).trim() : '',
+        tmdbId: item.tmdbId ? String(item.director).trim() : '',
         description: item.description ? String(item.description).trim() : '',
         link: '',
         streamingProviders: []
@@ -47,11 +47,11 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     // First, try to extract movie data with regex
     const movies: Movie[] = [];
     const movieTitleRegex = /"title":\s*"([^"]+)"/g;
-    const directorsRegex = /"title":\s*"([^"]+)"/g;
+    const tmdbIdRegex = /"tmdbId":\s*"([^"]+)"/g;
     const movieDescriptionRegex = /"description":\s*"([^"]+)"/g;
     
     const titles: string[] = [];
-    const directors: string[] = [];
+    const tmdbIds: string[] = [];
     const descriptions: string[] = [];
     
     // Extract all titles
@@ -61,9 +61,9 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     }
     
     // Extract all titles
-    let directorMatch;
-    while ((directorMatch = directorsRegex.exec(response)) !== null) {
-      directors.push(directorMatch[1].trim());
+    let tmdbMatch;
+    while ((tmdbMatch = tmdbIdRegex.exec(response)) !== null) {
+      tmdbIds.push(tmdbMatch[1].trim());
     }
     // Extract all descriptions
     let descMatch;
@@ -75,7 +75,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     for (let i = 0; i < Math.min(titles.length, descriptions.length); i++) {
       movies.push({
         title: titles[i].replace(/\\"/g, '"'),
-        director: directors[i].replace(/\\"/g, '"'),
+        tmdbId: tmdbIds[i].replace(/\\"/g, '"'),
         description: descriptions[i].replace(/\\"/g, '"')
           .replace(/\[\([^)]*\)\]/g, '') // Remove citations like [(example.com)]
           .replace(/\([^)]*\)/g, '')     // Remove citations like (example.com)

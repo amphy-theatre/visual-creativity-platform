@@ -34,12 +34,6 @@ export const useAnalytics = () => {
         properties.page_name = pageName;
       }
       
-      // Skip processing if the referrer is from lovable.dev
-      if (properties.referrer === "https://lovable.dev/") {
-        console.log('Skipping client-side analytics tracking for lovable.dev referrer');
-        return;
-      }
-      
       await fetch(config.edgeFunctions.trackAnalytics, {
         method: 'POST',
         headers: {

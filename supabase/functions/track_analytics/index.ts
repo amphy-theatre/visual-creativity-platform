@@ -16,18 +16,6 @@ serve(async (req) => {
   try {
     const { event_name, user_id, properties } = await req.json();
     
-    // Check if referrer is from lovable.dev and skip logging if it is
-    if (properties?.referrer === "https://lovable.dev/") {
-      console.log('Skipping analytics tracking for lovable.dev referrer');
-      return new Response(
-        JSON.stringify({ success: true, skipped: true }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200
-        }
-      );
-    }
-    
     // Get IP address from request headers
     const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';

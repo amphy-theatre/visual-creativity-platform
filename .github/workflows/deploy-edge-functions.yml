@@ -4,13 +4,14 @@ on:
   push:
     branches:
       - production  # Trigger on production branch pushes
-      - development # Trigger on development branch pushes
-      # Removed paths filter here, will check conditionally for development
+      - '**'       # Trigger on all other branch pushes
+    paths-ignore:
+      - '**.md'    # Ignore markdown files
+      - 'docs/**'  # Ignore docs directory
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Only run the job if it's a push to production OR (it's development AND files changed - checked in steps)
 
     steps:
       - name: Check out repository
@@ -23,9 +24,9 @@ jobs:
         with:
           version: latest
 
-      - name: Check for function changes on development branch
-        id: check-dev-changes
-        if: github.ref == 'refs/heads/development'
+      - name: Check for function changes
+        id: check-changes
+        if: github.ref != 'refs/heads/production'
         run: |
           echo "Checking for function changes in diff: ${{ github.event.before }}..${{ github.sha }}"
           git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "supabase/functions/" && echo "functions_changed=true" >> $GITHUB_OUTPUT || echo "functions_changed=false" >> $GITHUB_OUTPUT
@@ -33,33 +34,29 @@ jobs:
 
       - name: Set Supabase project variables
         id: set-vars
-        # Run if production push OR (development push AND functions changed)
-        if: github.ref == 'refs/heads/production' || (github.ref == 'refs/heads/development' && steps.check-dev-changes.outputs.functions_changed == 'true')
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/production" ]]; then
             echo "Using production environment credentials"
             echo "PROJECT_ID=${{ secrets.SUPABASE_PROJECT_ID }}" >> $GITHUB_OUTPUT
             echo "ACCESS_TOKEN=${{ secrets.SUPABASE_ACCESS_TOKEN }}" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref }}" == "refs/heads/development" ]]; then
+          else
             echo "Using testing environment credentials"
             echo "PROJECT_ID=${{ secrets.TESTING_PROJECT_ID }}" >> $GITHUB_OUTPUT
             echo "ACCESS_TOKEN=${{ secrets.TESTING_ACCESS_TOKEN }}" >> $GITHUB_OUTPUT
           fi
           cat $GITHUB_OUTPUT
 
-      - name: List modified functions (Development only)
+      - name: List modified functions (Non-Production)
         id: changed-files
-        if: github.ref == 'refs/heads/development' && steps.check-dev-changes.outputs.functions_changed == 'true'
+        if: github.ref != 'refs/heads/production' && steps.check-changes.outputs.functions_changed == 'true'
         run: |
-          # Ensure we use the same diff range as the check step
           MODIFIED_FUNCTIONS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "supabase/functions/" | cut -d'/' -f3 | sort -u)
           echo "Modified functions for deployment: $MODIFIED_FUNCTIONS"
-          # Format for use in the loop below
           echo "functions=$(echo $MODIFIED_FUNCTIONS | tr '\n' ' ')" >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
 
-      - name: Deploy modified functions (Development)
-        if: github.ref == 'refs/heads/development' && steps.check-dev-changes.outputs.functions_changed == 'true'
+      - name: Deploy modified functions (Non-Production)
+        if: github.ref != 'refs/heads/production' && steps.check-changes.outputs.functions_changed == 'true'
         env:
           SUPABASE_PROJECT_ID: ${{ steps.set-vars.outputs.PROJECT_ID }}
           SUPABASE_ACCESS_TOKEN: ${{ steps.set-vars.outputs.ACCESS_TOKEN }}

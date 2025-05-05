@@ -55,8 +55,8 @@ export async function getMovieRecommendations(
     
     Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
 
-    For each movie, provide ONLY the title, director, and a brief description without ANY citations, URLs, or references.
-    Format your response as a structured JSON output with an 'items' array containing objects with 'title' , 'director' and 'description' fields.
+    For each movie, provide ONLY the title, release year, and a brief description without ANY citations, URLs, or references.
+    Format your response as a structured JSON output with an 'items' array containing objects with 'title' , 'release_year' and 'description' fields.
     DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
     NEVER include any text outside of the JSON structure.`;
     
@@ -98,16 +98,16 @@ export async function getMovieRecommendations(
                       type: "string",
                       description: "Movie title only, no other text"
                     },
-                    director: { 
+                    release_year: { 
                       type: "string",
-                      description: "Name of the movie director only, no other text"
+                      description: "The YEAR the movie released only, no other text"
                     },
                     description: { 
                       type: "string",
                       description: "Brief description without any URLs, citations, or references"
                     },
                   },
-                  required: ["title", "director", "description"],
+                  required: ["title", "release_year", "description"],
                   additionalProperties: false,
                 }
               }

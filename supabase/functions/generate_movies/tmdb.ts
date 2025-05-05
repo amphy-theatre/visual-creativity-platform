@@ -5,7 +5,7 @@ const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 // Search for a movie by title and return basic info
-async function searchMovie(title: string, director: string): Promise<any> {
+async function searchMovie(title: string, release_year: string): Promise<any> {
   try {
     const response = await fetch(
       `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&include_adult=false`,
@@ -22,31 +22,18 @@ async function searchMovie(title: string, director: string): Promise<any> {
     console.log(movies);
 
     for (const movie of movies) {
-      const movieId = movie.id;
-
-      // Step 2: Get movie credits
-      const creditsResponse = await fetch(
-        `${TMDB_BASE_URL}/movie/${movieId}/credits?api_key=${TMDB_API_KEY}`
-      );
-
-
-      if (!creditsResponse.ok) {
-        console.error(`TMDB search failed for "${title}" credits: ${creditsResponse.status}`);
-        return null;
+      if (movie.release_date) {
+        const movieYear = movie.release_date.split('-')[0];
+        if (movieYear === release_year) {
+          return movie;
+        }
       }
-      const creditsData = await creditsResponse.json();
-      const crew = creditsData.crew;
-      const directors = crew.filter((person: any) => person.job === "Director");
-
-      if (directors.some((d: any) => d.name.toLowerCase() === director.toLowerCase())) {
-        return movie;
-      }
-      return null;
     }
   } catch (error) {
     console.error(`Error searching for movie "${title}":`, error);
     return null;
   }
+  return null;
 }
 
 // Get IMDb rating for a movie
@@ -159,10 +146,10 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
     try {
       // Make sure the title is clean before searching
       const cleanTitle = movie.title.replace(/^\*+|\*+$/g, '').trim();
-      const cleanDirector = movie.director.replace(/^\*+|\*+$/g, '').trim();
+      const cleanRelease = movie.release_year.trim();
       
       // Find the movie in TMDB
-      const tmdbMovie = await searchMovie(cleanTitle, cleanDirector);
+      const tmdbMovie = await searchMovie(cleanTitle, cleanRelease);
       
       if (tmdbMovie) {
         // Get streaming providers
@@ -176,7 +163,7 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
         
         // Get poster URL (if available)
         const posterUrl = tmdbMovie.poster_path 
-          ? `https://image.tmdb.org/t/p/w600_and_h900_bestv2${tmdbMovie.poster_path}`
+          ? `https://image.tmdb.org/t/p/original${tmdbMovie.poster_path}`
           : undefined;
         
         enrichedMovies.push({
@@ -196,6 +183,7 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
         });
       }
     } catch (error) {
+      console.log("");
       console.error(`Error enriching movie "${movie.title}":`, error);
       // Keep original movie in case of error
       enrichedMovies.push(movie);

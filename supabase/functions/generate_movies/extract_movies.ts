@@ -26,7 +26,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     if (parsedData && parsedData.items && Array.isArray(parsedData.items)) {
       const movies: Movie[] = parsedData.items.map((item: any) => ({
         title: item.title ? String(item.title).trim() : '',
-        director: item.director ? String(item.director).trim() : '',
+        release_year: item.release_year ? String(item.release_year).trim() : '',
         description: item.description ? String(item.description).trim() : '',
         link: '',
         streamingProviders: []
@@ -47,11 +47,11 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     // First, try to extract movie data with regex
     const movies: Movie[] = [];
     const movieTitleRegex = /"title":\s*"([^"]+)"/g;
-    const directorsRegex = /"title":\s*"([^"]+)"/g;
+    const releaseYearRegex = /"release_year":\s*"([^"]+)"/g;
     const movieDescriptionRegex = /"description":\s*"([^"]+)"/g;
     
     const titles: string[] = [];
-    const directors: string[] = [];
+    const release_years: string[] = [];
     const descriptions: string[] = [];
     
     // Extract all titles
@@ -61,9 +61,9 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     }
     
     // Extract all titles
-    let directorMatch;
-    while ((directorMatch = directorsRegex.exec(response)) !== null) {
-      directors.push(directorMatch[1].trim());
+    let releaseMatch;
+    while ((releaseMatch = releaseYearRegex.exec(response)) !== null) {
+      release_years.push(releaseMatch[1].trim());
     }
     // Extract all descriptions
     let descMatch;
@@ -75,7 +75,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     for (let i = 0; i < Math.min(titles.length, descriptions.length); i++) {
       movies.push({
         title: titles[i].replace(/\\"/g, '"'),
-        director: directors[i].replace(/\\"/g, '"'),
+        release_year: release_years[i].replace(/\\"/g, '"'),
         description: descriptions[i].replace(/\\"/g, '"')
           .replace(/\[\([^)]*\)\]/g, '') // Remove citations like [(example.com)]
           .replace(/\([^)]*\)/g, '')     // Remove citations like (example.com)
@@ -110,6 +110,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
         if (title) {
           movies.push({
             title: title,
+            release_year: "1234",
             description: description || `A film titled "${title}"`,
             link: '',
             streamingProviders: []

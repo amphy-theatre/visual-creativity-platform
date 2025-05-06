@@ -60,7 +60,7 @@ export async function getMovieRecommendations(
 
     For each movie, provide ONLY the title, release year, and a brief, quirky, engaging description that is relevant to the prompt.
 
-    YOU MUST FIND THE YEAR THAT THE MOVIE WAS RELEASED.`;
+    To find the release year of each movie, look up either the IMDB or wikipedia page for each movie.`;
     
     if (sanitizedPreviousMovies.length > 0) {
       instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;

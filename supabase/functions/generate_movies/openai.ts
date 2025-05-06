@@ -131,29 +131,38 @@ export async function getMovieRecommendations(
       temperature: 1.0,
       max_tokens: 300,
       response_format: JSON.stringify({
-        type: "object",
-        properties: {
-          items: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                title: { 
-                  type: "string",
-                  description: "Movie title only, no other text"
-                },
-                release_year: { 
-                  type: "string",
-                  description: "The YEAR the movie released only, no other text"
-                },
-                description: { 
-                  type: "string",
-                  description: "Brief description without any URLs, citations, or references"
-                },
-              },
-            }
+        type: "json_schema",
+        json_schema: {
+          schema: {
+            type: "object",
+            properties: {
+              items: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { 
+                      type: "string",
+                      description: "Movie title only, no other text"
+                    },
+                    release_year: { 
+                      type: "string",
+                      description: "The YEAR the movie released only, no other text"
+                    },
+                    description: { 
+                      type: "string",
+                      description: "Brief description without any URLs, citations, or references"
+                    },
+                  },
+                  required: ["title", "release_year", "description"],
+                  additionalProperties: false,
+                }
+              }
+            },
+            required: ["items"],
+            additionalProperties: false,
           }
-        },
+        }
       })
     };
 

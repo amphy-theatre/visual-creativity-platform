@@ -1,6 +1,8 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { OpenAI } from "npm:openai";
+import createDebug from "npm:debug";
+
+const debug = createDebug("generate_quote");
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,17 +47,39 @@ serve(async (req) => {
       throw new Error('Emotion cannot be empty');
     }
 
-    console.log('Generating quotes for emotion:', sanitizedEmotion);
+    debug('Generating quotes for emotion:', sanitizedEmotion);
     
     const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
     const openAIData = await openai.responses.create({
         model: "gpt-4.1-nano",
         tools: [],
-        instructions: 'Generate exactly 3 complete, meaningful quotes from movies (without attribution) based on the unique interpretations of the emotional content and meaning of the prompt. Each quote should be on its own line with no numbering. Keep quotes concise (under 100 characters each) but ensure they are complete thoughts.',
+        instructions: 'Generate exactly 3 complete, meaningful quotes from movies (without attribution) based on the unique interpretations of the emotional content and meaning of the prompt. Each quote should be concise (under 100 characters) but ensure they are complete thoughts.',
         input: `The user is feeling: ${sanitizedEmotion}. Provide 3 quotes from movies (9 to 15 words) that might resonate with this emotional state.`,
         temperature: 1.2,
         max_output_tokens: 250,
+        text: {
+          format: {
+            type: "json_schema",
+            name: "movie_quotes",
+            schema: {
+              type: "object",
+              properties: {
+                quotes: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                    description: "A complete movie quote without attribution"
+                  },
+                  minItems: 3,
+                  maxItems: 3
+                }
+              },
+              required: ["quotes"],
+              additionalProperties: false
+            }
+          }
+        }
     });
 
     if (!openAIData.output?.filter(op => op?.type == "message")[0].content[0].text) {
@@ -64,66 +88,38 @@ serve(async (req) => {
 
     const content = openAIData.output?.filter(op => op?.type == "message")[0].content[0].text;
     
-    // Split by newlines and filter empty lines
-    let quoteLines = content.split('\n').filter(line => line.trim() !== '');
-    
-    // Clean up quotes: remove numbering and quotes
-    quoteLines = quoteLines.map(line => {
-      // Remove numbering (e.g., "1.", "1)", etc.)
-      let cleaned = line.replace(/^\d+[\.\)\-]?\s*/, '');
+    // Parse the JSON response
+    let parsedContent;
+    try {
+      parsedContent = JSON.parse(content);
+    } catch (e) {
+      throw new Error('Invalid JSON response from OpenAI API');
+    }
+
+    if (!parsedContent.quotes || !Array.isArray(parsedContent.quotes)) {
+      throw new Error('Invalid response format from OpenAI API');
+    }
+
+    // Clean up quotes: remove quotes and any author attribution
+    const quotes = parsedContent.quotes.map((quote: string) => {
       // Remove quotes if present
-      cleaned = cleaned.replace(/^["']|["']$/g, '');
+      let cleaned = quote.replace(/^["']|["']$/g, '');
       // Remove any author attribution
       cleaned = cleaned.replace(/\s*[-–—]\s*.*$/, '');
       return cleaned.trim();
     });
-    
+
     // Ensure we have exactly 3 quotes
-    // If we have more, combine them to ensure we don't split quotes
-    const finalQuotes = [];
-    
-    // Try to intelligently combine potentially split quotes
-    if (quoteLines.length > 3) {
-      // Look for incomplete sentences or quotes that might be continuations
-      for (let i = 0; i < quoteLines.length; i++) {
-        const current = quoteLines[i];
-        
-        // If this is the start of a new quote (starts with capital letter)
-        if (i === 0 || /^[A-Z]/.test(current)) {
-          finalQuotes.push(current);
-        } else {
-          // This might be a continuation of the previous quote
-          const lastIndex = finalQuotes.length - 1;
-          if (lastIndex >= 0) {
-            // Check if the previous quote ends with punctuation
-            if (/[.!?]$/.test(finalQuotes[lastIndex])) {
-              // Previous quote seems complete, add this as a new one
-              finalQuotes.push(current);
-            } else {
-              // Combine with previous quote
-              finalQuotes[lastIndex] += ' ' + current;
-            }
-          } else {
-            finalQuotes.push(current);
-          }
-        }
-      }
-    } else {
-      // If we have 3 or fewer quotes, use them as is
-      finalQuotes.push(...quoteLines);
-    }
-    
-    // Ensure we have exactly 3 quotes
-    while (finalQuotes.length < 3) {
-      finalQuotes.push([
+    while (quotes.length < 3) {
+      quotes.push([
         "Rest is not a luxury, it is a necessity.",
         "Sometimes, the most productive thing you can do is to take a break.",
         "In the silence of rest, we find the strength to rise again."
-      ][finalQuotes.length]);
+      ][quotes.length]);
     }
     
     // Limit to exactly 3 quotes
-    const quotes = finalQuotes.slice(0, 3).map((text, index) => ({
+    const finalQuotes = quotes.slice(0, 3).map((text, index) => ({
       id: index + 1,
       text
     }));

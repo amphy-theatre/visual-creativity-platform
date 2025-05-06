@@ -4,6 +4,9 @@ import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
 import { enrichMoviesWithTMDBData } from './tmdb.ts';
 // import { OpenAI } from "npm:openai";
+import createDebug from "npm:debug";
+
+const debug = createDebug("movie_gen_ai");
 
 export async function getMovieRecommendations(
   selectedQuote?: string, 
@@ -34,10 +37,10 @@ export async function getMovieRecommendations(
     throw new Error('Emotion text is too long (maximum 500 characters)');
   }
 
-  console.log('Generating movie recommendations for quote:', sanitizedQuote);
-  if (sanitizedEmotion) console.log('Also considering emotion:', sanitizedEmotion);
-  if (sanitizedUserPreferences) console.log('User preferences from file summary:', sanitizedUserPreferences);
-  if (sanitizedPreviousMovies.length > 0) console.log('Excluding previously recommended movies:', sanitizedPreviousMovies);
+  debug('Generating movie recommendations for quote:', sanitizedQuote);
+  if (sanitizedEmotion) debug('Also considering emotion:', sanitizedEmotion);
+  if (sanitizedUserPreferences) debug('User preferences from file summary:', sanitizedUserPreferences);
+  if (sanitizedPreviousMovies.length > 0) debug('Excluding previously recommended movies:', sanitizedPreviousMovies);
 
   // const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
@@ -55,30 +58,35 @@ export async function getMovieRecommendations(
     - The user's style of writing.
     - pay attention to the WHOLE prompt and understand what it means in it's totality. Don't fixate on a single part.
 
-    The user may also provide a quote. If so, then analyze the quote for its meaning, themes and tone.
+    The user may also provide a quote. If so, then analyze the quote, paying attention to the following:
+    - theme.
+    - abstractness.
+    - message.
+    - tone.
 
-    Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
+    Use the information from your analysis as described above, to generate the THREE MOST RELEVANT movies that you can.
     
     For each movie, provide ONLY the title, release year, and a brief, concise description without ANY citations, URLs, or references.
     Format your response as a structured JSON output with an 'items' array containing objects with 'title', 'release_year' and 'description' fields.
     You can find the release year of the movie on imdb.com. ONLY THE FOUR DIGIT YEAR IT WAS RELEASED.
     DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
-    NEVER include any text outside of the JSON structure and ALWAYS keep your response UNDER 400 tokens.`
+    NEVER include any text outside of the JSON structure and ALWAYS keep your response UNDER 400 tokens.
+    `
     
     if (sanitizedPreviousMovies.length > 0) {
       instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;
     }
 
     // Build the input for OpenAI
-    let input = sanitizedEmotion != `` ? `Quote: "${sanitizedQuote}"\n` : ``;
-    input += `Emotion/Mood: ${sanitizedEmotion || 'Not specified'}`;
+    let input = `Emotion/Mood: ${sanitizedEmotion || 'Not specified'}`;
+    input += sanitizedQuote != `` ? `\nQuote: "${sanitizedQuote}"` : ``;
     
     // Add user preferences if available
     if (sanitizedUserPreferences) {
       input += `\nUser Preferences: ${sanitizedUserPreferences}`;
     }
     
-    // console.log("Sending request to OpenAI with model: gpt-4o-mini");
+    // debug("Sending request to OpenAI with model: gpt-4o-mini");
     
     // const openAIData = await openai.responses.create({
     //   model: "gpt-4o-mini",
@@ -168,7 +176,7 @@ export async function getMovieRecommendations(
       },
     };
 
-    console.log("Sending request to Sonar");
+    debug("Sending request to Sonar");
 
     const pplxData = await fetch(url, {
       method: 'POST',
@@ -187,16 +195,16 @@ export async function getMovieRecommendations(
       throw new Error('Invalid response from PPLX API');
     }
     
-    console.log("Raw PPLX response:", output);
+    debug("Raw PPLX response:", output);
   
     // Extract movies from the content using our more robust extraction
     let movies = extractMoviesFromResponse(output.choices[0].message.content);
     
-    console.log(`Extracted ${movies.length} movies from the response`);
+    debug(`Extracted ${movies.length} movies from the response`);
     
     // Ensure we have exactly 3 movies
     if (movies.length < 3) {
-      console.log(`Only extracted ${movies.length} movies, adding fallback movies`);
+      debug(`Only extracted ${movies.length} movies, adding fallback movies`);
       
       // Add fallback movies if we don't have enough
       const fallbackMovies = getFallbackMovies();
@@ -236,7 +244,7 @@ export async function getMovieRecommendations(
   } catch (error) {
     console.error('Error in getMovieRecommendations:', error);
     // Return fallback movies if OpenAI fails
-    console.log('Using fallback movies due to API error');
+    debug('Using fallback movies due to API error');
     const fallbackMovies = getFallbackMovies();
     return fallbackMovies.slice(0, 3);
   }

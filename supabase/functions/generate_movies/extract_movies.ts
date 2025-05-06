@@ -1,9 +1,12 @@
 
 import { Movie } from './types.ts';
+import createDebug from "npm:debug";
+
+const debug = createDebug("movie_extraction");
 
 export function extractMoviesFromResponse(response: string): Movie[] {
   if (!response || typeof response !== 'string') {
-    console.log('Invalid response received:', response);
+    debug('Invalid response received:', response);
     return [];
   }
 
@@ -19,9 +22,9 @@ export function extractMoviesFromResponse(response: string): Movie[] {
     cleanedResponse = cleanedResponse.replace(/https?:\/\/\S+/g, '');
     
     // Try to parse the cleaned JSON
-    console.log('Attempting to parse cleaned JSON response');
+    debug('Attempting to parse cleaned JSON response');
     const parsedData = JSON.parse(cleanedResponse);
-    console.log(parsedData)
+    debug(parsedData)
     // Check if the expected structure exists
     if (parsedData && parsedData.items && Array.isArray(parsedData.items)) {
       const movies: Movie[] = parsedData.items.map((item: any) => ({
@@ -32,14 +35,14 @@ export function extractMoviesFromResponse(response: string): Movie[] {
         streamingProviders: []
       }));
       
-      console.log(`Successfully extracted ${movies.length} movies from JSON structure`);
+      debug(`Successfully extracted ${movies.length} movies from JSON structure`);
       return movies;
     }
     
-    console.log('JSON did not contain expected "items" array structure, using fallback extraction');
+    debug('JSON did not contain expected "items" array structure, using fallback extraction');
   } catch (error) {
     console.error('Error parsing JSON response:', error);
-    console.log('Falling back to regex extraction methods');
+    debug('Falling back to regex extraction methods');
   }
 
   // Fallback to regex extraction if JSON parsing fails
@@ -85,7 +88,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
       });
     }
     
-    console.log(`Extracted ${movies.length} movies using regex`);
+    debug(`Extracted ${movies.length} movies using regex`);
     
     // If we successfully extracted movies with regex, return them
     if (movies.length > 0) {
@@ -119,7 +122,7 @@ export function extractMoviesFromResponse(response: string): Movie[] {
       }
     }
     
-    console.log(`Extracted ${movies.length} movies using fallback method`);
+    debug(`Extracted ${movies.length} movies using fallback method`);
     return movies;
   } catch (error) {
     console.error('Error extracting movies from response:', error);

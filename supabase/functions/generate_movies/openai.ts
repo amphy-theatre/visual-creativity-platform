@@ -58,9 +58,9 @@ export async function getMovieRecommendations(
     
     Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
 
-    For each movie, provide ONLY the title, release year, and a brief, quirky, engaging description that is relevant to the prompt.
-
-    To find the release year of each movie, look up either the IMDB or wikipedia page for each movie.`;
+    For each movie, provide ONLY the title, release year, and a brief description that is relevant to the prompt.
+    
+    MAKE SURE TO FIND ALL THREE PIECES OF INFORMATION FOR ALL OF THE MOVIES.`;
     
     if (sanitizedPreviousMovies.length > 0) {
       instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;
@@ -162,7 +162,15 @@ export async function getMovieRecommendations(
             additionalProperties: false
           }
         }
-      }
+      },
+      search_domain_filter: [
+        "wikipedia.org",
+        "imdb.com",
+        "rottentomatoes.com",
+        "metacritic.com",
+        "letterboxd.com",
+        "indiewire.com"
+    ]
     };
 
     console.log("Sending request to Sonar");

@@ -50,8 +50,7 @@ serve(async (req) => {
     const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
     const openAIData = await openai.responses.create({
-        model: "gpt-4o-mini",
-        tools: [],
+        model: "gpt-4.1-nano",
         instructions: 'Determine if a prompt is "figurative" (metaphorical, emotional, abstract) or "literal" (concrete, specific, direct request). Respond with ONLY the word "figurative" or "literal".',
         input: sanitizedPrompt,
         temperature: 0.2,

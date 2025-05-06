@@ -46,21 +46,24 @@ export async function getMovieRecommendations(
     const token : string = Deno.env.get('PPLX_API_KEY'); // Replace with your actual token
 
     // Build the input for OpenAI with improved instructions
-    let instructions = `SEARCH THE WEB to generate EXACTLY 3 movie recommendations based on the input provided.
-    
+    let instructions = `Generate EXACTLY 3 movie recommendations based on the input that the user provides.
+
     Analyse the user's prompt with the following guidelines:
     - If the user references any movies, extract information about the TONE, plot devices, THEMES and characters.
     - How abstract or literal the prompt is,
     - How specific the prompt is.
     - The user's style of writing.
+    - pay attention to the WHOLE prompt and understand what it means in it's totality. Don't fixate on a single part.
 
     The user may also provide a quote. If so, then analyze the quote for its meaning, themes and tone.
-    
-    Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
 
-    For each movie, provide ONLY the title, release year, and a brief description that is relevant to the prompt.
+    Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
     
-    MAKE SURE TO FIND ALL THREE PIECES OF INFORMATION FOR ALL OF THE MOVIES.`;
+    For each movie, provide ONLY the title, release year, and a brief, concise description without ANY citations, URLs, or references.
+    Format your response as a structured JSON output with an 'items' array containing objects with 'title', 'release_year' and 'description' fields.
+    You can find the release year of the movie on imdb.com. ONLY THE FOUR DIGIT YEAR IT WAS RELEASED.
+    DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
+    NEVER include any text outside of the JSON structure and ALWAYS keep your response UNDER 400 tokens.`
     
     if (sanitizedPreviousMovies.length > 0) {
       instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;
@@ -128,7 +131,7 @@ export async function getMovieRecommendations(
         { role: 'user', content: input }
       ],
       temperature: 1.0,
-      max_tokens: 300,
+      max_tokens: 800,
       response_format: {
         type: "json_schema",
         json_schema: {
@@ -145,7 +148,7 @@ export async function getMovieRecommendations(
                       description: "Movie title only, no other text"
                     },
                     release_year: { 
-                      type: "string",
+                      type: "number",
                       description: "The YEAR the movie released only, no other text"
                     },
                     description: { 
@@ -163,15 +166,6 @@ export async function getMovieRecommendations(
           }
         }
       },
-      search_domain_filter: [
-        "wikipedia.org",
-        "imdb.com",
-        "rottentomatoes.com",
-        "metacritic.com",
-        "letterboxd.com",
-        "indiewire.com",
-        "google.com"
-    ]
     };
 
     console.log("Sending request to Sonar");

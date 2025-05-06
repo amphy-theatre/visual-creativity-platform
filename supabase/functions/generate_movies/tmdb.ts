@@ -23,8 +23,9 @@ async function searchMovie(title: string, release_year: string): Promise<any> {
 
     for (const movie of movies) {
       if (movie.release_date) {
-        const movieYear = movie.release_date.split('-')[0];
-        if (movieYear === release_year) {
+        const movieYear = Number(movie.release_date.split('-')[0]);
+        const diff = movieYear - Number(release_year);
+        if (diff * diff == 1) {
           return movie;
         }
       }

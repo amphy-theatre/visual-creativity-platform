@@ -130,7 +130,7 @@ export async function getMovieRecommendations(
       ],
       temperature: 1.0,
       max_tokens: 300,
-      response_format: JSON.stringify({
+      response_format: {
         type: "json_schema",
         json_schema: {
           schema: {
@@ -155,15 +155,15 @@ export async function getMovieRecommendations(
                     },
                   },
                   required: ["title", "release_year", "description"],
-                  additionalProperties: false,
+                  additionalProperties: false
                 }
               }
             },
             required: ["items"],
-            additionalProperties: false,
+            additionalProperties: false
           }
         }
-      })
+      }
     };
 
     console.log("Sending request to Sonar");

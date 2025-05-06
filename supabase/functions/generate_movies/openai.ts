@@ -173,7 +173,7 @@ export async function getMovieRecommendations(
     
     if (!output) {
       console.error('Invalid or empty response from OpenAI API');
-      throw new Error('Invalid response from OpenAI API');
+      throw new Error('Invalid response from PPLX API');
     }
     
     console.log("Raw PPLX response:", output);

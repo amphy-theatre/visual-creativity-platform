@@ -3,7 +3,7 @@ import { extractMoviesFromResponse } from './extract_movies.ts';
 import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
 import { enrichMoviesWithTMDBData } from './tmdb.ts';
-import { OpenAI } from "npm:openai";
+// import { OpenAI } from "npm:openai";
 
 export async function getMovieRecommendations(
   selectedQuote?: string, 
@@ -39,9 +39,12 @@ export async function getMovieRecommendations(
   if (sanitizedUserPreferences) console.log('User preferences from file summary:', sanitizedUserPreferences);
   if (sanitizedPreviousMovies.length > 0) console.log('Excluding previously recommended movies:', sanitizedPreviousMovies);
 
-  const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
+  // const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
   try {
+    const url = 'https://api.perplexity.ai/chat/completions';
+    const token : string = Deno.env.get('PPLX_API_KEY'); // Replace with your actual token
+
     // Build the input for OpenAI with improved instructions
     let instructions = `SEARCH THE WEB to generate EXACTLY 3 movie recommendations based on the input provided.
     
@@ -51,7 +54,7 @@ export async function getMovieRecommendations(
     - How specific the prompt is.
     - The user's style of writing.
 
-    The user may also provide a quote. If so, then analyze the quote for it's meaning, themes and tone.
+    The user may also provide a quote. If so, then analyze the quote for its meaning, themes and tone.
     
     Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
 
@@ -63,7 +66,7 @@ export async function getMovieRecommendations(
     if (sanitizedPreviousMovies.length > 0) {
       instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;
     }
-    
+
     // Build the input for OpenAI
     let input = sanitizedEmotion != `` ? `Quote: "${sanitizedQuote}"\n` : ``;
     input += `Emotion/Mood: ${sanitizedEmotion || 'Not specified'}`;
@@ -73,65 +76,110 @@ export async function getMovieRecommendations(
       input += `\nUser Preferences: ${sanitizedUserPreferences}`;
     }
     
-    console.log("Sending request to OpenAI with model: gpt-4o-mini");
+    // console.log("Sending request to OpenAI with model: gpt-4o-mini");
     
-    const openAIData = await openai.responses.create({
-      model: "gpt-4o-mini",
-      tools: [{ type: "web_search_preview" }],
-      instructions: instructions,
-      input: input,
-      temperature: 1.0,
-      max_output_tokens: 500,
-      text: {
-        format: {
-          type: "json_schema",
-          name: "movie_recommendations",
-          schema: {
-            type: "object",
-            properties: {
-              items: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    title: { 
-                      type: "string",
-                      description: "Movie title only, no other text"
-                    },
-                    release_year: { 
-                      type: "string",
-                      description: "The YEAR the movie released only, no other text"
-                    },
-                    description: { 
-                      type: "string",
-                      description: "Brief description without any URLs, citations, or references"
-                    },
-                  },
-                  required: ["title", "release_year", "description"],
-                  additionalProperties: false,
-                }
-              }
-            },
-            required: ["items"],
-            additionalProperties: false,
-          }
-        }
-      }
-    });
+    // const openAIData = await openai.responses.create({
+    //   model: "gpt-4o-mini",
+    //   tools: [{ type: "web_search_preview" }],
+    //   instructions: instructions,
+    //   input: input,
+    //   temperature: 1.0,
+    //   max_output_tokens: 500,
+    //   text: {
+    //     format: {
+    //       type: "json_schema",
+    //       name: "movie_recommendations",
+    //       schema: {
+    //         type: "object",
+    //         properties: {
+    //           items: {
+    //             type: "array",
+    //             items: {
+    //               type: "object",
+    //               properties: {
+    //                 title: { 
+    //                   type: "string",
+    //                   description: "Movie title only, no other text"
+    //                 },
+    //                 release_year: { 
+    //                   type: "string",
+    //                   description: "The YEAR the movie released only, no other text"
+    //                 },
+    //                 description: { 
+    //                   type: "string",
+    //                   description: "Brief description without any URLs, citations, or references"
+    //                 },
+    //               },
+    //               required: ["title", "release_year", "description"],
+    //               additionalProperties: false,
+    //             }
+    //           }
+    //         },
+    //         required: ["items"],
+    //         additionalProperties: false,
+    //       }
+    //     }
+    //   }
+    // });
   
+    const requestData = {
+      model: 'sonar',
+      messages: [
+        { role: 'system', content: instructions },
+        { role: 'user', content: input }
+      ],
+      temperature: 1.0,
+      max_tokens: 300,
+      response_format: {
+        type: "object",
+        properties: {
+          items: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { 
+                  type: "string",
+                  description: "Movie title only, no other text"
+                },
+                release_year: { 
+                  type: "string",
+                  description: "The YEAR the movie released only, no other text"
+                },
+                description: { 
+                  type: "string",
+                  description: "Brief description without any URLs, citations, or references"
+                },
+              },
+            }
+          }
+        },
+      }
+    };
+
+    console.log("Sending request to Sonar");
+
+    const pplxData = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestData)
+    })
+
     // Safely access the response content
-    const output = openAIData.output?.filter(op => op?.type === "message");
-    const content = output?.[0]?.content?.[0]?.text;
+    const output = await pplxData.json()
     
-    if (!content) {
+    if (!output) {
       console.error('Invalid or empty response from OpenAI API');
       throw new Error('Invalid response from OpenAI API');
     }
     
-    console.log("Raw OpenAI response:", content);
+    console.log("Raw PPLX response:", output);
   
     // Extract movies from the content using our more robust extraction
-    let movies = extractMoviesFromResponse(content);
+    let movies = extractMoviesFromResponse(output);
     
     console.log(`Extracted ${movies.length} movies from the response`);
     

@@ -58,10 +58,9 @@ export async function getMovieRecommendations(
     
     Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
 
-    For each movie, provide ONLY the title, release year, and a brief description without ANY citations, URLs, or references.
-    Format your response as a structured JSON output with an 'items' array containing objects with 'title' , 'release_year' and 'description' fields.
-    DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
-    NEVER include any text outside of the JSON structure.`;
+    For each movie, provide ONLY the title, release year, and a brief, quirky, engaging description that is relevant to the prompt.
+
+    YOU MUST FIND THE YEAR THAT THE MOVIE WAS RELEASED.`;
     
     if (sanitizedPreviousMovies.length > 0) {
       instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;
@@ -188,7 +187,7 @@ export async function getMovieRecommendations(
     console.log("Raw PPLX response:", output);
   
     // Extract movies from the content using our more robust extraction
-    let movies = extractMoviesFromResponse(output);
+    let movies = extractMoviesFromResponse(output.choices[0].message.content);
     
     console.log(`Extracted ${movies.length} movies from the response`);
     

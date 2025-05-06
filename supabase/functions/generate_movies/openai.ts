@@ -169,7 +169,8 @@ export async function getMovieRecommendations(
         "rottentomatoes.com",
         "metacritic.com",
         "letterboxd.com",
-        "indiewire.com"
+        "indiewire.com",
+        "google.com"
     ]
     };
 

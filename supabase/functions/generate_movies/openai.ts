@@ -130,7 +130,7 @@ export async function getMovieRecommendations(
       ],
       temperature: 1.0,
       max_tokens: 300,
-      response_format: {
+      response_format: JSON.stringify({
         type: "object",
         properties: {
           items: {
@@ -154,7 +154,7 @@ export async function getMovieRecommendations(
             }
           }
         },
-      }
+      })
     };
 
     console.log("Sending request to Sonar");

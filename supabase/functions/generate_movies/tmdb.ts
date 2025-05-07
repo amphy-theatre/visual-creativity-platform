@@ -1,6 +1,6 @@
 import { Movie, StreamingProvider } from './types.ts';
 import { getProviderLogoUrl } from './providers.ts';
-import createDebug from "npm:debug";
+import { createDebug } from "@grammyjs/debug";
 
 const debug = createDebug("movie_tmdb");
 

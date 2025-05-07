@@ -1,6 +1,6 @@
 
 import { Movie } from './types.ts';
-import createDebug from "npm:debug";
+import { createDebug } from "@grammyjs/debug";
 
 const debug = createDebug("movie_extraction");
 

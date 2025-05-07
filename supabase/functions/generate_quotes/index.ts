@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { OpenAI } from "npm:openai";
-import createDebug from "npm:debug";
+import { createDebug } from "@grammyjs/debug";
 
 const debug = createDebug("generate_quote");
 

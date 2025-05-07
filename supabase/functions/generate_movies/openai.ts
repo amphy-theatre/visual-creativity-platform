@@ -4,7 +4,7 @@ import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
 import { enrichMoviesWithTMDBData } from './tmdb.ts';
 // import { OpenAI } from "npm:openai";
-import createDebug from "npm:debug";
+import { createDebug } from "@grammyjs/debug";
 
 const debug = createDebug("movie_gen_ai");
 

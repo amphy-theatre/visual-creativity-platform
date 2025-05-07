@@ -52,7 +52,7 @@ export async function getMovieRecommendations(
   - Note any style cues from a user quote (TONE, pacing, keywords).
 
 2. *Select 3 Highly Specific Films*
-  - Choose exactly three titles that perfectly embody the user's input.
+  - SEARCH THE WEB TO GENERATE exactly THREE DISTINCT titles that perfectly embody the user's input.
   - Avoid generic “genre-staples” AND DO NOT REPEAT films previously recommended in this session.
   - Ensure each pick is distinct in era, director, or cultural background to add richness.
 
@@ -67,7 +67,7 @@ export async function getMovieRecommendations(
 4. *Session Memory*
   - The user will tell you which movies you have recommended before. Do not repeat those.
 
-When the user types their prompt (trope, mood, quote, etc.), SEARCH THE WEB FOR RELEVANT MOVIES and apply these rules to generate the perfect curated list.`
+When the user types their prompt (trope, mood, quote, etc.), apply these rules to generate the perfect curated list.`
 
     // Build the input for OpenAI
     let input = `User input: ${sanitizedEmotion || 'Not specified'}`;
@@ -87,11 +87,11 @@ When the user types their prompt (trope, mood, quote, etc.), SEARCH THE WEB FOR 
       model: "gpt-4o-mini",
       tools: [{
         type: "web_search_preview",
-        search_context_size: "low",
+        search_context_size: "high",
       }],
       instructions: instructions,
       input: input,
-      temperature: 1.0,
+      temperature: 1.3,
       max_output_tokens: 500,
       text: {
         format: {

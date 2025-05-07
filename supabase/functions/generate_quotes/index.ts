@@ -101,13 +101,7 @@ serve(async (req) => {
     debugLog(parsedContent);
 
     // Clean up quotes: remove quotes and any author attribution
-    const quotes = parsedContent.quotes.map((quote: string) => {
-      // Remove quotes if present
-      let cleaned = quote.replace(/^["']|["']$/g, '');
-      // Remove any author attribution
-      cleaned = cleaned.replace(/\s*[-–—]\s*.*$/, '');
-      return cleaned.trim();
-    });
+    const quotes = parsedContent.quotes
 
     // Ensure we have exactly 3 quotes
     while (quotes.length < 3) {
@@ -117,15 +111,9 @@ serve(async (req) => {
         "In the silence of rest, we find the strength to rise again."
       ][quotes.length]);
     }
-    
-    // Limit to exactly 3 quotes
-    const finalQuotes = quotes.slice(0, 3).map((text, index) => ({
-      id: index + 1,
-      text
-    }));
 
     return new Response(
-      JSON.stringify({ finalQuotes }),
+      JSON.stringify({ quotes }),
       { 
         headers: { 
           ...corsHeaders, 

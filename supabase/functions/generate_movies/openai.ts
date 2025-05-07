@@ -88,6 +88,10 @@ When the user types their prompt (trope, mood, quote, etc.), apply these rules t
       tools: [{
         type: "web_search_preview",
         search_context_size: "high",
+        user_location: {
+            "type": "approximate",
+            "country": "US",
+        }
       }],
       instructions: instructions,
       input: input,

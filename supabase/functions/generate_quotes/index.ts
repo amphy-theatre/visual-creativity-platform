@@ -54,7 +54,7 @@ serve(async (req) => {
     const openAIData = await openai.responses.create({
         model: "gpt-4.1-nano",
         tools: [],
-        instructions: 'Generate exactly 3 complete, meaningful quotes from movies (without attribution) based on the unique interpretations of the emotional content and meaning of the prompt. Each quote should be concise (under 100 characters) but ensure they are complete thoughts.',
+        instructions: 'Generate EXACTLY THREE complete, meaningful quotes from movies (without attribution) based on the unique interpretations of the emotional content and meaning of the prompt. Each quote should be concise (under 100 characters) but ensure they are complete thoughts.',
         input: `The user is feeling: ${sanitizedEmotion}. Provide 3 quotes from movies (9 to 15 words) that might resonate with this emotional state.`,
         temperature: 1.2,
         max_output_tokens: 250,
@@ -71,8 +71,6 @@ serve(async (req) => {
                     type: "string",
                     description: "A complete movie quote without attribution"
                   },
-                  minItems: 3,
-                  maxItems: 3
                 }
               },
               required: ["quotes"],

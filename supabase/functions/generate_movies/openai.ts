@@ -2,7 +2,7 @@ import { extractMoviesFromResponse } from './extract_movies.ts';
 import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
 import { enrichMoviesWithTMDBData } from './tmdb.ts';
-// import { OpenAI } from "npm:openai";
+import { OpenAI } from "npm:openai";
 import { debug } from "../_utils/debug.ts";
 
 const debugLog = debug("movie_gen_ai");
@@ -41,107 +41,62 @@ export async function getMovieRecommendations(
   if (sanitizedUserPreferences) debugLog('User preferences from file summary:', sanitizedUserPreferences);
   if (sanitizedPreviousMovies.length > 0) debugLog('Excluding previously recommended movies:', sanitizedPreviousMovies);
 
-  // const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
+  const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
   try {
-    const url = 'https://api.perplexity.ai/chat/completions';
-    const token : string = Deno.env.get('PPLX_API_KEY'); // Replace with your actual token
-
     // Build the input for OpenAI with improved instructions
-    let instructions = `Generate EXACTLY 3 movie recommendations based on the input that the user provides.
+    let instructions = `You are an expert AI movie curator. A user will submit a trope, mood, vibe or brief scene description, and might submit a quote. You must:
+1. *Parse & Prioritize*
+  - Identify the core emotion or atmosphere (e.g. wistful nostalgia, high-octane suspense, bittersweet romance).
+  - Detect any explicit tropes or motifs (e.g. “enemies-to-lovers,” “last-man-standing,” “road trip”).
+  - Note any style cues from a user quote (TONE, pacing, keywords).
 
-    Analyse the user's prompt with the following guidelines:
-    - If the user references any movies, extract information about the TONE, plot devices, THEMES and characters.
-    - How abstract or literal the prompt is,
-    - How specific the prompt is.
-    - The user's style of writing.
-    - pay attention to the WHOLE prompt and understand what it means in it's totality. Don't fixate on a single part.
+2. *Select 3 Highly Specific Films*
+  - Choose exactly three titles that perfectly embody the user's input.
+  - Avoid generic “genre-staples” AND DO NOT REPEAT films previously recommended in this session.
+  - Ensure each pick is distinct in era, director, or cultural background to add richness.
 
-    The user may also provide a quote. If so, then analyze the quote, paying attention to the following:
-    - theme.
-    - abstractness.
-    - message.
-    - tone.
+3. *Output Requirements*
+  - Return a JSON object with a top-level key "items", containing an array of three objects.
+  - Each object must include:
+    - "title": the official movie title
+    - "year": release year
+    - "description": a 2-3 sentence description of the movie that ties it directly to the user's mood/trope/vibe  
+  - *Do not* include URLs, citations, or any extra commentary outside of the JSON.
 
-    Use the information from your analysis as described above, to generate the THREE MOST RELEVANT movies that you can.
-    
-    For each movie, provide ONLY the title, release year, and a brief, concise description without ANY citations, URLs, or references.
-    Format your response as a structured JSON output with an 'items' array containing objects with 'title', 'release_year' and 'description' fields.
-    You can find the release year of the movie on imdb.com. ONLY THE FOUR DIGIT YEAR IT WAS RELEASED.
-    DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
-    NEVER include any text outside of the JSON structure and ALWAYS keep your response UNDER 400 tokens.
-    `
-    
-    if (sanitizedPreviousMovies.length > 0) {
-      instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;
-    }
+4. *Session Memory*
+  - The user will tell you which movies you have recommended before. Do not repeat those.
+
+When the user types their prompt (trope, mood, quote, etc.), SEARCH THE WEB FOR RELEVANT MOVIES and apply these rules to generate the perfect curated list.`
 
     // Build the input for OpenAI
-    let input = `Emotion/Mood: ${sanitizedEmotion || 'Not specified'}`;
-    input += sanitizedQuote != `` ? `\nQuote: "${sanitizedQuote}"` : ``;
+    let input = `User input: ${sanitizedEmotion || 'Not specified'}`;
+    input += sanitizedQuote != `` ? `\nQuote: ${sanitizedQuote}` : ``;
     
     // Add user preferences if available
     if (sanitizedUserPreferences) {
       input += `\nUser Preferences: ${sanitizedUserPreferences}`;
     }
+    if (sanitizedPreviousMovies.length > 0) {
+      input += `\nPreviously recommended movies: ${sanitizedPreviousMovies.join(', ')}`;
+    }
+
+    debugLog("Sending request to OpenAI with model: gpt-4o-mini");
     
-    // debug("Sending request to OpenAI with model: gpt-4o-mini");
-    
-    // const openAIData = await openai.responses.create({
-    //   model: "gpt-4o-mini",
-    //   tools: [{ type: "web_search_preview" }],
-    //   instructions: instructions,
-    //   input: input,
-    //   temperature: 1.0,
-    //   max_output_tokens: 500,
-    //   text: {
-    //     format: {
-    //       type: "json_schema",
-    //       name: "movie_recommendations",
-    //       schema: {
-    //         type: "object",
-    //         properties: {
-    //           items: {
-    //             type: "array",
-    //             items: {
-    //               type: "object",
-    //               properties: {
-    //                 title: { 
-    //                   type: "string",
-    //                   description: "Movie title only, no other text"
-    //                 },
-    //                 release_year: { 
-    //                   type: "string",
-    //                   description: "The YEAR the movie released only, no other text"
-    //                 },
-    //                 description: { 
-    //                   type: "string",
-    //                   description: "Brief description without any URLs, citations, or references"
-    //                 },
-    //               },
-    //               required: ["title", "release_year", "description"],
-    //               additionalProperties: false,
-    //             }
-    //           }
-    //         },
-    //         required: ["items"],
-    //         additionalProperties: false,
-    //       }
-    //     }
-    //   }
-    // });
-  
-    const requestData = {
-      model: 'sonar',
-      messages: [
-        { role: 'system', content: instructions },
-        { role: 'user', content: input }
-      ],
+    const openAIData = await openai.responses.create({
+      model: "gpt-4o-mini",
+      tools: [{
+        type: "web_search_preview",
+        search_context_size: "low",
+      }],
+      instructions: instructions,
+      input: input,
       temperature: 1.0,
-      max_tokens: 800,
-      response_format: {
-        type: "json_schema",
-        json_schema: {
+      max_output_tokens: 500,
+      text: {
+        format: {
+          type: "json_schema",
+          name: "movie_recommendations",
           schema: {
             type: "object",
             properties: {
@@ -155,7 +110,7 @@ export async function getMovieRecommendations(
                       description: "Movie title only, no other text"
                     },
                     release_year: { 
-                      type: "number",
+                      type: "string",
                       description: "The YEAR the movie released only, no other text"
                     },
                     description: { 
@@ -164,40 +119,28 @@ export async function getMovieRecommendations(
                     },
                   },
                   required: ["title", "release_year", "description"],
-                  additionalProperties: false
+                  additionalProperties: false,
                 }
               }
             },
             required: ["items"],
-            additionalProperties: false
+            additionalProperties: false,
           }
         }
-      },
-    };
+      }
+    });
 
-    debugLog("Sending request to Sonar");
-
-    const pplxData = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    })
-
-    // Safely access the response content
-    const output = await pplxData.json()
-    
+    const output = openAIData.output?.filter(op => op?.type === "message");
     if (!output) {
-      console.error('Invalid or empty response from OpenAI API');
-      throw new Error('Invalid response from PPLX API');
+      ('Invalid or empty response from OpenAI API');
+      throw new Error('Invalid response from OpenAI API');
     }
     
-    debugLog("Raw PPLX response:", output);
-  
+    const content = output?.[0]?.content?.[0]?.text;
+    debugLog("Raw AI response:", content);
+
     // Extract movies from the content using our more robust extraction
-    let movies = extractMoviesFromResponse(output.choices[0].message.content);
+    let movies = extractMoviesFromResponse(content);
     
     debugLog(`Extracted ${movies.length} movies from the response`);
     

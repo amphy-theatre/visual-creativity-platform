@@ -52,9 +52,9 @@ serve(async (req) => {
     const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
     const openAIData = await openai.responses.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-nano",
         tools: [],
-        instructions: 'Generate EXACTLY THREE complete, meaningful quotes from movies (without attribution) based on the unique interpretations of the emotional content and meaning of the prompt. Each quote should be concise (under 100 characters) but ensure they are complete thoughts.',
+        instructions: 'Generate exactly 3 complete, meaningful movie quotes (without attribution) based on the unique interpretations of the emotional content and meaning of the prompt. Keep quotes concise (under 100 characters each) but ensure they are complete thoughts.',
         input: `The user is feeling: ${sanitizedEmotion}. Provide 3 quotes from movies (9 to 15 words) that might resonate with this emotional state.`,
         temperature: 1.2,
         max_output_tokens: 250,

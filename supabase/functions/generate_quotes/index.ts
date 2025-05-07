@@ -1,9 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { OpenAI } from "npm:openai";
-import { createDebug } from "jsr:@grammyjs/debug";
+import { debug } from "../_utils/debug.ts";
 
-console.debug = console.log.bind(console);
-const debug = createDebug("generate_quote");
+const debugLog = debug("generate_quote");
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -48,7 +47,7 @@ serve(async (req) => {
       throw new Error('Emotion cannot be empty');
     }
 
-    debug('Generating quotes for emotion:', sanitizedEmotion);
+    debugLog('Generating quotes for emotion:', sanitizedEmotion);
     
     const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 

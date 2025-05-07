@@ -1,9 +1,8 @@
 import { Movie, StreamingProvider } from './types.ts';
 import { getProviderLogoUrl } from './providers.ts';
-import { createDebug } from "jsr:@grammyjs/debug";
+import { debug } from "../_utils/debug.ts";
 
-console.debug = console.log.bind(console);
-const debug = createDebug("movie_tmdb");
+const debugLog = debug("movie_tmdb");
 
 const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -23,7 +22,7 @@ async function searchMovie(title: string, release_year: string): Promise<any> {
     const data = await response.json();
     if(!data || !data.results || !(data.results.length > 0)) return null;
     const movies = data.results;
-    debug(movies);
+    debugLog(movies);
 
     for (const movie of movies) {
       if (movie.release_date) {

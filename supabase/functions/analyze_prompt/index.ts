@@ -1,10 +1,8 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { OpenAI } from "npm:openai";
-import { createDebug } from "jsr:@grammyjs/debug";
+import { debug } from "../_utils/debug.ts";
 
-console.debug = console.log.bind(console);
-const debug = createDebug("analyze_prompt");
+const debugLog = debug("analyze_prompt");
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -49,7 +47,7 @@ serve(async (req) => {
       throw new Error('Prompt cannot be empty');
     }
 
-    debug('Analyzing prompt:', sanitizedPrompt);
+    debugLog('Analyzing prompt:', sanitizedPrompt);
     
     const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
@@ -70,7 +68,7 @@ serve(async (req) => {
     // Extract the classification from the response
     const classification = content.toLowerCase().includes('literal') ? 'literal' : 'figurative';
     
-    debug(`Classification result: ${classification}`);
+    debugLog(`Classification result: ${classification}`);
 
     return new Response(
       JSON.stringify({ type: classification }),

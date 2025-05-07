@@ -1,13 +1,11 @@
-
 import { extractMoviesFromResponse } from './extract_movies.ts';
 import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
 import { enrichMoviesWithTMDBData } from './tmdb.ts';
 // import { OpenAI } from "npm:openai";
-import { createDebug } from "jsr:@grammyjs/debug";
+import { debug } from "../_utils/debug.ts";
 
-console.debug = console.log.bind(console);
-const debug = createDebug("movie_gen_ai");
+const debugLog = debug("movie_gen_ai");
 
 export async function getMovieRecommendations(
   selectedQuote?: string, 
@@ -38,10 +36,10 @@ export async function getMovieRecommendations(
     throw new Error('Emotion text is too long (maximum 500 characters)');
   }
 
-  debug('Generating movie recommendations for quote:', sanitizedQuote);
-  if (sanitizedEmotion) debug('Also considering emotion:', sanitizedEmotion);
-  if (sanitizedUserPreferences) debug('User preferences from file summary:', sanitizedUserPreferences);
-  if (sanitizedPreviousMovies.length > 0) debug('Excluding previously recommended movies:', sanitizedPreviousMovies);
+  debugLog('Generating movie recommendations for quote:', sanitizedQuote);
+  if (sanitizedEmotion) debugLog('Also considering emotion:', sanitizedEmotion);
+  if (sanitizedUserPreferences) debugLog('User preferences from file summary:', sanitizedUserPreferences);
+  if (sanitizedPreviousMovies.length > 0) debugLog('Excluding previously recommended movies:', sanitizedPreviousMovies);
 
   // const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
@@ -177,7 +175,7 @@ export async function getMovieRecommendations(
       },
     };
 
-    debug("Sending request to Sonar");
+    debugLog("Sending request to Sonar");
 
     const pplxData = await fetch(url, {
       method: 'POST',
@@ -196,16 +194,16 @@ export async function getMovieRecommendations(
       throw new Error('Invalid response from PPLX API');
     }
     
-    debug("Raw PPLX response:", output);
+    debugLog("Raw PPLX response:", output);
   
     // Extract movies from the content using our more robust extraction
     let movies = extractMoviesFromResponse(output.choices[0].message.content);
     
-    debug(`Extracted ${movies.length} movies from the response`);
+    debugLog(`Extracted ${movies.length} movies from the response`);
     
     // Ensure we have exactly 3 movies
     if (movies.length < 3) {
-      debug(`Only extracted ${movies.length} movies, adding fallback movies`);
+      debugLog(`Only extracted ${movies.length} movies, adding fallback movies`);
       
       // Add fallback movies if we don't have enough
       const fallbackMovies = getFallbackMovies();
@@ -245,7 +243,7 @@ export async function getMovieRecommendations(
   } catch (error) {
     console.error('Error in getMovieRecommendations:', error);
     // Return fallback movies if OpenAI fails
-    debug('Using fallback movies due to API error');
+    debugLog('Using fallback movies due to API error');
     const fallbackMovies = getFallbackMovies();
     return fallbackMovies.slice(0, 3);
   }

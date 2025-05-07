@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { OpenAI } from "npm:openai";
 import { createDebug } from "jsr:@grammyjs/debug";
 
+console.debug = console.log.bind(console);
 const debug = createDebug("generate_quote");
 
 const corsHeaders = {

@@ -6,6 +6,7 @@ import { enrichMoviesWithTMDBData } from './tmdb.ts';
 // import { OpenAI } from "npm:openai";
 import { createDebug } from "jsr:@grammyjs/debug";
 
+console.debug = console.log.bind(console);
 const debug = createDebug("movie_gen_ai");
 
 export async function getMovieRecommendations(

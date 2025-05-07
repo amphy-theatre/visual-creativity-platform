@@ -2,6 +2,7 @@
 import { Movie } from './types.ts';
 import { createDebug } from "jsr:@grammyjs/debug";
 
+console.debug = console.log.bind(console);
 const debug = createDebug("movie_extraction");
 
 export function extractMoviesFromResponse(response: string): Movie[] {

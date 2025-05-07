@@ -2,6 +2,7 @@ import { Movie, StreamingProvider } from './types.ts';
 import { getProviderLogoUrl } from './providers.ts';
 import { createDebug } from "jsr:@grammyjs/debug";
 
+console.debug = console.log.bind(console);
 const debug = createDebug("movie_tmdb");
 
 const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');

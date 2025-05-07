@@ -123,7 +123,7 @@ serve(async (req) => {
     }));
 
     return new Response(
-      JSON.stringify({ quotes }),
+      JSON.stringify({ finalQuotes }),
       { 
         headers: { 
           ...corsHeaders, 

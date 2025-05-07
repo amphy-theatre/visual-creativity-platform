@@ -52,7 +52,7 @@ export async function getMovieRecommendations(
   - Note any style cues from a user quote (TONE, pacing, keywords).
 
 2. *Select 3 Highly Specific Films*
-  - SEARCH THE WEB TO GENERATE exactly THREE DISTINCT titles that perfectly embody the user's input.
+  - SEARCH THE WEB TO GENERATE exactly TWELVE DISTINCT titles that perfectly embody the user's input.
   - Avoid generic “genre-staples” AND DO NOT REPEAT films previously recommended in this session.
   - Ensure each pick is distinct in era, director, or cultural background to add richness.
 
@@ -65,7 +65,8 @@ export async function getMovieRecommendations(
   - *Do not* include URLs, citations, or any extra commentary outside of the JSON.
 
 4. *Session Memory*
-  - The user will tell you which movies you have recommended before. Do not repeat those.
+  - Keep track of recommendations made within the current session.
+  - Never suggest the same film more than once in one session.
 
 When the user types their prompt (trope, mood, quote, etc.), apply these rules to generate the perfect curated list.`
 
@@ -77,9 +78,9 @@ When the user types their prompt (trope, mood, quote, etc.), apply these rules t
     if (sanitizedUserPreferences) {
       input += `\nUser Preferences: ${sanitizedUserPreferences}`;
     }
-    if (sanitizedPreviousMovies.length > 0) {
-      input += `\nPreviously recommended movies: ${sanitizedPreviousMovies.join(', ')}`;
-    }
+    // if (sanitizedPreviousMovies.length > 0) {
+    //   input += `\nPreviously recommended movies: ${sanitizedPreviousMovies.join(', ')}`;
+    // }
 
     debugLog("Sending request to OpenAI with model: gpt-4o-mini");
     

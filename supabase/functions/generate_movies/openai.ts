@@ -47,9 +47,11 @@ export async function getMovieRecommendations(
     // Build the input for OpenAI with improved instructions
     let instructions = `You are an expert AI movie curator. A user will submit a trope, mood, vibe or brief scene description, and might submit a quote. You must:
 1. *Parse & Prioritize*
+  - *For the User Input:*
   - Identify the core emotion or atmosphere (e.g. wistful nostalgia, high-octane suspense, bittersweet romance).
   - Detect any explicit tropes or motifs (e.g. “enemies-to-lovers,” “last-man-standing,” “road trip”).
-  - Note any style cues from a user quote (TONE, pacing, keywords).
+  - Note any style cues (TONE, pacing, keywords).
+  - Use the quote ONLY as a tool to interpret what the user meant by the peo
 
 2. *Select 3 Highly Specific Films*
   - SEARCH THE WEB TO GENERATE exactly TWELVE DISTINCT titles that perfectly embody the user's input.
@@ -65,6 +67,7 @@ export async function getMovieRecommendations(
   - *Do not* include URLs, citations, or any extra commentary outside of the JSON.
 
 4. *Session Memory*
+  - The user will tell you which movies you have recommended before. Do not repeat those.
   - Keep track of recommendations made within the current session.
   - Never suggest the same film more than once in one session.
 
@@ -78,9 +81,9 @@ When the user types their prompt (trope, mood, quote, etc.), apply these rules t
     if (sanitizedUserPreferences) {
       input += `\nUser Preferences: ${sanitizedUserPreferences}`;
     }
-    // if (sanitizedPreviousMovies.length > 0) {
-    //   input += `\nPreviously recommended movies: ${sanitizedPreviousMovies.join(', ')}`;
-    // }
+    if (sanitizedPreviousMovies.length > 0) {
+      input += `\nPreviously recommended movies: ${sanitizedPreviousMovies.join(', ')}`;
+    }
 
     debugLog("Sending request to OpenAI with model: gpt-4o-mini");
     

@@ -7,6 +7,7 @@ import { PostHogProvider } from 'posthog-js/react'
 
 const options = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  disable_session_recording: window.location.hostname === 'localhost',
 }
 
 createRoot(document.getElementById("root")!).render(

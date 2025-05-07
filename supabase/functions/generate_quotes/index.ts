@@ -98,6 +98,8 @@ serve(async (req) => {
       throw new Error('Invalid response format from OpenAI API');
     }
 
+    debugLog(parsedContent);
+
     // Clean up quotes: remove quotes and any author attribution
     const quotes = parsedContent.quotes.map((quote: string) => {
       // Remove quotes if present

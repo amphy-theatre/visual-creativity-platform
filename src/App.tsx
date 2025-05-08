@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import { useAnalytics } from "./hooks/useAnalytics";
 import AuthModal from "./components/AuthModal";
 import { useAuth } from "./context/AuthContext";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,11 @@ const App = () => (
                         <Recommendations />
                       </AnalyticsTracker>
                     </ProtectedRoute>
+                  } />
+                  <Route path="/privacy-policy" element={
+                    <AnalyticsTracker>
+                      <PrivacyPolicy />
+                    </AnalyticsTracker>
                   } />
                   {/* This catch-all route ensures any unknown routes are handled by NotFound */}
                   <Route path="*" element={

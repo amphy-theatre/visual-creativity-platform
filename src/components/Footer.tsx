@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Instagram, Youtube } from "lucide-react";
+import { Instagram, Youtube, TwitterIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const TiktokIcon = () => (
@@ -19,6 +19,24 @@ const Footer: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-6">
+            <a 
+              href="#/privacy-policy" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-foreground hover:text-primary transition-colors duration-200"
+              aria-label="Privacy Policy"
+            >
+              Privacy Policy
+            </a>
+            <a 
+              href="https://x.com/amphytheatre" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-foreground hover:text-primary transition-colors duration-200"
+              aria-label="X (Twitter)"
+            >
+              <TwitterIcon size={20} />
+            </a>
             <a 
               href="https://www.instagram.com/amphytheatre_movierecs/" 
               target="_blank" 

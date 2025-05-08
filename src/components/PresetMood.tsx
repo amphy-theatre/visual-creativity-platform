@@ -75,7 +75,7 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
       navigate("/quotes", { 
         state: { 
           mood: description, 
-          quotes: data, 
+          quotes: data.quotes, 
           promptUsage: promptUsage 
         }
       });

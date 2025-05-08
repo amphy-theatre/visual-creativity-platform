@@ -1,5 +1,8 @@
 import { Movie, StreamingProvider } from './types.ts';
 import { getProviderLogoUrl } from './providers.ts';
+import { debug } from "../_utils/debug.ts";
+
+const debugLog = debug("movie_tmdb");
 
 const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -19,12 +22,13 @@ async function searchMovie(title: string, release_year: string): Promise<any> {
     const data = await response.json();
     if(!data || !data.results || !(data.results.length > 0)) return null;
     const movies = data.results;
-    console.log(movies);
+    debugLog(movies);
 
     for (const movie of movies) {
       if (movie.release_date) {
-        const movieYear = movie.release_date.split('-')[0];
-        if (movieYear === release_year) {
+        const movieYear = Number(movie.release_date.split('-')[0]);
+        const diff = movieYear - Number(release_year);
+        if (diff * diff < 2) {
           return movie;
         }
       }
@@ -183,7 +187,6 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
         });
       }
     } catch (error) {
-      console.log("");
       console.error(`Error enriching movie "${movie.title}":`, error);
       // Keep original movie in case of error
       enrichedMovies.push(movie);

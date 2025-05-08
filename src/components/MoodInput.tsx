@@ -200,7 +200,7 @@ const MoodInput: React.FC<MoodInputProps> = ({
           navigate("/quotes", { 
             state: { 
               mood: moodText, 
-              quotes: data, 
+              quotes: data.quotes, 
               promptUsage: promptUsage
             }
           });

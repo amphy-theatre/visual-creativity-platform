@@ -1,9 +1,11 @@
-
 import { extractMoviesFromResponse } from './extract_movies.ts';
 import { Movie } from './types.ts';
 import { getFallbackMovies } from './providers.ts';
 import { enrichMoviesWithTMDBData } from './tmdb.ts';
 import { OpenAI } from "npm:openai";
+import { debug } from "../_utils/debug.ts";
+
+const debugLog = debug("movie_gen_ai");
 
 export async function getMovieRecommendations(
   selectedQuote?: string, 
@@ -34,53 +36,70 @@ export async function getMovieRecommendations(
     throw new Error('Emotion text is too long (maximum 500 characters)');
   }
 
-  console.log('Generating movie recommendations for quote:', sanitizedQuote);
-  if (sanitizedEmotion) console.log('Also considering emotion:', sanitizedEmotion);
-  if (sanitizedUserPreferences) console.log('User preferences from file summary:', sanitizedUserPreferences);
-  if (sanitizedPreviousMovies.length > 0) console.log('Excluding previously recommended movies:', sanitizedPreviousMovies);
+  debugLog('Generating movie recommendations for quote:', sanitizedQuote);
+  if (sanitizedEmotion) debugLog('Also considering emotion:', sanitizedEmotion);
+  if (sanitizedUserPreferences) debugLog('User preferences from file summary:', sanitizedUserPreferences);
+  if (sanitizedPreviousMovies.length > 0) debugLog('Excluding previously recommended movies:', sanitizedPreviousMovies);
 
   const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
   try {
     // Build the input for OpenAI with improved instructions
-    let instructions = `SEARCH THE WEB to generate EXACTLY 3 movie recommendations based on the input provided.
-    
-    Analyse the user's prompt with the following guidelines:
-    - If the user references any movies, extract information about the TONE, plot devices, THEMES and characters.
-    - How abstract or literal the prompt is,
-    - How specific the prompt is.
-    - The user's style of writing.
+    let instructions = `You are an expert AI movie curator. A user will submit a trope, mood, vibe or brief scene description, and might submit a quote. You must:
+1. *Parse & Prioritize*
+  - *For the User Input:*
+  - Identify the core emotion or atmosphere (e.g. wistful nostalgia, high-octane suspense, bittersweet romance).
+  - Detect any explicit tropes or motifs (e.g. “enemies-to-lovers,” “last-man-standing,” “road trip”).
+  - Note any style cues (TONE, pacing, keywords).
+  - Use the quote ONLY as a tool to interpret what the user meant by the peo
 
-    The user may also provide a quote. If so, then analyze the quote for it's meaning, themes and tone.
-    
-    Use the information from your analysis to generate the THREE MOST RELEVANT movies that you can.
+2. *Select 3 Highly Specific Films*
+  - SEARCH THE WEB TO GENERATE exactly TWELVE DISTINCT titles that perfectly embody the user's input.
+  - Avoid generic “genre-staples” AND DO NOT REPEAT films previously recommended in this session.
+  - Ensure each pick is distinct in era, director, or cultural background to add richness.
 
-    For each movie, provide ONLY the title, release year, and a brief description without ANY citations, URLs, or references.
-    Format your response as a structured JSON output with an 'items' array containing objects with 'title' , 'release_year' and 'description' fields.
-    DO NOT include any URLs, citations, or references like (website.com) or [source] in your descriptions.
-    NEVER include any text outside of the JSON structure.`;
-    
-    if (sanitizedPreviousMovies.length > 0) {
-      instructions += `\nDO NOT recommend any of these movies: ${sanitizedPreviousMovies.join(', ')}`;
-    }
-    
+3. *Output Requirements*
+  - Return a JSON object with a top-level key "items", containing an array of three objects.
+  - Each object must include:
+    - "title": the official movie title
+    - "year": release year
+    - "description": a 2-3 sentence description of the movie that ties it directly to the user's mood/trope/vibe  
+  - *Do not* include URLs, citations, or any extra commentary outside of the JSON.
+
+4. *Session Memory*
+  - The user will tell you which movies you have recommended before. Do not repeat those.
+  - Keep track of recommendations made within the current session.
+  - Never suggest the same film more than once in one session.
+
+When the user types their prompt (trope, mood, quote, etc.), apply these rules to generate the perfect curated list.`
+
     // Build the input for OpenAI
-    let input = sanitizedEmotion != `` ? `Quote: "${sanitizedQuote}"\n` : ``;
-    input += `Emotion/Mood: ${sanitizedEmotion || 'Not specified'}`;
+    let input = `User input: ${sanitizedEmotion || 'Not specified'}`;
+    input += sanitizedQuote != `` ? `\nQuote: ${sanitizedQuote}` : ``;
     
     // Add user preferences if available
     if (sanitizedUserPreferences) {
       input += `\nUser Preferences: ${sanitizedUserPreferences}`;
     }
-    
-    console.log("Sending request to OpenAI with model: gpt-4o-mini");
+    if (sanitizedPreviousMovies.length > 0) {
+      input += `\nPreviously recommended movies: ${sanitizedPreviousMovies.join(', ')}`;
+    }
+
+    debugLog("Sending request to OpenAI with model: gpt-4o-mini");
     
     const openAIData = await openai.responses.create({
       model: "gpt-4o-mini",
-      tools: [{ type: "web_search_preview" }],
+      tools: [{
+        type: "web_search_preview",
+        search_context_size: "high",
+        user_location: {
+            "type": "approximate",
+            "country": "US",
+        }
+      }],
       instructions: instructions,
       input: input,
-      temperature: 1.0,
+      temperature: 1.3,
       max_output_tokens: 500,
       text: {
         format: {
@@ -118,26 +137,24 @@ export async function getMovieRecommendations(
         }
       }
     });
-  
-    // Safely access the response content
+
     const output = openAIData.output?.filter(op => op?.type === "message");
-    const content = output?.[0]?.content?.[0]?.text;
-    
-    if (!content) {
-      console.error('Invalid or empty response from OpenAI API');
+    if (!output) {
+      ('Invalid or empty response from OpenAI API');
       throw new Error('Invalid response from OpenAI API');
     }
     
-    console.log("Raw OpenAI response:", content);
-  
+    const content = output?.[0]?.content?.[0]?.text;
+    debugLog("Raw AI response:", content);
+
     // Extract movies from the content using our more robust extraction
     let movies = extractMoviesFromResponse(content);
     
-    console.log(`Extracted ${movies.length} movies from the response`);
+    debugLog(`Extracted ${movies.length} movies from the response`);
     
     // Ensure we have exactly 3 movies
     if (movies.length < 3) {
-      console.log(`Only extracted ${movies.length} movies, adding fallback movies`);
+      debugLog(`Only extracted ${movies.length} movies, adding fallback movies`);
       
       // Add fallback movies if we don't have enough
       const fallbackMovies = getFallbackMovies();
@@ -177,7 +194,7 @@ export async function getMovieRecommendations(
   } catch (error) {
     console.error('Error in getMovieRecommendations:', error);
     // Return fallback movies if OpenAI fails
-    console.log('Using fallback movies due to API error');
+    debugLog('Using fallback movies due to API error');
     const fallbackMovies = getFallbackMovies();
     return fallbackMovies.slice(0, 3);
   }

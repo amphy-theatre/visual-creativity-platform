@@ -1,6 +1,8 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { OpenAI } from "npm:openai";
+import { debug } from "../_utils/debug.ts";
+
+const debugLog = debug("analyze_prompt");
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,13 +47,12 @@ serve(async (req) => {
       throw new Error('Prompt cannot be empty');
     }
 
-    console.log('Analyzing prompt:', sanitizedPrompt);
+    debugLog('Analyzing prompt:', sanitizedPrompt);
     
     const openai = new OpenAI({apiKey: Deno.env.get('OPENAI_API_KEY')});
 
     const openAIData = await openai.responses.create({
-        model: "gpt-4o-mini",
-        tools: [],
+        model: "gpt-4.1-nano",
         instructions: 'Determine if a prompt is "figurative" (metaphorical, emotional, abstract) or "literal" (concrete, specific, direct request). Respond with ONLY the word "figurative" or "literal".',
         input: sanitizedPrompt,
         temperature: 0.2,
@@ -67,7 +68,7 @@ serve(async (req) => {
     // Extract the classification from the response
     const classification = content.toLowerCase().includes('literal') ? 'literal' : 'figurative';
     
-    console.log(`Classification result: ${classification}`);
+    debugLog(`Classification result: ${classification}`);
 
     return new Response(
       JSON.stringify({ type: classification }),

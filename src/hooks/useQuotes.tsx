@@ -30,8 +30,8 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
   const config = useAppConfig();
 
   // Process quotes from the API response structure or use fallback quotes
-  const displayQuotes = quotes && quotes.quotes && Array.isArray(quotes.quotes) && quotes.quotes.length > 0 ? 
-    quotes.quotes.map(q => q.text) : 
+  const displayQuotes = quotes && Array.isArray(quotes) && quotes.length > 0 ? 
+    quotes : 
     [
       "Relief blooms where the weight of uncertainty once lay.",
       "Every ending carries the seeds of new beginnings.",

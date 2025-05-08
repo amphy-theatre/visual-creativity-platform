@@ -39,7 +39,7 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
     ];
 
   const handleRefresh = async () => {
-    setMood(sessionStorage.getItem("userMood") || "");
+    setMood(mood);
     console.log(mood);
     if (!mood.trim()) {
       return false;
@@ -77,7 +77,7 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
       console.log('Received new quotes:', data);
       
       // Update quotes state with the new data
-      setQuotes(data);
+      setQuotes(data.quotes);
       return true;
     } catch (error) {
       console.error('Error regenerating quotes:', error);

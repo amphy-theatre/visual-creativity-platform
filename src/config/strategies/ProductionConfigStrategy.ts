@@ -26,6 +26,8 @@ export class ProductionConfigStrategy {
         summarizeCsv: `${edgeFunctionsBaseUrl}/summarize_csv`,
         analyzePrompt: `${edgeFunctionsBaseUrl}/analyze_prompt`,
         trackAnalytics: `${edgeFunctionsBaseUrl}/track_analytics`,
+        handlePayments: `${edgeFunctionsBaseUrl}/stripe_webhook`,
+        checkoutSession: `${edgeFunctionsBaseUrl}/checkout-session`,
       },
       app: {
         defaultTheme: 'system',

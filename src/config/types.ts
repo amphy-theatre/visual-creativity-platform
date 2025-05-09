@@ -19,6 +19,8 @@ export interface AppConfig {
     summarizeCsv: string;
     analyzePrompt: string;
     trackAnalytics: string; // Added missing trackAnalytics endpoint
+    handlePayments: string;
+    checkoutSession: string;
   };
   // App configuration
   app: {

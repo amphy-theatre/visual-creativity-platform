@@ -13,4 +13,5 @@ export interface StreamingProvider {
     posterUrl?: string;
     streamingProviders?: StreamingProvider[];
     rating?: number | null;
+    tmdbId: string;
   }

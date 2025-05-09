@@ -176,7 +176,8 @@ export async function enrichMoviesWithTMDBData(movies: Movie[]): Promise<Movie[]
           link: tmdbLink,
           posterUrl: posterUrl,
           streamingProviders: providers.length > 0 ? providers : undefined,
-          rating: rating
+          rating: rating,
+          tmdbId: tmdbMovie.id,
         });
       } else {
         // If no TMDB data, keep original movie but add placeholder link

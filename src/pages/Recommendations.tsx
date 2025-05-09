@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import MovieCard from "../components/MovieCard";
+import MovieModal from "../components/MovieModal";
 import { Button } from "../components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
@@ -89,6 +90,8 @@ const Recommendations: React.FC = () => {
   });
   
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedMovieForModal, setSelectedMovieForModal] = useState<MovieData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   let headerText = "Based on your mood";
   if (selectedQuote) {
@@ -215,6 +218,17 @@ const Recommendations: React.FC = () => {
     }, 7500)
   })
 
+  const handleMovieCardClick = (movie: MovieData) => {
+    setSelectedMovieForModal(movie);
+    setIsModalOpen(true);
+    trackEvent('movie_modal_opened', { movieTitle: movie.title });
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedMovieForModal(null);
+  };
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-8">        
@@ -282,11 +296,25 @@ const Recommendations: React.FC = () => {
                   variant: provider.variant,
                   url: provider.url
                 }))}
+                onClick={() => handleMovieCardClick(movie)}
               />
             </div>
           ))}
         </div>
       </div>
+
+      {selectedMovieForModal && (
+        <MovieModal
+          movie={{
+            title: selectedMovieForModal.title,
+            image: selectedMovieForModal.posterUrl,
+            description: selectedMovieForModal.description,
+            rating: selectedMovieForModal.rating,
+          }}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </Layout>
   );
 };

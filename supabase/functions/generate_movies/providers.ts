@@ -1,4 +1,3 @@
-
 // Helper function to get streaming provider logo
 export function getProviderLogoUrl(providerName: string): string {
     const providers: Record<string, string> = {

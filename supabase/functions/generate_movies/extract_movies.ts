@@ -31,7 +31,8 @@ export function extractMoviesFromResponse(response: string): Movie[] {
         release_year: item.release_year ? String(item.release_year).trim() : '',
         description: item.description ? String(item.description).trim() : '',
         link: '',
-        streamingProviders: []
+        streamingProviders: [],
+        tmdbId: ""
       }));
       
       debugLog(`Successfully extracted ${movies.length} movies from JSON structure`);
@@ -83,7 +84,8 @@ export function extractMoviesFromResponse(response: string): Movie[] {
           .replace(/\([^)]*\)/g, '')     // Remove citations like (example.com)
           .replace(/https?:\/\/\S+/g, ''), // Remove URLs
         link: '',
-        streamingProviders: []
+        streamingProviders: [],
+        tmdbId: "",
       });
     }
     
@@ -115,7 +117,8 @@ export function extractMoviesFromResponse(response: string): Movie[] {
             release_year: "1234",
             description: description || `A film titled "${title}"`,
             link: '',
-            streamingProviders: []
+            streamingProviders: [],
+            tmdbId: "",
           });
         }
       }

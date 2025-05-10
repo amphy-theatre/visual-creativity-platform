@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import MovieCard from "../components/MovieCard";
-import MovieModal from "../components/MovieModal";
+import MovieModal, { ExpandedMovieDetails } from "../components/MovieModal";
 import { Button } from "../components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
@@ -35,6 +35,7 @@ interface MovieData {
   posterUrl: string;
   streamingProviders?: StreamingProvider[];
   rating: number;
+  tmdbId: string;
 }
 
 interface RecommendationsResponse {
@@ -90,7 +91,7 @@ const Recommendations: React.FC = () => {
   });
   
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedMovieForModal, setSelectedMovieForModal] = useState<MovieData | null>(null);
+  const [selectedMovieForModal, setSelectedMovieForModal] = useState<ExpandedMovieDetails | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   let headerText = "Based on your mood";
@@ -218,8 +219,19 @@ const Recommendations: React.FC = () => {
     }, 7500)
   })
 
-  const handleMovieCardClick = (movie: MovieData) => {
-    setSelectedMovieForModal(movie);
+  const handleMovieCardClick = async (movie: MovieData) => {
+    const response = await fetch(config.edgeFunctions.expandedMovieInfo, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
+      },
+      body: JSON.stringify({
+        tmdbId: movie.tmdbId
+      }),
+    });
+    const movieData = await response.json();
+    setSelectedMovieForModal(movieData.movies);
     setIsModalOpen(true);
     trackEvent('movie_modal_opened', { movieTitle: movie.title });
   };
@@ -305,12 +317,7 @@ const Recommendations: React.FC = () => {
 
       {selectedMovieForModal && (
         <MovieModal
-          movie={{
-            title: selectedMovieForModal.title,
-            image: selectedMovieForModal.posterUrl,
-            description: selectedMovieForModal.description,
-            rating: selectedMovieForModal.rating,
-          }}
+          movie={selectedMovieForModal}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
         />

@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -20,8 +19,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Fredoka", "system-ui", "sans-serif"],
-        fredoka: ["Fredoka", "system-ui", "sans-serif"],
+        sans: ["EB Garamond", "system-ui", "sans-serif"],
+        fredoka: ["EB Garamond", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

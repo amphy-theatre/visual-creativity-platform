@@ -17,8 +17,8 @@ async function getMovieDetails(tmdbId: string): Promise<any> {
       console.error(`TMDB movie search failed for "${tmdbId}": ${response.status}`);
       return null;
     }
-    
     const data = await response.json();
+    console.log(data)
     if (!data) return null;
 
     const castResponse = await fetch(
@@ -31,6 +31,7 @@ async function getMovieDetails(tmdbId: string): Promise<any> {
     }
  
     const castCrew = await castResponse.json();
+    console.log(castCrew)
     if (!castCrew) return null;
 
     const videoResponse = await fetch(
@@ -43,16 +44,17 @@ async function getMovieDetails(tmdbId: string): Promise<any> {
     }
 
     const video = await videoResponse.json();
+    console.log(video)
     if (!video) return null;
 
     const crew = castCrew.crew;
     const directors = crew.filter((person: any) => person.job === "Director").map(person => person.name);
     const leads = castCrew.cast.slice(0,5).map(person => person.name);
-    const videoLink = `https://www.youtube.com/watch?v=${video.results[0]}`
+    const videoLink = video.results.filter(vid => vid.type == "Trailer")[0].key;
     return {
         title: data.title,
         overview: data.overview,
-        genres: data.genres,
+        genres: data.genres.map(genre => genre.name),
         runtime: data.runtime,
         directors: directors,
         starring: leads,
@@ -78,7 +80,7 @@ serve(async (req) => {
   try {
     const { tmdbId } = await req.json();
     const movies = await getMovieDetails(tmdbId);
-    
+    console.log(movies);
     return new Response(
       JSON.stringify({ movies }),
       { 

@@ -51,6 +51,10 @@ async function getMovieDetails(tmdbId: string): Promise<any> {
     const directors = crew.filter((person: any) => person.job === "Director").map(person => person.name);
     const leads = castCrew.cast.slice(0,5).map(person => person.name);
     const videoLink = video.results.filter(vid => vid.type == "Trailer")[0].key;
+    const posterUrl = data.poster_path 
+      ? `https://image.tmdb.org/t/p/original${data.poster_path}`
+      : "https://picsum.photos/800/600";
+
     return {
         title: data.title,
         overview: data.overview,
@@ -59,6 +63,7 @@ async function getMovieDetails(tmdbId: string): Promise<any> {
         directors: directors,
         starring: leads,
         video: videoLink,
+        backdrop: posterUrl,
     }
   } catch (error) {
     console.error(`Error searching for movie "${tmdbId}":`, error);

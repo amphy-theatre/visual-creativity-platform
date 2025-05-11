@@ -69,7 +69,6 @@ const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
     }
   };
 
-  const backdropImageUrl = movie.video ? `https://img.youtube.com/vi/${movie.video}/maxresdefault.jpg` : null;
 
   return (
     <div 
@@ -80,15 +79,16 @@ const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
         className="bg-neutral-900 text-white rounded-lg shadow-xl w-full max-w-3xl relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative w-full bg-black" style={{ minHeight: '250px', maxHeight: '60vh' }}>
-          {(!playVideo && backdropImageUrl) && (
+        <div className="relative w-full aspect-video bg-black">
+          {(!playVideo && movie.backdrop) && (
             <>
-              <img 
-                src={backdropImageUrl} 
-                alt={`Backdrop for ${movie.title}`} 
-                className="w-full h-full object-cover"
-                style={{ display: 'block' }} 
-              />
+              <div className="w-full h-full overflow-hidden">
+                <img 
+                  src={movie.backdrop} 
+                  alt={`Backdrop for ${movie.title}`} 
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
               {movie.video && (
                 <div 
                   className="absolute inset-0 flex justify-center items-center cursor-pointer group bg-black bg-opacity-20 hover:bg-opacity-10 transition-colors"
@@ -102,7 +102,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
           )}
 
           {(playVideo && movie.video) && (
-            <div className="aspect-video w-full h-full">
+            <div className="w-full h-full">
               <iframe
                 width="100%"
                 height="100%"
@@ -115,8 +115,8 @@ const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
             </div>
           )}
           
-          {(!backdropImageUrl && !playVideo) && (
-            <div className="w-full h-full flex justify-center items-center text-neutral-400" style={{ minHeight: '250px', maxHeight: '60vh' }}>
+          {(!movie.backdrop && !playVideo) && (
+            <div className="w-full h-full flex justify-center items-center text-neutral-400">
               <p>No preview available</p>
             </div>
           )}

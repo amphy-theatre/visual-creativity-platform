@@ -18,6 +18,7 @@ export interface AppConfig {
     generateMovies: string;
     summarizeCsv: string;
     analyzePrompt: string;
+    expandedMovieInfo: string;
     trackAnalytics: string; // Added missing trackAnalytics endpoint
     handlePayments: string;
     checkoutSession: string;

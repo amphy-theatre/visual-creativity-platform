@@ -41,7 +41,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       cursor: true,
       loop: true,
     });
-    instance.type("Ask Amphytheatre for ")
+    instance.type("Ask amphytheatre for ")
     phrases.forEach(phrase => {
       instance.type(phrase)
       .pause(delayBetweenTexts)

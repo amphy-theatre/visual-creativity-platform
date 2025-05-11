@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import MovieCard from "../components/MovieCard";
+import MovieModal, { ExpandedMovieDetails } from "../components/MovieModal";
 import { Button } from "../components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "../components/ui/use-toast";
@@ -34,6 +35,7 @@ interface MovieData {
   posterUrl: string;
   streamingProviders?: StreamingProvider[];
   rating: number;
+  tmdbId: string;
 }
 
 interface RecommendationsResponse {
@@ -89,6 +91,8 @@ const Recommendations: React.FC = () => {
   });
   
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedMovieForModal, setSelectedMovieForModal] = useState<ExpandedMovieDetails | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   let headerText = "Based on your mood";
   if (selectedQuote) {
@@ -215,6 +219,28 @@ const Recommendations: React.FC = () => {
     }, 7500)
   })
 
+  const handleMovieCardClick = async (movie: MovieData) => {
+    const response = await fetch(config.edgeFunctions.expandedMovieInfo, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
+      },
+      body: JSON.stringify({
+        tmdbId: movie.tmdbId
+      }),
+    });
+    const movieData = await response.json();
+    setSelectedMovieForModal(movieData.movies);
+    setIsModalOpen(true);
+    trackEvent('movie_modal_opened', { movieTitle: movie.title });
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedMovieForModal(null);
+  };
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-8">        
@@ -282,11 +308,20 @@ const Recommendations: React.FC = () => {
                   variant: provider.variant,
                   url: provider.url
                 }))}
+                onClick={() => handleMovieCardClick(movie)}
               />
             </div>
           ))}
         </div>
       </div>
+
+      {selectedMovieForModal && (
+        <MovieModal
+          movie={selectedMovieForModal}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </Layout>
   );
 };

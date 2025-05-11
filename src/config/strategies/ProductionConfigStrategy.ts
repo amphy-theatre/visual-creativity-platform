@@ -25,6 +25,7 @@ export class ProductionConfigStrategy {
         generateMovies: `${edgeFunctionsBaseUrl}/generate_movies`,
         summarizeCsv: `${edgeFunctionsBaseUrl}/summarize_csv`,
         analyzePrompt: `${edgeFunctionsBaseUrl}/analyze_prompt`,
+        expandedMovieInfo: `${edgeFunctionsBaseUrl}/expanded_movie_info`,
         trackAnalytics: `${edgeFunctionsBaseUrl}/track_analytics`,
         handlePayments: `${edgeFunctionsBaseUrl}/stripe_webhook`,
         checkoutSession: `${edgeFunctionsBaseUrl}/checkout-session`,

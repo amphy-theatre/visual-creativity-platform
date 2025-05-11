@@ -7,7 +7,8 @@ export type AnalyticsEvent =
   | 'movies_generated'
   | 'page_view'
   | 'button_click'
-  | 'prompt_analyzed';
+  | 'prompt_analyzed'
+  | 'movie_modal_opened';
 
 export const useAnalytics = () => {
   const { user } = useAuth();

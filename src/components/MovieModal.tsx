@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // RE-ADDED and UPDATED: Helper function to format runtime
 const formatRuntime = (runtimeInput: string | number): string => {
@@ -53,14 +53,31 @@ interface MovieModalProps {
 
 const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
   const [playVideo, setPlayVideo] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  if (!isOpen || !movie) {
+  useEffect(() => {
+    if (isOpen) {
+      // Delay setting visibility to allow for CSS transition
+      const timer = setTimeout(() => {
+        setIsModalVisible(true);
+      }, 50); // Small delay to ensure the element is in the DOM before transitioning
+      return () => clearTimeout(timer);
+    } else {
+      setIsModalVisible(false);
+    }
+  }, [isOpen]);
+
+  if (!isOpen && !isModalVisible) { // Keep modal in DOM during fade-out
     return null;
   }
 
   const handleClose = () => {
-    setPlayVideo(false);
-    onClose();
+    setIsModalVisible(false); // Start fade-out
+    // Delay actual close to allow for fade-out transition
+    setTimeout(() => {
+      setPlayVideo(false);
+      onClose();
+    }, 300); // Match this duration to your CSS transition
   };
 
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -72,7 +89,7 @@ const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center p-4"
+      className={`fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center p-4 transition-opacity duration-300 ease-in-out ${isModalVisible && isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       onClick={handleBackdropClick}
     >
       <div 

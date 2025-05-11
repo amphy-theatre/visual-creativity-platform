@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Separator } from "./ui/separator";
 
@@ -15,6 +14,7 @@ interface MovieCardProps {
   description: string;
   rating: number;
   platforms: Platform[];
+  onClick: () => void;
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({
@@ -23,6 +23,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
   description,
   rating,
   platforms = [],
+  onClick,
 }) => {
   const [imageRetries, setImageRetries] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
@@ -48,7 +49,10 @@ const MovieCard: React.FC<MovieCardProps> = ({
   };
 
   return (
-    <div className="movie-card rounded-lg overflow-hidden flex flex-col h-full border border-foreground/10 hover:border-foreground/30 transition-colors shadow-sm">
+    <div 
+      className="movie-card rounded-lg overflow-hidden flex flex-col h-full border border-foreground/10 hover:border-foreground/30 transition-colors shadow-sm cursor-pointer"
+      onClick={onClick}
+    >
       <div className="relative aspect-[2/3] overflow-hidden">
         <img 
           src={image} 

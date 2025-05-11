@@ -25,6 +25,7 @@ export class TestingConfigStrategy {
         generateMovies: `${edgeFunctionsBaseUrl}/generate_movies`,
         summarizeCsv: `${edgeFunctionsBaseUrl}/summarize_csv`,
         analyzePrompt: `${edgeFunctionsBaseUrl}/analyze_prompt`,
+        expandedMovieInfo: `${edgeFunctionsBaseUrl}/expanded_movie_info`,
         trackAnalytics: `${edgeFunctionsBaseUrl}/track_analytics`,
       },
       app: {

@@ -24,11 +24,11 @@ const Index: React.FC = () => {
         />
         
         <div className="text-center space-y-2 animate-fade-in">
-          <h1 className="text-5xl md:text-6xl  text-center text-blue-500 mb-2 animate-fade-in">
-            Amphytheatre
+          <h1 className="text-5xl md:text-6xl font-bold text-center text-blue-500 mb-2 animate-fade-in">
+            amphytheatre
           </h1>
           <h2 className="text-3xl md:text-4xl text-center text-foreground/80 mb-12 animate-fade-in">
-            Movies to match your mood
+            movies to match your mood
           </h2>
 
           <h1 className="text-4xl md:text-3xl text-foreground relative">
@@ -49,32 +49,32 @@ const Index: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <PresetMood 
-                title="Inspiration" 
+                title="inspiration" 
                 genre="inspiration" 
                 description="Something uplifting"
               />
               <PresetMood 
-                title="Thriller" 
+                title="thriller" 
                 genre="thriller" 
                 description="A gripping adventure"
               />
               <PresetMood 
-                title="Drama" 
+                title="drama" 
                 genre="drama" 
                 description="A heartbreaking story"
               />
               <PresetMood 
-                title="Romance" 
+                title="romance" 
                 genre="romance" 
                 description="Something romantic"
               />
               <PresetMood 
-                title="Philosophical" 
+                title="philosophical" 
                 genre="philosophical" 
                 description="A thought-provoking film"
               />
               <PresetMood 
-                title="Comedy" 
+                title="comedy" 
                 genre="comedy" 
                 description="Something lighthearted"
               />

@@ -152,7 +152,7 @@ serve(async (req) => {
       case 'customer.subscription.deleted': {
         const canceled = event.data.object as Stripe.Subscription;
         await supabase.from('subscriptions').update({
-          status: 'cancelled',
+          status: canceled.status,
           canceled_at: new Date((canceled.canceled_at as number) * 1000),
           cancel_at_period_end: canceled.cancel_at_period_end,
           updated_at: new Date(),

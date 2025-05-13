@@ -114,6 +114,7 @@ serve(async (req) => {
           updated_at: new Date(),
         }).eq('stripe_subscription_id', subscription.id as string);
         console.log("Updated subscription", data, error)
+        break;
       }
       // Payment failure: mark subscription past due
       case 'invoice.payment_failed': {

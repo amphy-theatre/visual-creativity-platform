@@ -20,7 +20,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["EB Garamond", "system-ui", "sans-serif"],
-        fredoka: ["EB Garamond", "system-ui", "sans-serif"],
+        fredoka: ["Fredoka", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

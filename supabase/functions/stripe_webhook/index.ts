@@ -76,13 +76,6 @@ serve(async (req) => {
           updated_at: new Date(),
         }).select();
         console.log("insertion complete", data, error)
-// make trigger and remove
-        await supabase.from(`profiles`).update({
-          subscription_status: subscription.status,
-          subscription_tier: subscription.metadata?.tier,
-          current_period_end: new Date((subscription.items.data[0].current_period_end as number) * 1000),
-          cancel_at_period_end: subscription.cancel_at_period_end,
-        }).eq('id', subscription.metadata?.userId);
       
         break;
       }

@@ -102,18 +102,19 @@ serve(async (req) => {
           created_at: new Date(),
         }).select();
         console.log("added payment", data, error)
-        const subscription = await stripe.subscriptions.retreive(subscriptionId as string)
-        await supabase.from('subscriptions').update({
-          status: subscription.status,
-          tier: subscription.metadata?.tier,
-          current_period_start: new Date((invoice.lines.data[0].period?.start as number) * 1000),
-          current_period_end: new Date((invoice.lines.data[0].period?.end as number) * 1000),
-          updated_at: new Date(),
-        }).eq('stripe_subscription_id', subscriptionId as string);
-
         break;
       }
-
+      case `customer.subscription.updated` : {
+        const subscription = event.data.object as Stripe.Subscription;
+        const {data, error } = await supabase.from('subscriptions').update({
+          status: subscription.status,
+          tier: subscription.metadata?.tier,
+          current_period_start: new Date((subscription.items.data[0].current_period_start as number) * 1000),
+          current_period_end: new Date((subscription.items.data[0].current_period_end as number) * 1000),
+          updated_at: new Date(),
+        }).eq('stripe_subscription_id', subscription.id as string);
+        console.log("Updated subscription", data, error)
+      }
       // Payment failure: mark subscription past due
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;

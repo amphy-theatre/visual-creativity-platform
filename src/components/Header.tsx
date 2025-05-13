@@ -42,17 +42,6 @@ const Header: React.FC = () => {
         )}
         
         <div className="flex-1 flex justify-end items-center space-x-4">
-          {!user && location.pathname !== "/auth" && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-10 w-10 rounded-full"
-              onClick={() => setIsAuthModalOpen(true)}
-            >
-              <LogIn className="h-5 w-5 text-primary" />
-            </Button>
-          )}
-
           {!isProduction() && (
             <Toggle 
               pressed={debugMode} 
@@ -76,17 +65,29 @@ const Header: React.FC = () => {
               <Moon className="h-5 w-5 text-primary" />
             )}
           </Toggle>
-          
+
+          {!user && location.pathname !== "/auth" && (
+            <Button 
+              variant="default" 
+              size="lg" 
+              className="h-10 px-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+              onClick={() => setIsAuthModalOpen(true)}
+            >
+              <LogIn className="h-4 w-4" />
+              <span>Sign In</span>
+            </Button>
+          )}
+
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Avatar className="h-10 w-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                <Avatar className="h-10 w-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all font-fredoka">
                   <AvatarFallback className="bg-purple-500 text-white text-lg">
                     {user.email?.charAt(0).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" sideOffset={10} className="w-56">
+              <DropdownMenuContent align="center" sideOffset={10} className="w-80 font-fredoka">
                 <DropdownMenuItem className="text-sm text-muted-foreground text-center justify-center">
                   {user.email}
                 </DropdownMenuItem>

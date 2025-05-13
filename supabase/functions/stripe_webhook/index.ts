@@ -67,7 +67,7 @@ serve(async (req) => {
           user_id: subscription.metadata?.userId,
           stripe_customer_id: subscription.customer,
           stripe_subscription_id: subscription.id,
-          tier: `free`,
+          tier: subscription.metadata?.tier,
           status: subscription.status,
           current_period_start: new Date((subscription.items.data[0].current_period_start as number) * 1000),
           current_period_end: new Date((subscription.items.data[0].current_period_end as number) * 1000),
@@ -76,6 +76,14 @@ serve(async (req) => {
           updated_at: new Date(),
         }).select();
         console.log("insertion complete", data, error)
+// make trigger and remove
+        await supabase.from(`profiles`).update({
+          subscription_status: subscription.status,
+          subscription_tier: subscription.metadata?.tier,
+          current_period_end: new Date((subscription.items.data[0].current_period_end as number) * 1000),
+          cancel_at_period_end: subscription.cancel_at_period_end,
+        }).eq('id', subscription.metadata?.userId);
+      
         break;
       }
       // Payment success: activates or renews subscription
@@ -84,16 +92,15 @@ serve(async (req) => {
         const subscriptionId = invoice.parent.subscription_details.subscription;
         const { data: subRec } = await supabase
           .from('subscriptions')
-          .select('id, user_id')
+          .select('user_id, stripe_subscription_id')
           .eq('stripe_subscription_id', subscriptionId as string)
           .single();
         if (!subRec) break;
-
         const paymentIntent = invoice.payment_intent
           ? await stripe.paymentIntents.retrieve(invoice.payment_intent as string)
           : null;
         const { data, error } = await supabase.from('payments').insert({
-          subscription_id: subRec.id,
+          subscription_id: subRec.stripe_subscription_id,
           stripe_payment_intent_id: invoice.payment_intent as string,
           amount: invoice.amount_paid,
           currency: invoice.currency,
@@ -102,17 +109,15 @@ serve(async (req) => {
           created_at: new Date(),
         }).select();
         console.log("added payment", data, error)
-
+        const subscription = await stripe.subscriptions.retreive(subscriptionId as string)
         await supabase.from('subscriptions').update({
-          status: 'active',
-          tier: 'premium',
+          status: subscription.status,
+          tier: subscription.metadata?.tier,
           current_period_start: new Date((invoice.lines.data[0].period?.start as number) * 1000),
           current_period_end: new Date((invoice.lines.data[0].period?.end as number) * 1000),
           updated_at: new Date(),
         }).eq('stripe_subscription_id', subscriptionId as string);
 
-        await supabase.from('users').update({ subscription_status: 'active'})
-          .eq('id', subRec.user_id);
         break;
       }
 
@@ -122,13 +127,13 @@ serve(async (req) => {
         const subscriptionId = invoice.parent.subscription_details.subscription;
         const { data: subRec } = await supabase
           .from('subscriptions')
-          .select('id, user_id')
+          .select('user_id, stripe_subscription_id')
           .eq('stripe_subscription_id', subscriptionId as string)
           .single();
         if (!subRec) break;
 
         const { data, error } = await supabase.from('payments').insert({
-          subscription_id: subRec.id,
+          subscription_id: subRec.subscription_id,
           stripe_payment_intent_id: invoice.payment_intent as string,
           amount: invoice.amount_paid,
           currency: invoice.currency,
@@ -137,12 +142,10 @@ serve(async (req) => {
           created_at: new Date(),
         }).select();
         console.log("created payments", data, error)
+        const subscription = await stripe.subscriptions.retreive(subscriptionId as string)
 
-        await supabase.from('subscriptions').update({ status: 'past_due', updated_at: new Date() })
+        await supabase.from('subscriptions').update({ status: subscription.status , updated_at: new Date() })
           .eq('stripe_subscription_id', subscriptionId as string);
-        await supabase.from('users').update({ subscription_status: 'past_due'})
-          .eq('id', subRec.user_id);
-        break;
       }
 
       // Subscription cancellation
@@ -154,16 +157,6 @@ serve(async (req) => {
           cancel_at_period_end: canceled.cancel_at_period_end,
           updated_at: new Date(),
         }).eq('stripe_subscription_id', canceled.id);
-
-        const { data: subInfo } = await supabase
-          .from('subscriptions')
-          .select('user_id')
-          .eq('stripe_subscription_id', canceled.id)
-          .single();
-        if (subInfo) {
-          await supabase.from('users').update({ subscription_status: 'free' })
-            .eq('id', subInfo.user_id);
-        }
         break;
       }
 

@@ -22,7 +22,7 @@ export default function CheckoutPage() {
       },
       body: JSON.stringify({
         userId: user.id,
-        tier: `price_1RMaBxPxmwukl9XbuMBW3OP4`,
+        tier: `premium`,
       }),
     })
     .then(res => res.json())

@@ -8,6 +8,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const priceIds: { [key: string]: string } = {
+  premium: `price_1RMaBxPxmwukl9XbuMBW3OP4`
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -28,39 +32,28 @@ serve(async (req) => {
 
   // Ensure the user has a Stripe customer ID
   const { data: userRec } = await supabase
-    .from('users')
+    .from('profiles')
     .select('stripe_customer_id')
     .eq('id', userId)
     .single();
 
   let customerId = userRec?.stripe_customer_id;
   if (!customerId) {
-    const customer = await stripe.customers.create({ metadata: { userId } });
+    const customer = await stripe.customers.create({
+      email: userRec?.username,
+      metadata: { userId, tier }
+    });
     customerId = customer.id;
-    await supabase.from('users').update({ stripe_customer_id: customerId }).eq('id', userId);
+    await supabase.from('profiles').update({ stripe_customer_id: customerId }).eq('id', userId);
   }
 
   // Create subscription in `default_incomplete` mode to get PaymentIntent
   const subscription = await stripe.subscriptions.create({
     customer: customerId,
-    items: [{ price: tier }],
+    items: [{ price: priceIds[tier] }],
     payment_behavior: 'default_incomplete',
     expand: ['latest_invoice.payment_intent'],
     metadata: { userId, tier }
-  });
-
-  // Persist subscription record immediately
-  await supabase.from('subscriptions').insert({
-    user_id: userId,
-    stripe_customer_id: customerId,
-    stripe_subscription_id: subscription.id,
-    tier,
-    status: subscription.status,
-    current_period_start: new Date((subscription.current_period_start as number) * 1000),
-    current_period_end: new Date((subscription.current_period_end as number) * 1000),
-    cancel_at_period_end: subscription.cancel_at_period_end,
-    created_at: new Date(),
-    updated_at: new Date(),
   });
 
   // Return the PaymentIntent client secret for Elements

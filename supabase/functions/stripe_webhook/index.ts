@@ -60,10 +60,13 @@ serve(async (req) => {
   
   try {
     switch (event.type) {
-      // Subscription creation (custom flow)
-      case 'customer.subscription.created': {
-        const subscription = event.data.object as Stripe.Subscription;
-        const { data, error } = await supabase.from('subscriptions').insert({
+      // Payment success: activates or renews subscription
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = invoice.parent.subscription_details.subscription;
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
+
+        const { data: subRec, error: subError } = await supabase.from('subscriptions').insert({
           user_id: subscription.metadata?.userId,
           stripe_customer_id: subscription.customer,
           stripe_subscription_id: subscription.id,
@@ -75,29 +78,18 @@ serve(async (req) => {
           created_at: new Date(),
           updated_at: new Date(),
         }).select();
-        console.log("insertion complete", data, error)
-      
-        break;
-      }
-      // Payment success: activates or renews subscription
-      case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice;
-        const subscriptionId = invoice.parent.subscription_details.subscription;
-        const { data: subRec } = await supabase
-          .from('subscriptions')
-          .select('user_id, stripe_subscription_id')
-          .eq('stripe_subscription_id', subscriptionId as string)
-          .single();
-        if (!subRec) break;
+        console.log("subscription insertion complete", subRec, subError)
+
         const paymentIntent = invoice.payment_intent
           ? await stripe.paymentIntents.retrieve(invoice.payment_intent as string)
           : null;
+
         const { data, error } = await supabase.from('payments').insert({
-          subscription_id: subRec.stripe_subscription_id,
+          subscription_id: subscription.id,
           stripe_payment_intent_id: invoice.payment_intent as string,
           amount: invoice.amount_paid,
           currency: invoice.currency,
-          status: 'succeeded',
+          status: invoice.status,
           method_details: paymentIntent?.charges.data[0].payment_method_details || {},
           created_at: new Date(),
         }).select();
@@ -138,7 +130,7 @@ serve(async (req) => {
           created_at: new Date(),
         }).select();
         console.log("created payments", data, error)
-        const subscription = await stripe.subscriptions.retreive(subscriptionId as string)
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId as string)
 
         await supabase.from('subscriptions').update({ status: subscription.status , updated_at: new Date() })
           .eq('stripe_subscription_id', subscriptionId as string);
@@ -149,6 +141,7 @@ serve(async (req) => {
         const canceled = event.data.object as Stripe.Subscription;
         await supabase.from('subscriptions').update({
           status: canceled.status,
+          tier: 'free',
           canceled_at: new Date((canceled.canceled_at as number) * 1000),
           cancel_at_period_end: canceled.cancel_at_period_end,
           updated_at: new Date(),

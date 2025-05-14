@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
 // Number of prompts allowed per month - easy to change
-export const MONTHLY_PROMPT_LIMIT = 100;
+export const MONTHLY_PROMPT_LIMIT = 50;
+export const MONTHLY_PROMPT_LIMIT_PREMIUM = 200;
 
 export type PromptUsageType = {
   prompt_count: number;

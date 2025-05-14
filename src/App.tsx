@@ -16,7 +16,7 @@ import { useAnalytics } from "./hooks/useAnalytics";
 import AuthModal from "./components/AuthModal";
 import { useAuth } from "./context/AuthContext";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
-import CheckoutPage from "./pages/Checkout";
+// import CheckoutPage from "./pages/Checkout";
 import { SubscriptionProvider } from "./context/SubscriberContext";
 
 const queryClient = new QueryClient();
@@ -83,13 +83,6 @@ const App = () => (
                       <ProtectedRoute>
                         <AnalyticsTracker>
                           <Recommendations />
-                        </AnalyticsTracker>
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/payments" element={
-                      <ProtectedRoute>
-                        <AnalyticsTracker>
-                          <CheckoutPage />
                         </AnalyticsTracker>
                       </ProtectedRoute>
                     } />

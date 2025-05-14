@@ -1,9 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { supabase } from "../integrations/supabase/client";
 import { toast } from "../components/ui/use-toast";
-import { MONTHLY_PROMPT_LIMIT } from "./usePromptUsage";
 import { useAppConfig } from "./useAppConfig";
 
 type PromptUsageType = {

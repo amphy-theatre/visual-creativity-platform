@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../integrations/supabase/client";
 import { toast } from "./ui/use-toast";
 import { useAuth } from "../context/AuthContext";
-import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
+import { usePromptUsage } from "../hooks/usePromptUsage";
 import { useUserPreferences } from "../hooks/useUserPreferences";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { useAppConfig } from "@/hooks/useAppConfig";
@@ -43,7 +43,7 @@ const QuoteList: React.FC<QuoteListProps> = ({
   const { userPreferences } = useUserPreferences();
   const { trackEvent } = useAnalytics();
   const config = useAppConfig();
-
+  const { promptUsage: promptUsageFromHook } = usePromptUsage();
   const handleQuoteSelection = async (quote: string) => {
     // Check if user has reached their monthly limit
     if (promptUsage?.limit_reached) {
@@ -90,7 +90,7 @@ const QuoteList: React.FC<QuoteListProps> = ({
       if (user) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
-          monthly_limit: MONTHLY_PROMPT_LIMIT
+          monthly_limit: promptUsageFromHook.monthly_limit
         });
         
         if (usageError) {

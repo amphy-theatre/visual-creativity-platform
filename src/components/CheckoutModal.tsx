@@ -4,6 +4,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from './CheckoutForm';
 import { useAppConfig } from "@/hooks/useAppConfig";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   Dialog,
   DialogContent,
@@ -26,19 +27,17 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const config = useAppConfig();
   const { user, session } = useAuth();
+  const { theme: currentTheme } = useTheme();
 
   useEffect(() => {
     if (!isOpen || !user || !session) {
-      // Don't fetch if the modal isn't open, or if user/session is not available
       if (isOpen && (!user || !session)) {
         console.error("User or session not available for checkout.");
-        // Optionally, show a message to the user
       }
-      setClientSecret(null); // Reset client secret when modal is closed or user/session is missing
+      setClientSecret(null);
       return;
     }
 
-    // Fetch a new client secret only when the modal is opened and user/session are present
     fetch(config.edgeFunctions.checkoutSession, {
       method: 'POST',
       headers: {
@@ -47,7 +46,7 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
       },
       body: JSON.stringify({
         userId: user.id,
-        tier: 'premium', // Assuming 'premium' is the target tier
+        tier: 'premium',
       }),
     })
     .then(res => {
@@ -61,27 +60,25 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
         setClientSecret(data.clientSecret);
       } else {
         console.error("Client secret not found in response:", data);
-        setClientSecret(null); // Ensure clientSecret is null if not found
+        setClientSecret(null);
       }
     })
     .catch(error => {
       console.error("Error fetching client secret:", error);
-      setClientSecret(null); // Ensure clientSecret is null on error
-      // Optionally, inform the user about the error
+      setClientSecret(null);
     });
   }, [isOpen, user, session, config]);
 
-  const appearance = {
-    theme: 'night', // or 'stripe' or 'flat' or 'none'
+  const appearance: StripeElementsOptions['appearance'] = {
+    theme: currentTheme === 'dark' ? 'night' : 'stripe',
     variables: {
-      colorPrimary: '#6D28D9', // purple-600
-      colorBackground: '#0C111F', // Your site's dark background
-      colorText: '#FFFFFF',
-      colorDanger: '#EF4444', // red-500
+      colorPrimary: '#6D28D9',
+      colorBackground: currentTheme === 'dark' ? '#0C111F' : '#FFFFFF',
+      colorText: currentTheme === 'dark' ? '#FFFFFF' : '#000000',
+      colorDanger: '#EF4444',
       fontFamily: 'Ideal Sans, system-ui, sans-serif',
       spacingUnit: '4px',
       borderRadius: '4px',
-      // See all possible variables below
     }
   };
   
@@ -92,15 +89,15 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[92%] sm:max-w-md p-0 border-gray-800 bg-[#0C111F] text-white max-h-[90vh] overflow-auto rounded-lg font-fredoka">
+      <DialogContent className="w-[92%] sm:max-w-md p-0 border-gray-800 bg-background text-foreground max-h-[90vh] overflow-auto rounded-lg font-fredoka">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="text-2xl">Upgrade to Premium</DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-muted-foreground">
             and get more prompts, more personalized recommendations with watch history uploads, and other features coming soon!
           </DialogDescription>
         </DialogHeader>
-        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 bg-[#0C111F] ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-20">
-          <X className="h-4 w-4 text-white" />
+        <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-20">
+          <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogClose>
         
@@ -112,7 +109,7 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
           )}
           {!clientSecret && (
             <div className="flex items-center justify-center h-32">
-              <p className="text-gray-400">Loading payment form...</p>
+              <p className="text-muted-foreground">Loading payment form...</p>
             </div>
           )}
         </div>
@@ -121,4 +118,4 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
   );
 };
 
-export default CheckoutModal; 
+export default CheckoutModal;

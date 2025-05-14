@@ -67,10 +67,10 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[92%] sm:max-w-[80%] md:max-w-[80%] lg:max-w-[80%] xl:max-w-[80%] p-0 border-gray-800 bg-transparent max-h-[90vh] sm:max-h-[80vh] overflow-auto sm:overflow-hidden rounded-lg bg-[#0C111F]">
-        <div className="flex flex-col lg:flex-row bg-[#0C111F] text-white rounded-lg relative">
-          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 bg-[#0C111F] ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-20">
-            <X className="h-4 w-4 text-white" />
+      <DialogContent className="w-[92%] sm:max-w-[80%] md:max-w-[80%] lg:max-w-[80%] xl:max-w-[80%] p-0 border-gray-800 max-h-[90vh] sm:max-h-[80vh] overflow-auto sm:overflow-hidden rounded-lg bg-background text-foreground">
+        <div className="flex flex-col lg:flex-row bg-background text-foreground rounded-lg relative">
+          <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-20">
+            <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </DialogClose>
           
@@ -79,14 +79,14 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             <div className="max-w-md mx-auto w-full">
               <h1 className="text-4xl sm:text-5xl mb-2">Amphytheatre</h1>
               
-              <p className="text-xl text-gray-400 mb-6 hidden lg:block">
+              <p className="text-xl text-muted-foreground mb-6 hidden lg:block">
                 Sign in
               </p>
               
               <div className="space-y-4 hidden lg:block">
                 <Button
                   variant="outline"
-                  className="w-full bg-transparent border border-gray-700 hover:bg-gray-800 text-white py-5 sm:py-6 flex items-center justify-center gap-3"
+                  className="w-full bg-transparent border border-gray-700 hover:bg-gray-800 py-5 sm:py-6 flex items-center justify-center gap-3"
                   onClick={handleGoogleSignIn}
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -103,7 +103,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                     <span className="w-full border-t border-gray-700"></span>
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-[#0C111F] px-2 text-gray-400">Or</span>
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
                   </div>
                 </div>
                 
@@ -126,7 +126,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                     <span className="w-full border-t border-gray-700"></span>
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-[#0C111F] px-2 text-gray-400">Or</span>
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
                   </div>
                 </div>
                 
@@ -151,12 +151,12 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 Your Personal Vibe-Based<br />Movie Guide
               </h2>
               
-              <p className="text-center text-xl text-gray-300 mb-6">
+              <p className="text-center text-xl text-muted-foreground mb-6"> {/* TODO: Consider text-muted-foreground or similar if gray-300 is too light in light mode */}
                 Find media to match your current mood.
               </p>
               
-              <p className="text-center text-xl text-gray-400 mb-8">
-                Sign up for <span className="text-red-400">100 free prompts</span>, <span className="text-blue-400">personalized recommendations</span>, <span className="text-purple-400">watch history uploads</span>, and more <span className="text-amber-400">exciting features</span> coming soon!
+              <p className="text-center text-xl text-muted-foreground mb-8">
+                Sign up for <span className="text-red-400">50 free prompts</span>, <span className="text-blue-400">personalized recommendations</span>, <span className="text-purple-400">watch history uploads</span>, and more <span className="text-amber-400">exciting features</span> coming soon!
               </p>
               
               <div className="flex justify-center gap-2">
@@ -175,12 +175,12 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 Your Personal, Vibe-Based Movie Guide
               </h2>
               
-              <p className="text-center text-lg text-gray-300 mb-4">
+              <p className="text-center text-lg text-gray-300 mb-4"> {/* TODO: Consider text-muted-foreground or similar if gray-300 is too light in light mode */}
                 Find media to match your current mood.
               </p>
               
-              <p className="text-center text-lg text-gray-400 mb-6">
-                Sign up for <span className="text-red-400">100 free prompts</span>, <span className="text-blue-400">personalized recommendations</span>, <span className="text-purple-400">watch history uploads</span>, and more <span className="text-amber-400">exciting features</span> coming soon!
+              <p className="text-center text-lg text-muted-foreground mb-6">
+                Sign up for <span className="text-red-400">50 free prompts</span>, <span className="text-blue-400">personalized recommendations</span>, <span className="text-purple-400">watch history uploads</span>, and more <span className="text-amber-400">exciting features</span> coming soon!
               </p>
               
               <div className="flex justify-center gap-2">
@@ -194,10 +194,10 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
         </div>
         
         {/* Sticky Google button for mobile only */}
-        <div className="sticky bottom-0 w-full p-4 bg-[#0C111F] border-t border-gray-800 lg:hidden">
+        <div className="sticky bottom-0 w-full p-4 bg-background border-t border-gray-800 lg:hidden">
           <Button
             variant="outline"
-            className="w-full bg-transparent border border-gray-700 hover:bg-gray-800 text-white py-5 flex items-center justify-center gap-3"
+            className="w-full bg-transparent border border-gray-700 hover:bg-gray-800 py-5 flex items-center justify-center gap-3"
             onClick={handleGoogleSignIn}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

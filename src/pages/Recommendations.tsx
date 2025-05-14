@@ -9,7 +9,7 @@ import { toast } from "../components/ui/use-toast";
 import { supabase } from "../integrations/supabase/client";
 import { useAuth } from "../context/AuthContext";
 import { useUserPreferences } from "../hooks/useUserPreferences";
-import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
+import { usePromptUsage } from "../hooks/usePromptUsage";
 import { useAnalytics } from "../hooks/useAnalytics";
 import AuthModal from "../components/AuthModal";
 import { useAppConfig } from "@/hooks/useAppConfig";
@@ -48,6 +48,7 @@ const Recommendations: React.FC = () => {
   const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset, fromLiteralPrompt } = location.state || {};
   const { user, session, isGuestMode, isTrialUsed, setTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
   const { userPreferences } = useUserPreferences();
+  const { promptUsage } = usePromptUsage();
   const { trackEvent } = useAnalytics();
   const config = useAppConfig();
 
@@ -142,7 +143,7 @@ const Recommendations: React.FC = () => {
       if (user) {
         const { data: usageData, error: usageError } = await supabase.rpc('increment_prompt_count', { 
           uid: user.id,
-          monthly_limit: MONTHLY_PROMPT_LIMIT
+          monthly_limit: promptUsage.monthly_limit
         });
         
         if (usageError) {

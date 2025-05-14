@@ -5,11 +5,13 @@ import MoodInput from "../components/MoodInput";
 import { useAuth } from "../context/AuthContext";
 import AnimatedText from "@/components/AnimatedText";
 import AuthModal from "@/components/AuthModal";
+import { SubscriptionProvider } from "@/context/SubscriberContext";
+import CSVUploader from "@/components/CSVUploader";
 
 const Index: React.FC = () => {
   const { isGuestMode, isTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
   const [inputValue, setInputValue] = useState("");
-  
+  const [csvData, setCsvData] = useState<string | null>(null);
   const handleInputChange = (value: string) => {
     setInputValue(value);
   };
@@ -81,6 +83,10 @@ const Index: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <SubscriptionProvider>
+          <CSVUploader onCsvDataChange={setCsvData}/>
+        </SubscriptionProvider>
       </div>
     </Layout>
   );

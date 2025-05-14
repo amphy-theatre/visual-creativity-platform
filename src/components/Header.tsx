@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound, Bug } from "lucide-react";
+import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound, Bug, XCircle, Star } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
+import { useNavigate } from "react-router-dom";
 import { Toggle } from "./ui/toggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -14,14 +15,22 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { useAppConfig } from "@/hooks/useAppConfig";
+import { useSubscription } from "@/context/SubscriberContext";
+import CheckoutModal from "./CheckoutModal";
+import { toast } from "@/hooks/use-toast";
 
 const Header: React.FC = () => {
   const location = useLocation();
   const showBackButton = location.pathname !== "/" && location.pathname !== "/auth";
+  const { tier, canRender, cancelledButActive } = useSubscription();
   const { theme, toggleTheme } = useTheme();
   const { debugMode, toggleDebugMode } = useDebug();
-  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { user, session, signOut } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const config = useAppConfig();
 
   // Check if we're in production environment
   const isProduction = () => {
@@ -29,6 +38,55 @@ const Header: React.FC = () => {
            process.env.NODE_ENV === 'production' ||
            import.meta.env.VITE_DISABLE_DEBUG === 'true';
   };
+
+  const handleCancelSubscription = async () => {
+    if (!user || !user.id) {
+      console.error("User ID not found for cancelling subscription.");
+      // Optionally, show a toast or notification to the user
+      return;
+    }
+
+    if (!config) {
+      console.error("App configuration not loaded.");
+      // Optionally, show a toast or notification to the user
+      return;
+    }
+
+    try {
+      const response = await fetch(config.edgeFunctions.cancelSubscription, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || config.supabase.publishableKey}`
+        },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to cancel subscription:", errorData);
+        // Optionally, show a toast or notification to the user about the failure
+        throw new Error(errorData.error || 'Failed to cancel subscription');
+      }
+
+      // Handle successful cancellation
+      console.log("Subscription cancellation request successful");
+      toast({
+        title: "Subscription Cancelled",
+        description: "Your subscription has been successfully cancelled. You will lose access to premium features at the end of the current billing period.",
+      });
+
+      navigate('/'); 
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      // Optionally, show a toast or notification to the user about the error
+    }
+  };
+
+  const handlePayment = () => {
+    setIsCheckoutModalOpen(false);
+    window.location.reload();
+  }
 
   return (
     <header className="w-full py-4 px-4 sm:px-6 md:px-8">
@@ -41,7 +99,18 @@ const Header: React.FC = () => {
           <div className="w-10">{/* Placeholder for spacing */}</div>
         )}
         
-        <div className="flex-1 flex justify-end items-center space-x-4">
+        <div className="flex-1 flex justify-end items-center space-x-2 sm:space-x-4">
+          {user && !canRender() && (
+            <Button 
+              variant="outline"
+              size="sm"
+              className="h-9 sm:h-10 px-3 sm:px-4 rounded-full bg-transparent border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2"
+              onClick={() => setIsCheckoutModalOpen(true)}
+            >
+              <Star className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-xs sm:text-sm">Premium</span>
+            </Button>
+          )}
           {!isProduction() && (
             <Toggle 
               pressed={debugMode} 
@@ -91,6 +160,15 @@ const Header: React.FC = () => {
                 <DropdownMenuItem className="text-sm text-muted-foreground text-center justify-center">
                   {user.email}
                 </DropdownMenuItem>
+                { tier === `premium` && !cancelledButActive() && (
+                  <DropdownMenuItem 
+                    onClick={handleCancelSubscription} 
+                    className="text-destructive focus:text-destructive cursor-pointer text-center justify-center"
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    <span>Cancel Subscription</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer text-center justify-center">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign out</span>
@@ -102,6 +180,7 @@ const Header: React.FC = () => {
       </div>
       
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      {user && <CheckoutModal isOpen={isCheckoutModalOpen} onClose={handlePayment} />}
     </header>
   );
 };

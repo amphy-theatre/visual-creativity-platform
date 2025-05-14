@@ -3,13 +3,14 @@ import React, { useState } from "react";
 import FileDropbox from "./FileDropbox";
 import { toast } from "@/components/ui/use-toast";
 import { readFileAsText } from "@/utils/csvUtils";
-
+import { useSubscription } from "@/context/SubscriberContext";
 interface CSVUploaderProps {
   onCsvDataChange: (data: string | null) => void;
 }
 
 const CSVUploader: React.FC<CSVUploaderProps> = ({ onCsvDataChange }) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const { canRender } = useSubscription()
 
   const handleFileChange = async (file: File | null) => {
     setUploadedFile(file);
@@ -34,7 +35,9 @@ const CSVUploader: React.FC<CSVUploaderProps> = ({ onCsvDataChange }) => {
   };
 
   return (
+    canRender() ?
     <FileDropbox onChange={handleFileChange} maxSize={10} />
+    : null
   );
 };
 

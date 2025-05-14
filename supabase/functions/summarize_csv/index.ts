@@ -53,6 +53,29 @@ serve(async (req) => {
     // Use service role key if available (for bypassing RLS)
     const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseKey);
 
+    const {data, error } = await supabase.from("profiles")
+      .select("subscription_tier")
+      .eq("id", userId as string)
+      .single();
+
+    if( !data ) return new Response(null);
+
+    if(data.subscription_tier !== `premium`) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'User is not premium',
+          success: false
+        }),
+        { 
+          status: 500, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          } 
+        },
+      );
+    }
+
     // Start the background task for generating summary and saving to database
     const processCsvAndSaveSummary = async () => {
       try {

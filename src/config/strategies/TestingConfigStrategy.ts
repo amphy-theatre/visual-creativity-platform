@@ -27,6 +27,9 @@ export class TestingConfigStrategy {
         analyzePrompt: `${edgeFunctionsBaseUrl}/analyze_prompt`,
         expandedMovieInfo: `${edgeFunctionsBaseUrl}/expanded_movie_info`,
         trackAnalytics: `${edgeFunctionsBaseUrl}/track_analytics`,
+        handlePayments: `${edgeFunctionsBaseUrl}/stripe_webhook`,
+        checkoutSession: `${edgeFunctionsBaseUrl}/checkout_session`,
+        cancelSubscription: `${edgeFunctionsBaseUrl}/cancel_subscription`,
       },
       app: {
         defaultTheme: 'system',

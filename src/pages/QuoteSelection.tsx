@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import QuoteList from "../components/QuoteList";
 import { useQuotes } from "../hooks/useQuotes";
 import PromptLimitModal from "../components/modals/PromptLimitModal";
-import { MONTHLY_PROMPT_LIMIT } from "../hooks/usePromptUsage";
+import { usePromptUsage } from "../hooks/usePromptUsage";
 import AuthModal from "@/components/AuthModal";
 
 type PromptUsageType = {
@@ -23,7 +23,8 @@ const QuoteSelection: React.FC = () => {
   const navigate = useNavigate();
   const { mood: initialMood, quotes: initialQuotes, promptUsage: initialPromptUsage } = location.state || { mood: "", quotes: [], promptUsage: null };
   const { user, isGuestMode, isTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
-  
+  const { promptUsage: promptUsageFromHook } = usePromptUsage();
+
   const {
     displayQuotes,
     isLoading,
@@ -41,7 +42,7 @@ const QuoteSelection: React.FC = () => {
       try {
         const { data, error } = await supabase.rpc('get_prompt_usage', { 
           uid: user.id,
-          monthly_limit: MONTHLY_PROMPT_LIMIT
+          monthly_limit: promptUsageFromHook.monthly_limit
         });
         
         if (error) {
@@ -110,7 +111,7 @@ const QuoteSelection: React.FC = () => {
       <PromptLimitModal
         open={showLimitModal}
         onOpenChange={setShowLimitModal}
-        monthlyLimit={promptUsage?.monthly_limit || MONTHLY_PROMPT_LIMIT}
+        monthlyLimit={promptUsage?.monthly_limit}
       />
     </Layout>
   );

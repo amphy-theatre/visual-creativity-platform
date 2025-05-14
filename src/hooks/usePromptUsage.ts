@@ -1,10 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/context/SubscriberContext";
 
 // Number of prompts allowed per month - easy to change
-export const MONTHLY_PROMPT_LIMIT = 100;
+export const MONTHLY_PROMPT_LIMIT = 50;
+export const MONTHLY_PROMPT_LIMIT_PREMIUM = 200;
 
 export type PromptUsageType = {
   prompt_count: number;
@@ -14,15 +15,17 @@ export type PromptUsageType = {
 };
 
 export const usePromptUsage = () => {
+  const { user } = useAuth();
+  const { canRender } = useSubscription();
+  const monthlyLimit = canRender() ? MONTHLY_PROMPT_LIMIT_PREMIUM : MONTHLY_PROMPT_LIMIT;
   const [promptUsage, setPromptUsage] = useState<PromptUsageType>({
     prompt_count: 0,
     limit_reached: false,
-    remaining: MONTHLY_PROMPT_LIMIT,
-    monthly_limit: MONTHLY_PROMPT_LIMIT,
+    remaining: monthlyLimit,
+    monthly_limit: monthlyLimit,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [showLimitModal, setShowLimitModal] = useState(false);
-  const { user } = useAuth();
 
   useEffect(() => {
     const fetchPromptUsage = async () => {
@@ -34,7 +37,7 @@ export const usePromptUsage = () => {
       try {
         const { data, error } = await supabase.rpc("get_prompt_usage", {
           uid: user.id,
-          monthly_limit: MONTHLY_PROMPT_LIMIT,
+          monthly_limit: monthlyLimit, 
         });
 
         if (error) {
@@ -42,11 +45,9 @@ export const usePromptUsage = () => {
           return;
         }
 
-        // Type assertion to ensure the data matches our expected structure
         const usage = data as PromptUsageType;
         setPromptUsage(usage);
 
-        // Show the modal if user has reached their limit
         if (usage.limit_reached) {
           setShowLimitModal(true);
         }
@@ -58,7 +59,7 @@ export const usePromptUsage = () => {
     };
 
     fetchPromptUsage();
-  }, [user]);
+  }, [user, canRender]);
 
   const incrementPromptCount = async () => {
     if (!user) return null;
@@ -68,7 +69,7 @@ export const usePromptUsage = () => {
         "increment_prompt_count",
         {
           uid: user.id,
-          monthly_limit: MONTHLY_PROMPT_LIMIT,
+          monthly_limit: monthlyLimit,
         }
       );
 
@@ -76,7 +77,6 @@ export const usePromptUsage = () => {
         throw new Error(`Failed to update prompt usage: ${usageError.message}`);
       }
 
-      // Update local state with the new prompt usage, with type assertion
       const updatedUsage = usageData as PromptUsageType;
       setPromptUsage(updatedUsage);
 

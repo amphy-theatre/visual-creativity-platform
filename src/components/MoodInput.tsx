@@ -8,7 +8,6 @@ import PromptLimitModal from "./modals/PromptLimitModal";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAppConfig } from "@/hooks/useAppConfig";
 import SubmitButton from "./SubmitButton";
-import CSVUploader from "./CSVUploader";
 import AnimatedPlaceholderTextArea from "./AnimatedPlaceholderTextArea";
 import { phrases } from "../phrases";
 
@@ -246,9 +245,7 @@ const MoodInput: React.FC<MoodInputProps> = ({
         showPromptCount={!isGuestMode}
         loadingText={isAnalyzing ? "Analyzing your prompt..." : "Generating..."}
       />
-      
-      {/* <CSVUploader onCsvDataChange={setCsvData} /> */}
-      
+            
       <PromptLimitModal
         open={showLimitModal}
         onOpenChange={setShowLimitModal}

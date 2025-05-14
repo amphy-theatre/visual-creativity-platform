@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 const priceIds: { [key: string]: string } = {
-  premium: `price_1RMaBxPxmwukl9XbuMBW3OP4`
+  premium: Deno.env.get('PREMIUM_STRIPE_PRICE_ID') as string
 };
 
 serve(async (req) => {

@@ -111,7 +111,6 @@ const Header: React.FC = () => {
               <span className="text-xs sm:text-sm">Premium</span>
             </Button>
           )}
-
           {!isProduction() && (
             <Toggle 
               pressed={debugMode} 

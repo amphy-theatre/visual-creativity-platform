@@ -29,6 +29,7 @@ export class ProductionConfigStrategy {
         trackAnalytics: `${edgeFunctionsBaseUrl}/track_analytics`,
         handlePayments: `${edgeFunctionsBaseUrl}/stripe_webhook`,
         checkoutSession: `${edgeFunctionsBaseUrl}/checkout-session`,
+        cancelSubscription: `${edgeFunctionsBaseUrl}/cancel-subscription`,
       },
       app: {
         defaultTheme: 'system',

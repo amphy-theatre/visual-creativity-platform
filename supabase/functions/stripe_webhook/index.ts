@@ -111,6 +111,7 @@ serve(async (req) => {
           tier: subscription.metadata?.tier,
           current_period_start: new Date((subscription.items.data[0].current_period_start as number) * 1000),
           current_period_end: new Date((subscription.items.data[0].current_period_end as number) * 1000),
+          cancel_at_period_end: subscription.cancel_at_period_end,
           updated_at: new Date(),
         }).eq('stripe_subscription_id', subscription.id as string);
         console.log("Updated subscription", data, error)

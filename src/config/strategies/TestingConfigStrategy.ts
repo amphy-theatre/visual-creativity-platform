@@ -29,6 +29,7 @@ export class TestingConfigStrategy {
         trackAnalytics: `${edgeFunctionsBaseUrl}/track_analytics`,
         handlePayments: `${edgeFunctionsBaseUrl}/stripe_webhook`,
         checkoutSession: `${edgeFunctionsBaseUrl}/checkout_session`,
+        cancelSubscription: `${edgeFunctionsBaseUrl}/cancel_subscription`,
       },
       app: {
         defaultTheme: 'system',

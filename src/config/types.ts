@@ -22,6 +22,7 @@ export interface AppConfig {
     trackAnalytics: string; // Added missing trackAnalytics endpoint
     handlePayments: string;
     checkoutSession: string;
+    cancelSubscription: string;
   };
   // App configuration
   app: {

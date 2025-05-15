@@ -25,6 +25,8 @@ interface CheckoutModalProps {
 
 const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [amount, setAmount] = useState<number | null>(null);
+  const [currency, setCurrency] = useState<string | null>(null);
   const config = useAppConfig();
   const { user, session } = useAuth();
   const { theme: currentTheme } = useTheme();
@@ -35,6 +37,8 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
         console.error("User or session not available for checkout.");
       }
       setClientSecret(null);
+      setAmount(null);
+      setCurrency(null);
       return;
     }
 
@@ -58,14 +62,20 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
     .then(data => {
       if (data.clientSecret) {
         setClientSecret(data.clientSecret);
+        setAmount(data.amount);
+        setCurrency(data.currency);
       } else {
         console.error("Client secret not found in response:", data);
         setClientSecret(null);
+        setAmount(null);
+        setCurrency(null);
       }
     })
     .catch(error => {
       console.error("Error fetching client secret:", error);
       setClientSecret(null);
+      setAmount(null);
+      setCurrency(null);
     });
   }, [isOpen, user, session, config]);
 
@@ -91,9 +101,16 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-[92%] sm:max-w-md p-0 border-gray-800 bg-background text-foreground max-h-[90vh] overflow-auto rounded-lg font-fredoka">
         <DialogHeader className="p-6 pb-4">
-          <DialogTitle className="text-2xl">Upgrade to Premium</DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            and get more prompts, more personalized recommendations with watch history uploads, and other features coming soon!
+          <DialogTitle className="text-2xl font-normal flex justify-between items-center">
+            <span>Upgrade to Premium:</span>
+            {amount && currency && (
+              <span className="pr-5">
+                {(amount / 100).toLocaleString('en-US', { style: 'currency', currency: currency.toUpperCase() })}
+              </span>
+            )}
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground pt-2">
+            Get 200 prompts, more personalized recommendations with watch history uploads, and other features coming soon!
           </DialogDescription>
         </DialogHeader>
         <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-20">

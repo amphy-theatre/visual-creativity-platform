@@ -58,8 +58,11 @@ serve(async (req) => {
 
   // Return the PaymentIntent client secret for Elements
   const clientSecret = subscription.latest_invoice?.payment_intent?.client_secret;
+  const amount = subscription.latest_invoice?.payment_intent?.amount;
+  const currency = subscription.latest_invoice?.payment_intent?.currency;
+  
   return new Response(
-    JSON.stringify({ clientSecret }),
+    JSON.stringify({ clientSecret, amount, currency }),
     {
       headers: {
         ...corsHeaders,

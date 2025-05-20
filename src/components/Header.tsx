@@ -113,17 +113,15 @@ const Header: React.FC = () => {
               <span className="text-xs sm:text-sm">Premium</span>
             </Button>
           )}
-          {user && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 sm:h-10 px-3 sm:px-4 rounded-full font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2"
-              onClick={() => setIsPricingModalOpen(true)}
-            >
-              <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-              <span className="text-xs sm:text-sm text-primary">Plans</span>
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 sm:h-10 px-3 sm:px-4 rounded-full font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2"
+            onClick={() => setIsPricingModalOpen(true)}
+          >
+            <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+            <span className="text-xs sm:text-sm text-primary">Plans</span>
+          </Button>
           {!isProduction() && (
             <Toggle 
               pressed={debugMode} 

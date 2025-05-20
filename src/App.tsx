@@ -13,7 +13,7 @@ import { DebugProvider } from "./context/DebugContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { useAnalytics } from "./hooks/useAnalytics";
-import AuthModal from "./components/AuthModal";
+import PricingModal from "@/components/PricingModal/PricingModal";
 import { useAuth } from "./context/AuthContext";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 // import CheckoutPage from "./pages/Checkout";
@@ -41,11 +41,11 @@ const AnalyticsTracker = ({ children }: { children: React.ReactNode }) => {
 
 // App wrapper with auth modal
 const AppWithAuth = ({ children }: { children: React.ReactNode }) => {
-  const { showAuthModal, setShowAuthModal } = useAuth();
+  const { showPricingModal, setShowPricingModal } = useAuth();
   
   return (
     <>
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <PricingModal isOpen={showPricingModal} onClose={() => setShowPricingModal(false)} />
       {children}
     </>
   );

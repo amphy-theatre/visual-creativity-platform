@@ -22,45 +22,27 @@ export function getProviderLogoUrl(providerName: string): string {
     return [
       {
         title: "Inside Out",
-        director: "",
-        description: "A heartwarming story about emotions and growing up.",
-        posterUrl: "https://image.tmdb.org/t/p/w500/2AT32WI3iaGkVPzjcs9n0hQHtNw.jpg",
-        link: "https://www.disneyplus.com/movies/inside-out",
-        streamingProviders: [
-          { 
-            name: "Disney+", 
-            url: "https://www.disneyplus.com",
-            logoUrl: getProviderLogoUrl("Disney+")
-          }
-        ]
+        release_year: "2015",
+        description: "After young Riley is uprooted from her Midwest life and moved to San Francisco, her emotions - Joy, Fear, Anger, Disgust and Sadness - conflict on how best to navigate a new city, house, and school.",
+        link: '',
+        streamingProviders: [],
+        tmdbId: ""
       },
       {
         title: "Good Will Hunting",
-        director: "",
+        release_year: "1997",
         description: "A janitor at MIT has a gift for mathematics but needs help from a psychologist to find direction.",
-        posterUrl: "https://image.tmdb.org/t/p/w500/bABCBKYBK7A5G1x0wSB5no4Iscs.jpg",
-        link: "https://www.netflix.com/title/17405997",
-        streamingProviders: [
-          { 
-            name: "Netflix", 
-            url: "https://www.netflix.com",
-            logoUrl: getProviderLogoUrl("Netflix")
-          }
-        ]
+        link: '',
+        streamingProviders: [],
+        tmdbId: ""
       },
       {
         title: "Soul",
-        director: "",
+        release_year: "2020",
         description: "A musician who has lost his passion for music is transported out of his body and must find his way back.",
-        posterUrl: "https://image.tmdb.org/t/p/w500/hm58Jw4Lw8OIeECIq5qyPYhAeRJ.jpg",
-        link: "https://www.disneyplus.com/movies/soul",
-        streamingProviders: [
-          { 
-            name: "Disney+", 
-            url: "https://www.disneyplus.com",
-            logoUrl: getProviderLogoUrl("Disney+")
-          }
-        ]
+        link: '',
+        streamingProviders: [],
+        tmdbId: ""
       }
     ];
   }

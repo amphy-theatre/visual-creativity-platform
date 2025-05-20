@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { usePromptUsage } from "@/hooks/usePromptUsage";
-import PromptLimitModal from "@/components/modals/PromptLimitModal";
 import { useAuth } from "@/context/AuthContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAppConfig } from "@/hooks/useAppConfig";
@@ -15,9 +14,8 @@ interface PresetMoodProps {
 
 const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) => {
   const navigate = useNavigate();
-  const [showLimitModal, setShowLimitModal] = useState(false);
-  const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading } = usePromptUsage();
-  const { session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
+  const { promptUsage, incrementPromptCount, setShowLimitModal } = usePromptUsage();
+  const { session, isGuestMode, isTrialUsed } = useAuth();
   const { trackEvent } = useAnalytics();
   const config = useAppConfig();
   
@@ -115,12 +113,6 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
           <div className="text-xl font-semibold">{title}</div>
         </div>
       </div>
-      
-      <PromptLimitModal
-        open={showLimitModal}
-        onOpenChange={setShowLimitModal}
-        monthlyLimit={promptUsage?.monthly_limit || 75}
-      />
     </>
   );
 };

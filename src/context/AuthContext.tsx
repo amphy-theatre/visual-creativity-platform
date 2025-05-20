@@ -13,8 +13,8 @@ type AuthContextType = {
   isGuestMode: boolean;
   setGuestMode: (enabled: boolean) => void;
   getRedirectUrl: () => string;
-  showAuthModal: boolean;
-  setShowAuthModal: (show: boolean) => void;
+  showPricingModal: boolean;
+  setShowPricingModal: (show: boolean) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return storedValue ? JSON.parse(storedValue) : false;
   });
   const [isGuestMode, setGuestMode] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const navigate = useNavigate();
 
   // Persist trial usage to session storage when it changes
@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Show auth modal when trial is used and user is in guest mode
     if (isTrialUsed && isGuestMode) {
-      setShowAuthModal(true);
+      setShowPricingModal(true);
     }
   }, [isTrialUsed, isGuestMode]);
 
@@ -95,8 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isGuestMode, 
       setGuestMode,
       getRedirectUrl,
-      showAuthModal,
-      setShowAuthModal
+      showPricingModal,
+      setShowPricingModal
     }}>
       {children}
     </AuthContext.Provider>

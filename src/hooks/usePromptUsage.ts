@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useSubscription } from "@/context/SubscriberContext";
 
 // Number of prompts allowed per month - easy to change
-export const MONTHLY_PROMPT_LIMIT = 50;
+export const MONTHLY_PROMPT_LIMIT = 15;
 export const MONTHLY_PROMPT_LIMIT_PREMIUM = 200;
 
 export type PromptUsageType = {

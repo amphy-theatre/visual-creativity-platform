@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound, Bug, XCircle, Star } from "lucide-react";
+import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound, Bug, XCircle, Star, LayoutGrid } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useNavigate } from "react-router-dom";
 import { Toggle } from "./ui/toggle";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useDebug } from "@/context/DebugContext";
-import AuthModal from "./AuthModal";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useAppConfig } from "@/hooks/useAppConfig";
 import { useSubscription } from "@/context/SubscriberContext";
 import CheckoutModal from "./CheckoutModal";
+import PricingModal from "./PricingModal/PricingModal";
 import { toast } from "@/hooks/use-toast";
 
 const Header: React.FC = () => {
@@ -27,16 +28,44 @@ const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { debugMode, toggleDebugMode } = useDebug();
   const navigate = useNavigate();
-  const { user, session, signOut } = useAuth();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, session, signOut, getRedirectUrl } = useAuth();
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const config = useAppConfig();
+
+  useEffect(() => {
+    if (user && localStorage.getItem('redirectToCheckoutAfterLogin') === 'true') {
+      setIsCheckoutModalOpen(true);
+      localStorage.removeItem('redirectToCheckoutAfterLogin');
+    }
+  }, [user]);
 
   // Check if we're in production environment
   const isProduction = () => {
     return window.location.hostname.includes('vercel.app') || 
            process.env.NODE_ENV === 'production' ||
            import.meta.env.VITE_DISABLE_DEBUG === 'true';
+  };
+
+  const handleDirectGoogleSignIn = async () => {
+    try {
+      const redirectUrl = getRedirectUrl();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+      if (error) throw error;
+      // No onClose() here as we are not in a modal context.
+      // Potentially navigate or show a toast message upon successful initiation.
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCancelSubscription = async () => {
@@ -100,6 +129,30 @@ const Header: React.FC = () => {
         )}
         
         <div className="flex-1 flex justify-end items-center space-x-2 sm:space-x-4">
+          {!isProduction() && (
+            <Toggle 
+            pressed={debugMode} 
+            onPressedChange={toggleDebugMode}
+            aria-label="Toggle debug mode"
+            className="icon-button h-10 w-10 rounded-full"
+            >
+              <Bug className={`h-5 w-5 ${debugMode ? 'text-red-500' : 'text-primary'}`} />
+            </Toggle>
+          )}
+          
+          <Toggle 
+            pressed={theme === "light"} 
+            onPressedChange={toggleTheme}
+            aria-label="Toggle theme"
+            className="icon-button h-10 w-10 rounded-full"
+            >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5 text-primary" />
+            ) : (
+              <Moon className="h-5 w-5 text-primary" />
+            )}
+          </Toggle>
+          
           {user && !canRender() && (
             <Button 
               variant="outline"
@@ -111,41 +164,30 @@ const Header: React.FC = () => {
               <span className="text-xs sm:text-sm">Premium</span>
             </Button>
           )}
-          {!isProduction() && (
-            <Toggle 
-              pressed={debugMode} 
-              onPressedChange={toggleDebugMode}
-              aria-label="Toggle debug mode"
-              className="icon-button h-10 w-10 rounded-full"
+
+          {!user && location.pathname !== "/auth" && (
+            <Button
+            variant="outline"
+            size="sm"
+            className="h-10 px-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+            onClick={() => setIsPricingModalOpen(true)}
             >
-              <Bug className={`h-5 w-5 ${debugMode ? 'text-red-500' : 'text-primary'}`} />
-            </Toggle>
+              <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+              <span className="text-xs sm:text-sm text-primary">Sign Up</span>
+            </Button>
           )}
-          
-          <Toggle 
-            pressed={theme === "light"} 
-            onPressedChange={toggleTheme}
-            aria-label="Toggle theme"
-            className="icon-button h-10 w-10 rounded-full"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5 text-primary" />
-            ) : (
-              <Moon className="h-5 w-5 text-primary" />
-            )}
-          </Toggle>
 
           {!user && location.pathname !== "/auth" && (
             <Button 
               variant="default" 
               size="lg" 
               className="h-10 px-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
-              onClick={() => setIsAuthModalOpen(true)}
+              onClick={handleDirectGoogleSignIn}
             >
               <LogIn className="h-4 w-4" />
-              <span>Sign Up or Login</span>
+              <span>Login</span>
             </Button>
-          )}
+          )}    
 
           {user && (
             <DropdownMenu>
@@ -179,8 +221,8 @@ const Header: React.FC = () => {
         </div>
       </div>
       
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       {user && <CheckoutModal isOpen={isCheckoutModalOpen} onClose={handlePayment} />}
+      <PricingModal isOpen={isPricingModalOpen} onClose={() => setIsPricingModalOpen(false)} />
     </header>
   );
 };

@@ -4,12 +4,12 @@ import PresetMood from "../components/PresetMood";
 import MoodInput from "../components/MoodInput";
 import { useAuth } from "../context/AuthContext";
 import AnimatedText from "@/components/AnimatedText";
-import AuthModal from "@/components/AuthModal";
+import PricingModal from "@/components/PricingModal/PricingModal";
 import { SubscriptionProvider } from "@/context/SubscriberContext";
 import CSVUploader from "@/components/CSVUploader";
 
 const Index: React.FC = () => {
-  const { isGuestMode, isTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
+  const { isGuestMode, isTrialUsed, showPricingModal, setShowPricingModal } = useAuth();
   const [inputValue, setInputValue] = useState("");
   const [csvData, setCsvData] = useState<string | null>(null);
   const handleInputChange = (value: string) => {
@@ -19,10 +19,10 @@ const Index: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-10 pb-12">        
-        {/* Auth Modal */}
-        <AuthModal 
-          isOpen={showAuthModal} 
-          onClose={() => setShowAuthModal(false)} 
+        {/* Pricing Modal controlled by AuthContext's showPricingModal state */}
+        <PricingModal 
+          isOpen={showPricingModal} 
+          onClose={() => setShowPricingModal(false)} 
         />
         
         <div className="text-center space-y-2 animate-fade-in">

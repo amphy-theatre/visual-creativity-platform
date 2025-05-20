@@ -143,7 +143,7 @@ const Header: React.FC = () => {
               onClick={() => setIsAuthModalOpen(true)}
             >
               <LogIn className="h-4 w-4" />
-              <span>Sign In</span>
+              <span>Sign Up or Login</span>
             </Button>
           )}
 

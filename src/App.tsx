@@ -41,11 +41,11 @@ const AnalyticsTracker = ({ children }: { children: React.ReactNode }) => {
 
 // App wrapper with auth modal
 const AppWithAuth = ({ children }: { children: React.ReactNode }) => {
-  const { showAuthModal, setShowAuthModal } = useAuth();
+  const { showPricingModal, setShowPricingModal } = useAuth();
   
   return (
     <>
-      <PricingModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <PricingModal isOpen={showPricingModal} onClose={() => setShowPricingModal(false)} />
       {children}
     </>
   );

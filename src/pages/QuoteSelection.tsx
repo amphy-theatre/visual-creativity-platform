@@ -22,7 +22,7 @@ const QuoteSelection: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { mood: initialMood, quotes: initialQuotes, promptUsage: initialPromptUsage } = location.state || { mood: "", quotes: [], promptUsage: null };
-  const { user, isGuestMode, isTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
+  const { user, isGuestMode, isTrialUsed, showPricingModal, setShowPricingModal } = useAuth();
   const { promptUsage: promptUsageFromHook } = usePromptUsage();
 
   const {
@@ -70,10 +70,10 @@ const QuoteSelection: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-8">        
-        {/* Pricing Modal controlled by AuthContext's showAuthModal state */}
+        {/* Pricing Modal controlled by AuthContext's showPricingModal state */}
         <PricingModal 
-          isOpen={showAuthModal} 
-          onClose={() => setShowAuthModal(false)} 
+          isOpen={showPricingModal} 
+          onClose={() => setShowPricingModal(false)} 
         />
         
         <div className="flex items-center">

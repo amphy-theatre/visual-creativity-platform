@@ -9,7 +9,7 @@ import { SubscriptionProvider } from "@/context/SubscriberContext";
 import CSVUploader from "@/components/CSVUploader";
 
 const Index: React.FC = () => {
-  const { isGuestMode, isTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
+  const { isGuestMode, isTrialUsed, showPricingModal, setShowPricingModal } = useAuth();
   const [inputValue, setInputValue] = useState("");
   const [csvData, setCsvData] = useState<string | null>(null);
   const handleInputChange = (value: string) => {
@@ -19,10 +19,10 @@ const Index: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-10 pb-12">        
-        {/* Pricing Modal controlled by AuthContext's showAuthModal state */}
+        {/* Pricing Modal controlled by AuthContext's showPricingModal state */}
         <PricingModal 
-          isOpen={showAuthModal} 
-          onClose={() => setShowAuthModal(false)} 
+          isOpen={showPricingModal} 
+          onClose={() => setShowPricingModal(false)} 
         />
         
         <div className="text-center space-y-2 animate-fade-in">

@@ -11,7 +11,7 @@ import { useAuth } from "../context/AuthContext";
 import { useUserPreferences } from "../hooks/useUserPreferences";
 import { usePromptUsage } from "../hooks/usePromptUsage";
 import { useAnalytics } from "../hooks/useAnalytics";
-import AuthModal from "../components/AuthModal";
+import PricingModal from "../components/PricingModal/PricingModal";
 import { useAppConfig } from "@/hooks/useAppConfig";
 
 type PromptUsageType = {
@@ -46,7 +46,7 @@ const Recommendations: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedQuote, recommendations: initialRecommendations, mood, selectedGenre, fromPreset, fromLiteralPrompt } = location.state || {};
-  const { user, session, isGuestMode, isTrialUsed, setTrialUsed, showAuthModal, setShowAuthModal } = useAuth();
+  const { user, session, isGuestMode, isTrialUsed, setTrialUsed, showPricingModal, setShowPricingModal } = useAuth();
   const { userPreferences } = useUserPreferences();
   const { promptUsage } = usePromptUsage();
   const { trackEvent } = useAnalytics();
@@ -131,7 +131,7 @@ const Recommendations: React.FC = () => {
     }
     
     if (isGuestMode && isTrialUsed) {
-      setShowAuthModal(true);
+      setShowPricingModal(true);
       return;
     }
     
@@ -245,9 +245,9 @@ const Recommendations: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-8">        
-        <AuthModal 
-          isOpen={showAuthModal} 
-          onClose={() => setShowAuthModal(false)} 
+        <PricingModal 
+          isOpen={showPricingModal} 
+          onClose={() => setShowPricingModal(false)} 
         />
         
         <div className="flex items-center mb-4">

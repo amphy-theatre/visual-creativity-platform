@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound, Bug, XCircle, Star } from "lucide-react";
+import { ArrowLeft, LogIn, LogOut, Moon, Sun, UserRound, Bug, XCircle, Star, LayoutGrid } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useNavigate } from "react-router-dom";
 import { Toggle } from "./ui/toggle";
@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useAppConfig } from "@/hooks/useAppConfig";
 import { useSubscription } from "@/context/SubscriberContext";
 import CheckoutModal from "./CheckoutModal";
+import PricingModal from "./PricingModal/PricingModal";
 import { toast } from "@/hooks/use-toast";
 
 const Header: React.FC = () => {
@@ -30,6 +31,7 @@ const Header: React.FC = () => {
   const { user, session, signOut } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const config = useAppConfig();
 
   // Check if we're in production environment
@@ -111,6 +113,17 @@ const Header: React.FC = () => {
               <span className="text-xs sm:text-sm">Premium</span>
             </Button>
           )}
+          {user && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 sm:h-10 px-3 sm:px-4 rounded-full font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2"
+              onClick={() => setIsPricingModalOpen(true)}
+            >
+              <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+              <span className="text-xs sm:text-sm text-primary">Plans</span>
+            </Button>
+          )}
           {!isProduction() && (
             <Toggle 
               pressed={debugMode} 
@@ -181,6 +194,7 @@ const Header: React.FC = () => {
       
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       {user && <CheckoutModal isOpen={isCheckoutModalOpen} onClose={handlePayment} />}
+      <PricingModal isOpen={isPricingModalOpen} onClose={() => setIsPricingModalOpen(false)} />
     </header>
   );
 };

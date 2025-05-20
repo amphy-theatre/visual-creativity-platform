@@ -15,8 +15,7 @@ interface PresetMoodProps {
 
 const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) => {
   const navigate = useNavigate();
-  const [showLimitModal, setShowLimitModal] = useState(false);
-  const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading } = usePromptUsage();
+  const { promptUsage, incrementPromptCount, isLoading: isPromptUsageLoading, showLimitModal, setShowLimitModal } = usePromptUsage();
   const { session, isGuestMode, isTrialUsed, setTrialUsed } = useAuth();
   const { trackEvent } = useAnalytics();
   const config = useAppConfig();

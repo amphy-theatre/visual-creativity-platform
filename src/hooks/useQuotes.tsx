@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "../components/ui/use-toast";
 import { useAppConfig } from "./useAppConfig";
-
+import { usePromptUsage } from "./usePromptUsage";
 type PromptUsageType = {
   prompt_count: number;
   limit_reached: boolean;
@@ -23,7 +23,7 @@ export const useQuotes = (initialQuotes: any, initialMood: string, initialPrompt
   const [isLoading, setIsLoading] = useState(false);
   const [mood, setMood] = useState(initialMood);
   const [promptUsage, setPromptUsage] = useState<PromptUsageType | null>(initialPromptUsage);
-  const [showLimitModal, setShowLimitModal] = useState(false);
+  const { showLimitModal, setShowLimitModal } = usePromptUsage();
   const { user, session } = useAuth();
   const config = useAppConfig();
 

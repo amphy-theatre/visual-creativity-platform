@@ -9,7 +9,7 @@ import QuoteList from "../components/QuoteList";
 import { useQuotes } from "../hooks/useQuotes";
 import PromptLimitModal from "../components/modals/PromptLimitModal";
 import { usePromptUsage } from "../hooks/usePromptUsage";
-import AuthModal from "@/components/AuthModal";
+import PricingModal from "@/components/PricingModal/PricingModal";
 
 type PromptUsageType = {
   prompt_count: number;
@@ -70,8 +70,8 @@ const QuoteSelection: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-8">        
-        {/* Auth Modal */}
-        <AuthModal 
+        {/* Pricing Modal controlled by AuthContext's showAuthModal state */}
+        <PricingModal 
           isOpen={showAuthModal} 
           onClose={() => setShowAuthModal(false)} 
         />

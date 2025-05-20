@@ -4,7 +4,7 @@ import PresetMood from "../components/PresetMood";
 import MoodInput from "../components/MoodInput";
 import { useAuth } from "../context/AuthContext";
 import AnimatedText from "@/components/AnimatedText";
-import AuthModal from "@/components/AuthModal";
+import PricingModal from "@/components/PricingModal/PricingModal";
 import { SubscriptionProvider } from "@/context/SubscriberContext";
 import CSVUploader from "@/components/CSVUploader";
 
@@ -19,8 +19,8 @@ const Index: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-10 pb-12">        
-        {/* Auth Modal */}
-        <AuthModal 
+        {/* Pricing Modal controlled by AuthContext's showAuthModal state */}
+        <PricingModal 
           isOpen={showAuthModal} 
           onClose={() => setShowAuthModal(false)} 
         />

@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import AuthModal from "@/components/AuthModal";
+import PricingModal from "@/components/PricingModal/PricingModal";
 
 const NotFound = () => {
   const location = useLocation();
@@ -14,7 +14,7 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <PricingModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
       
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">404</h1>

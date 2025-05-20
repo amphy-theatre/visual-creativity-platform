@@ -102,7 +102,7 @@ const CheckoutModal = ({ isOpen, onClose }: CheckoutModalProps) => {
       <DialogContent className="w-[92%] sm:max-w-md p-0 border-gray-800 bg-background text-foreground max-h-[90vh] overflow-auto rounded-lg font-fredoka">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="text-2xl font-normal flex justify-between items-center">
-            <span>Upgrade to Premium:</span>
+            <span>Premium:</span>
             {amount && currency && (
               <span className="pr-5">
                 {(amount / 100).toLocaleString('en-US', { style: 'currency', currency: currency.toUpperCase() })}

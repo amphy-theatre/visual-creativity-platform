@@ -36,6 +36,28 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleGetStartedAndSignIn = async () => {
+    try {
+      localStorage.setItem('redirectToCheckoutAfterLogin', 'true');
+      const redirectUrl = getRedirectUrl();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+      if (error) throw error;
+      onClose();
+    } catch (error: any) {
+      localStorage.removeItem('redirectToCheckoutAfterLogin');
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center p-4 animate-fade-in">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
@@ -46,12 +68,6 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
           <h2 className="text-2xl md:text-3xl text-foreground mb-2">
             Your Personal Vibe-Based<br />Movie Guide
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground mb-4">
-            Find media to match your current mood.
-          </p>
-          <p className="text-lg md:text-xl text-muted-foreground">
-            Sign up for <span className="text-red-400">50 free prompts</span>, <span className="text-blue-400">personalized recommendations</span>, <span className="text-purple-400">watch history uploads</span>, and more <span className="text-amber-400">exciting features</span> coming soon!
-          </p>
         </div>
 
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 flex-grow overflow-y-auto pb-6">
@@ -60,19 +76,19 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
             <h3 className="text-2xl font-semibold text-foreground mb-1">Casual</h3>
             <p className="text-5xl font-bold text-foreground mb-1">Free</p>
             <div className="h-px bg-border my-4"></div>
-            <p className="text-lg font-semibold text-foreground mb-3">Includes</p>
-            <ul className="space-y-2 text-muted-foreground mb-6">
+            <p className="text-2xl font-semibold text-foreground mb-3">Includes</p>
+            <ul className="space-y-2 text-muted-foreground mb-6 text-xl">
               <li className="flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                Pro two-week trial
+                15 prompts
               </li>
               <li className="flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                2000 completions
+                Links to streaming providers
               </li>
               <li className="flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                50 slow requests
+                Easy access to movie trailers
               </li>
             </ul>
             <div className="mt-auto">
@@ -92,34 +108,38 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Buff Tier */}
-          <div className="bg-card border-2 border-amber-700 p-6 rounded-lg flex flex-col">
-            <h3 className="text-2xl font-semibold text-foreground mb-1">Buff</h3>
+          <div className="bg-card border-2 border-cyan-300 p-6 rounded-lg flex flex-col">
+            <h3 className="text-2xl font-semibold text-foreground mb-1">Movie Buff</h3>
             <div className="flex items-baseline mb-1">
-              <p className="text-5xl font-bold text-foreground mr-1">$2.99</p>
-              <span className="text-muted-foreground">/month</span>
+              <p className="text-5xl font-bold text-foreground mr-1"><span className='font-thin text-muted-foreground'>CA</span>
+              $2.99</p>
+              <span className="text-xl text-muted-foreground">/month</span>
             </div>
             <div className="h-px bg-border my-4"></div>
-            <p className="text-lg font-semibold text-foreground mb-3">Everything in Casual, plus</p>
-            <ul className="space-y-2 text-muted-foreground mb-6">
+            <p className="text-2xl font-semibold text-foreground mb-3">Everything in Casual, plus</p>
+            <ul className="space-y-2 text-muted-foreground mb-6 text-xl">
               <li className="flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                Unlimited completions
+                200 total prompts
               </li>
               <li className="flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                500 requests per month
+                Movie history import
               </li>
               <li className="flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                Unlimited slow requests <span className="ml-1 text-muted-foreground/70">(?)</span>
+                Personalized recommendations
               </li>
               <li className="flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg>
-                Max mode <span className="ml-1 text-muted-foreground/70">(?)</span>
+                More exciting features coming soon!
               </li>
             </ul>
             <div className="mt-auto">
-              <button className="w-full bg-white text-black hover:bg-white/90 font-fredoka font-semibold py-3 px-4 rounded-md">
+              <button 
+                onClick={handleGetStartedAndSignIn}
+                className="w-full bg-white text-black hover:bg-white/90 font-fredoka py-3 px-4 rounded-md"
+              >
                 Get Started
               </button>
             </div>
@@ -128,7 +148,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
         
         <button 
             onClick={onClose} 
-            className="md:hidden absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
             aria-label="Close pricing modal"
         >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>

@@ -50,7 +50,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
   return (
     <div 
-      className="movie-card rounded-lg overflow-hidden flex flex-col h-full border border-foreground/10 hover:border-foreground/30 transition-colors shadow-sm cursor-pointer"
+      className="movie-card rounded-lg overflow-hidden flex flex-col h-full border border-foreground/10 shadow-md transition-all duration-300 ease-in-out cursor-pointer group hover:border-foreground/40 hover:shadow-xl hover:scale-[1.02] dark:hover:border-foreground/60 dark:hover:shadow-[0_0_20px_3px_rgba(200,200,200,0.15)]"
       onClick={onClick}
     >
       <div className="relative aspect-[2/3] overflow-hidden">
@@ -67,6 +67,23 @@ const MovieCard: React.FC<MovieCardProps> = ({
             </span>
           </div>
         )}
+        {/* Expand Icon Indicator */}
+        <div className="absolute top-3 right-3 p-1.5 bg-black/50 rounded-full pointer-events-none">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5" // Adjusted strokeWidth for visual balance with smaller size
+            stroke="currentColor"
+            className="w-5 h-5 text-white" // Made icon smaller
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"
+            />
+          </svg>
+        </div>
       </div>
       
       <div className="p-6 space-y-5 flex-1 flex flex-col">

@@ -41,7 +41,7 @@ const TextAreaInput: React.FC<TextAreaInputProps> = ({
   return (
     <div className="space-y-2 w-full">
       <div 
-        className="rainbow-border-container p-1 rounded-md" 
+        className="border-2 border-gray-500 p-1 rounded-md" 
       >
         <Textarea
           ref={textareaRef}

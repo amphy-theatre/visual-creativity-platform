@@ -5,14 +5,23 @@ import { usePromptUsage } from "@/hooks/usePromptUsage";
 import { useAuth } from "@/context/AuthContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAppConfig } from "@/hooks/useAppConfig";
+import {
+  Lightbulb,
+  Compass,
+  Heart,
+  BookOpen,
+  Smile,
+  Icon as LucideIcon,
+} from "lucide-react";
 
 interface PresetMoodProps {
   title: string;
   genre: "inspiration" | "thriller" | "drama" | "romance" | "philosophical" | "comedy";
   description: string;
+  icon: React.ReactElement<React.ComponentProps<LucideIcon>>;
 }
 
-const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) => {
+const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description, icon }) => {
   const navigate = useNavigate();
   const { promptUsage, incrementPromptCount, setShowLimitModal } = usePromptUsage();
   const { session, isGuestMode, isTrialUsed } = useAuth();
@@ -88,15 +97,15 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
   };
   
   const getGenreStyles = () => {
-    const baseClasses = "preset-card border-2 p-6 rounded-lg cursor-pointer transition-all duration-300 flex flex-col items-center text-center";
+    const baseClasses = " p-4 rounded-lg cursor-pointer transition-all duration-300 flex flex-col items-center justify-center text-center text-white aspect-square flex-1";
     
     const genreStyles: Record<string, string> = {
-      inspiration: "border-amber-500 hover:bg-amber-50/50 [&_*]:bg-gradient-to-r [&_*]:from-amber-500 [&_*]:to-yellow-400 [&_*]:bg-clip-text [&_*]:text-transparent",
-      thriller: "border-orange-500 hover:bg-orange-50/50 [&_*]:bg-gradient-to-r [&_*]:from-orange-500 [&_*]:to-red-500 [&_*]:bg-clip-text [&_*]:text-transparent",
-      drama: "border-blue-500 hover:bg-blue-50/50 [&_*]:bg-gradient-to-r [&_*]:from-blue-500 [&_*]:to-indigo-600 [&_*]:bg-clip-text [&_*]:text-transparent",
-      romance: "border-pink-500 hover:bg-pink-50/50 [&_*]:bg-gradient-to-r [&_*]:from-pink-500 [&_*]:to-rose-400 [&_*]:bg-clip-text [&_*]:text-transparent",
-      philosophical: "border-violet-500 hover:bg-violet-50/50 [&_*]:bg-gradient-to-r [&_*]:from-violet-500 [&_*]:to-purple-600 [&_*]:bg-clip-text [&_*]:text-transparent",
-      comedy: "border-emerald-500 hover:bg-emerald-50/50 [&_*]:bg-gradient-to-r [&_*]:from-emerald-400 [&_*]:to-teal-500 [&_*]:bg-clip-text [&_*]:text-transparent"
+      inspiration: "bg-cyan-700 hover:bg-cyan-600",
+      thriller: "bg-orange-600 hover:bg-orange-500",
+      drama: "bg-slate-700 hover:bg-slate-600",
+      romance: "bg-rose-600 hover:bg-rose-500",
+      philosophical: "bg-indigo-600 hover:bg-indigo-500",
+      comedy: "bg-emerald-600 hover:bg-emerald-500",
     };
     
     return `${baseClasses} ${genreStyles[genre]}`;
@@ -108,10 +117,8 @@ const PresetMood: React.FC<PresetMoodProps> = ({ title, genre, description }) =>
         className={getGenreStyles()}
         onClick={handleClick}
       >
-        <div className="space-y-4">
-          <div className="text-sm font-medium">"{description}"</div>
-          <div className="text-xl font-semibold">{title}</div>
-        </div>
+        {React.cloneElement(icon, { size: 50, className: "mb-1" })}
+        <div className="text-xl font-medium">{title}</div>
       </div>
     </>
   );

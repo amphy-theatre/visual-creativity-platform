@@ -94,7 +94,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
             <div className="mt-auto">
               <button 
                 onClick={handleGoogleSignIn}
-                className="w-full bg-transparent border border-gray-700 hover:bg-gray-800 text-foreground font-fredoka font-medium py-3 px-4 rounded-md flex items-center justify-center gap-3"
+                className="w-full bg-foreground hover:bg-foreground/80 text-background font-fredoka font-medium py-3 px-4 rounded-md flex items-center justify-center gap-3"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115Z" />
@@ -108,7 +108,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Buff Tier */}
-          <div className="bg-card border-2 border-cyan-300 p-6 rounded-lg flex flex-col">
+          <div className="bg-card border-2 border-amber-300 p-6 rounded-lg flex flex-col">
             <h3 className="text-2xl font-semibold text-foreground mb-1">Movie Buff</h3>
             <div className="flex items-baseline mb-1">
               <p className="text-5xl font-bold text-foreground mr-1"><span className='font-thin text-muted-foreground'>CA</span>
@@ -138,7 +138,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose }) => {
             <div className="mt-auto">
               <button 
                 onClick={handleGetStartedAndSignIn}
-                className="w-full bg-white text-black hover:bg-white/90 font-fredoka py-3 px-4 rounded-md"
+                className="w-full bg-foreground hover:bg-foreground/80 text-background font-fredoka py-3 px-4 rounded-md"
               >
                 Get Started
               </button>

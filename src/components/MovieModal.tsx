@@ -93,10 +93,10 @@ const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
       onClick={handleBackdropClick}
     >
       <div 
-        className="bg-neutral-900 text-white rounded-lg shadow-xl w-full max-w-3xl relative overflow-hidden"
+        className="bg-background text-foreground rounded-lg shadow-xl w-full max-w-3xl relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative w-full aspect-video bg-black">
+        <div className="relative w-full aspect-video">
           {(!playVideo && movie.backdrop) && (
             <>
               <div className="w-full h-full overflow-hidden">
@@ -140,20 +140,20 @@ const MovieModal: React.FC<MovieModalProps> = ({ movie, isOpen, onClose }) => {
 
           {/* Title Overlay: Shown only when video is NOT playing */}
           {(!playVideo) && (
-            <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 bg-gradient-to-t from-black via-black/80 to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 bg-gradient-to-t from-background via-background/80 to-transparent">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">{movie.title}</h2>
             </div>
           )}
         </div>
         
         {/* Movie details section: Overview and other info - always visible below image/video */}
-        <div className="p-4 md:p-6 bg-black">
+        <div className="p-4 md:p-6">
           {/* Overview - Moved here, conditionally rendered to avoid duplication if part of an overlay elsewhere, but now it's standalone */}
-          <p className="text-xs sm:text-sm text-gray-200 mb-3 md:mb-4 max-h-24 sm:max-h-28 md:max-h-32 overflow-y-auto leading-relaxed">
+          <p className="text-xs sm:text-lg mb-3 md:mb-4 max-h-24 sm:max-h-28 md:max-h-32 overflow-y-auto leading-relaxed">
             {movie.overview}
           </p>
           
-          <div className="text-xs sm:text-sm text-gray-300 space-y-1">
+          <div className="text-md sm:text-md space-y-1">
             {movie.genres && movie.genres.length > 0 && 
               <div><strong>Genres:</strong> {movie.genres.join(', ')}</div>}
             {movie.runtime && 

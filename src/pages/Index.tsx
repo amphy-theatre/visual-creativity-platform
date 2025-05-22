@@ -7,6 +7,14 @@ import AnimatedText from "@/components/AnimatedText";
 import PricingModal from "@/components/PricingModal/PricingModal";
 import { SubscriptionProvider } from "@/context/SubscriberContext";
 import CSVUploader from "@/components/CSVUploader";
+import {
+  Lightbulb,
+  Compass,
+  Heart,
+  HeartCrack,
+  BookOpen,
+  Smile,
+} from "lucide-react";
 
 const Index: React.FC = () => {
   const { isGuestMode, isTrialUsed, showPricingModal, setShowPricingModal } = useAuth();
@@ -26,7 +34,7 @@ const Index: React.FC = () => {
         />
         
         <div className="text-center space-y-2 animate-fade-in">
-          <h1 className="text-5xl md:text-6xl font-bold text-center text-blue-500 mb-2 animate-fade-in">
+          <h1 className="text-5xl md:text-6xl font-bold text-center text-foreground mb-2 animate-fade-in">
             amphytheatre
           </h1>
           <h2 className="text-3xl md:text-4xl text-center text-foreground/80 mb-12 animate-fade-in">
@@ -45,40 +53,46 @@ const Index: React.FC = () => {
             <MoodInput initialValue={inputValue}/>
         </div>
         
-        <div className="opacity-80">
+        <div className="opacity-75 flex-row w-[80%] mx-auto">
           <div className="space-y-6 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            <div className="text-lg text-foreground/80">Or choose a preset prompt:</div>
+            <div className="text-xl text-foreground/80">Or choose a preset prompt:</div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="flex flex-wrap gap-3 pb-2">
               <PresetMood 
-                title="inspiration" 
+                title="Inspiration" 
                 genre="inspiration" 
                 description="Something uplifting"
+                icon={<Lightbulb />}
               />
               <PresetMood 
-                title="thriller" 
+                title="Thriller" 
                 genre="thriller" 
                 description="A gripping adventure"
+                icon={<Compass />}
               />
               <PresetMood 
-                title="drama" 
+                title="Drama" 
                 genre="drama" 
                 description="A heartbreaking story"
+                icon={<HeartCrack />}
               />
               <PresetMood 
-                title="romance" 
+                title="Romance" 
                 genre="romance" 
                 description="Something romantic"
+                icon={<Heart />}
               />
               <PresetMood 
-                title="philosophical" 
+                title="Philosophical" 
                 genre="philosophical" 
                 description="A thought-provoking film"
+                icon={<BookOpen />}
               />
               <PresetMood 
-                title="comedy" 
+                title="Comedy" 
                 genre="comedy" 
                 description="Something lighthearted"
+                icon={<Smile />}
               />
             </div>
           </div>

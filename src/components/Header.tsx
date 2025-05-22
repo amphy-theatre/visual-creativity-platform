@@ -122,7 +122,7 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {showBackButton ? (
           <Link to="/" className="icon-button">
-            <ArrowLeft className="h-5 w-5 text-primary" />
+            <ArrowLeft className="h-5 w-5 text-background" />
           </Link>
         ) : (
           <div className="w-10">{/* Placeholder for spacing */}</div>
@@ -134,9 +134,9 @@ const Header: React.FC = () => {
             pressed={debugMode} 
             onPressedChange={toggleDebugMode}
             aria-label="Toggle debug mode"
-            className="icon-button h-10 w-10 rounded-full"
+            className="icon-button h-10 w-10"
             >
-              <Bug className={`h-5 w-5 ${debugMode ? 'text-red-500' : 'text-primary'}`} />
+              <Bug className={`h-5 w-5  ${debugMode ? 'text-red-500' : 'text-background'}`} />
             </Toggle>
           )}
           
@@ -144,12 +144,12 @@ const Header: React.FC = () => {
             pressed={theme === "light"} 
             onPressedChange={toggleTheme}
             aria-label="Toggle theme"
-            className="icon-button h-10 w-10 rounded-full"
+            className="icon-button h-10 w-10"
             >
             {theme === "dark" ? (
-              <Sun className="h-5 w-5 text-primary" />
+              <Sun className="h-5 w-5" />
             ) : (
-              <Moon className="h-5 w-5 text-primary" />
+              <Moon className="h-5 w-5" />
             )}
           </Toggle>
           
@@ -157,7 +157,7 @@ const Header: React.FC = () => {
             <Button 
               variant="outline"
               size="sm"
-              className="h-9 sm:h-10 px-3 sm:px-4 rounded-full bg-transparent border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2"
+              className="h-9 sm:h-10 px-3 sm:px-4 rounded-full hover:bg-transparent border-yellow-400 hover:text-yellow-400 bg-amber-400 text-black font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2"
               onClick={() => setIsCheckoutModalOpen(true)}
             >
               <Star className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -167,13 +167,13 @@ const Header: React.FC = () => {
 
           {!user && location.pathname !== "/auth" && (
             <Button
-            variant="outline"
+            variant="default"
             size="sm"
-            className="h-10 px-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+            className="h-10 px-6 rounded-full bg-foreground text-background font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
             onClick={() => setIsPricingModalOpen(true)}
             >
-              <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-              <span className="text-xs sm:text-sm text-primary">Sign Up</span>
+              <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-xs sm:text-sm">Sign Up</span>
             </Button>
           )}
 
@@ -181,7 +181,7 @@ const Header: React.FC = () => {
             <Button 
               variant="default" 
               size="lg" 
-              className="h-10 px-6 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+              className="h-10 px-6 rounded-full bg-foreground text-background font-medium shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
               onClick={handleDirectGoogleSignIn}
             >
               <LogIn className="h-4 w-4" />

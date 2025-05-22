@@ -6,67 +6,67 @@
 
 @layer base {
   :root {
-    /* Light mode colors */
-    --background: 210 40% 98%;
-    --foreground: 230 35% 7%;
+    /* Light mode colors - Revised for inverse BG/FG and color harmony */
+    --background: 40 50% 90%; /* Very Light Beige */
+    --foreground: 40 50% 10%; /* Very Dark Beige/Brown */
 
-    --card: 0 0% 100%;
-    --card-foreground: 230 35% 7%;
+    --card: 40 50% 95%; /* Off-White, slightly lighter than background */
+    --card-foreground: 40 50% 15%; /* Dark Beige/Brown, for text on card */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 230 35% 7%;
+    --popover: 40 50% 95%; /* Off-White, same as card */
+    --popover-foreground: 40 50% 15%; /* Dark Beige/Brown, for text on popover */
 
-    --primary: 230 35% 7%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 40 50% 10%; /* Terracotta */
+    --primary-foreground: 0 0% 98%; /* Off-White, for text on primary */
 
-    --secondary: 230 5% 84%;
-    --secondary-foreground: 230 35% 7%;
+    --secondary: 40 45% 85%; /* Light Grayish Beige */
+    --secondary-foreground: 40 45% 20%; /* Dark Brownish Gray, for text on secondary */
 
-    --muted: 230 5% 92%;
-    --muted-foreground: 230 35% 44%;
+    --muted: 40 40% 75%; /* Medium Light Grayish Beige, for muted backgrounds/text */
+    --muted-foreground: 40 40% 30%; /* Medium Dark Beige/Brown, for text on muted */
 
-    --accent: 230 5% 92%;
-    --accent-foreground: 230 35% 7%;
+    --accent: 35 60% 70%; /* Light Terracotta/Orange */
+    --accent-foreground: 0 0% 10%; /* Very Dark Gray, for text on accent */
 
-    --destructive: 0 62.8% 70.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 60%; /* Vibrant Red */
+    --destructive-foreground: 0 0% 98%; /* Off-White, for text on destructive */
 
-    --border: 230 10% 84%;
-    --input: 230 10% 84%;
-    --ring: 230 62.8% 50.6%;
+    --border: 40 50% 80%; /* Light Brownish Gray, for borders */
+    --input: 40 50% 95%; /* Off-White, for input backgrounds (same as card) */
+    --ring: 35 70% 50%; /* Terracotta, for focus rings */
 
     --radius: 0.75rem;
   }
 
   .dark {
-    /* Dark mode colors */
-    --background: 230 35% 7%;
-    --foreground: 0 0% 98%;
+    /* Dark mode colors - Revised for pure black background and color harmony */
+    --background: 0 0% 0%; /* Pure Black */
+    --foreground: 40 50% 90%; /* Very Light Beige (inverse of background) */
 
-    --card: 230 30% 10%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 10%; /* Very Dark Gray, slightly lighter than background */
+    --card-foreground: 0 0% 20%; /* Light Beige (for text on card) */
 
-    --popover: 230 35% 7%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 5%; /* Very Dark Gray, same as card */
+    --popover-foreground: 40 50% 85%; /* Light Beige (for text on popover) */
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 230 35% 7%;
+    --primary: 40 50% 90%; /* Terracotta (adjusted for black bg) */
+    --primary-foreground: 0 0% 10%; /* Off-White (high contrast for primary elements) */
 
-    --secondary: 230 25% 20%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 10%; /* Dark Gray */
+    --secondary-foreground: 40 50% 80%; /* Medium-Light Beige (for text on secondary) */
 
-    --muted: 230 25% 16%;
-    --muted-foreground: 0 0% 64%;
+    --muted: 0 0% 12%; /* Slightly lighter Dark Gray (for muted elements/text) */
+    --muted-foreground: 40 50% 65%; /* Medium Beige (for text on muted) */
 
-    --accent: 230 25% 16%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 35 60% 55%; /* Terracotta/Orange (adjusted for black bg) */
+    --accent-foreground: 0 0% 98%; /* Off-White (high contrast for accent elements) */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 70% 50%; /* Red (adjusted for black bg) */
+    --destructive-foreground: 0 0% 98%; /* Off-White (for text on destructive elements) */
 
-    --border: 230 20% 20%;
-    --input: 230 20% 16%;
-    --ring: 230 62.8% 50.6%;
+    --border: 0 0% 15%; /* Dark Gray (for borders) */
+    --input: 0 0% 5%; /* Very Dark Gray (for input backgrounds, same as card) */
+    --ring: 35 70% 55%; /* Terracotta (for focus rings, matches accent) */
   }
 }
 
@@ -106,7 +106,7 @@
   }
   
   .icon-button {
-    @apply rounded-full p-2 bg-secondary/80 hover:bg-secondary/60 transition-all duration-300;
+    @apply rounded-full p-2 bg-foreground hover:bg-foreground/60 text-background transition-all duration-300;
   }
   
   .quote-card {
@@ -115,23 +115,5 @@
   
   .movie-card {
     @apply glass-card overflow-hidden animate-fade-in;
-  }
-
-  .rainbow-border-container {
-    position: relative;
-    border-radius: var(--radius);
-    padding: 2px;
-    overflow: hidden;
-    background: conic-gradient(
-      from 0deg,
-      #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff0000
-    );
-    transform-origin: center center;
-    z-index: 0;
-  }
-
-  .rainbow-border-container textarea {
-    position: relative;
-    z-index: -1;
   }
 }

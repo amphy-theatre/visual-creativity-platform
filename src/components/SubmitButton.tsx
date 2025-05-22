@@ -23,7 +23,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       <Button
         onClick={onClick}
         disabled={isDisabled}
-        className={`w-full py-3 px-6 rounded-full shadow-lg text-white font-semibold bg-blue-500 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-green-500 active:bg-green-500 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`w-full py-3 px-6 rounded-full shadow-lg text-background font-semibold bg-foreground transition-all duration-300 ease-in-out hover:scale-105 hover:bg-green-500 active:bg-green-500 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         {isLoading ? (
           <>
